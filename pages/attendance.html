@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="sw" data-theme="dark">
+<head>
+  <title>Mahudhurio — FeMOS</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#060C18">
+  <link rel="manifest" href="../manifest.json">
+  <link rel="icon" href="../assets/logo-48.png" type="image/png">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="femos-ambient" aria-hidden="true"></div>
+<div id="toast-portal" aria-live="polite"></div>
+<div id="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+  <div class="confirm-box">
+    <div class="confirm-emoji" id="confirm-emoji">⚠️</div>
+    <div class="confirm-title" id="confirm-title">Una uhakika?</div>
+    <div class="confirm-desc"  id="confirm-desc">Kitendo hiki hakiwezi kurudishwa.</div>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost" id="confirm-cancel">Ghairi</button>
+      <button class="btn btn-danger" id="confirm-ok">Thibitisha</button>
+    </div>
+  </div>
+</div>
+<div id="femos-root">
+  <div class="page-content">
+    <div class="status-bar" aria-hidden="true">
+      <span class="time" data-live-clock>09:41</span>
+      <div class="indicators"><span data-network-status>●●●●</span><span class="battery">⚡ 87%</span></div>
+    </div>
+    <div class="back-bar">
+      <button class="btn-icon" onclick="window.location.href=\"home.html\"" aria-label="Rudi nyuma">←</button>
+      <span class="back-title">Mahudhurio</span>
+      <button class="btn-icon" onclick="window.location.href=\"att-history.html\"" aria-label="Historia">📋</button>
+    </div>
+    <div class="scroll-area with-bnav" id="att-scroll">
+
+      <!-- SELECT VIEW -->
+      <div id="att-select">
+        <div id="lec-courses" class="hidden">
+          <div class="section-header" style="padding-top:8px"><span class="section-title">Chagua kozi kufungua kipindi</span></div>
+          <div style="padding:0 var(--s-5);display:flex;flex-direction:column;gap:8px" id="course-list"></div>
+          <div style="height:16px"></div>
+        </div>
+        <div id="stu-signin">
+          <div class="section-header" style="padding-top:8px"><span class="section-title">Saini Mahudhurio</span></div>
+          <div style="padding:0 var(--s-5)">
+            <div class="card" style="padding:14px;margin-bottom:12px">
+              <div class="overline" style="color:var(--text-tertiary);margin-bottom:4px">Unique ID yako</div>
+              <div id="stu-uid" style="font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--clr-cyan);letter-spacing:.05em;word-break:break-all">—</div>
+            </div>
+            <button class="btn btn-primary btn-full" style="margin-bottom:10px" onclick="AttPage.signInQR()">📱 Saini kwa QR Code</button>
+            <div class="divider-label"><span>au weka ID kwa mkono</span></div>
+            <div class="form-field" style="margin:10px 0">
+              <span class="field-icon-left">🪪</span>
+              <input class="form-input" id="man-id" type="text" placeholder="Weka Unique ID (FEMOS-...)" autocapitalize="characters">
+            </div>
+            <button class="btn btn-secondary btn-full" onclick="AttPage.signInManual()">Thibitisha kwa ID</button>
+            <div class="hidden" id="stu-signed-card" style="margin-top:14px;padding:20px;text-align:center;background:var(--bg-surface);border:1px solid var(--border-soft);border-radius:var(--r-lg)"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DASHBOARD VIEW -->
+      <div id="att-dash" class="hidden">
+        <div style="margin:12px var(--s-5) 14px;padding:18px;border-radius:var(--r-xl);background:linear-gradient(135deg,var(--bg-elevated),var(--bg-overlay));border:1px solid var(--border-soft);border-left:3px solid var(--clr-success)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="live-dot"></div>
+              <span class="tag tag-green" id="d-status-tag">🟢 Inaendelea</span>
+            </div>
+            <span style="font-family:var(--font-display);font-size:13px;color:var(--text-tertiary)" id="d-elapsed">00:00</span>
+          </div>
+          <div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--text-primary);margin-bottom:2px" id="d-cname">—</div>
+          <div style="font-size:12px;color:var(--text-tertiary)"><span id="d-ccode">—</span> · Chumba: <span id="d-room">—</span></div>
+          <div style="margin-top:12px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+              <span style="font-size:12px;color:var(--text-secondary)">Waliopo</span>
+              <span style="font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--clr-success)">
+                <span id="d-present">0</span>/<span id="d-enrolled">0</span> (<span id="d-pct">0%</span>)
+              </span>
+            </div>
+            <div style="height:6px;background:var(--glass-soft);border-radius:999px;overflow:hidden">
+              <div id="d-bar" style="height:100%;background:linear-gradient(90deg,var(--clr-success),var(--clr-cyan));border-radius:999px;transition:width .6s;width:0%"></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:0 var(--s-5) 14px">
+          <div class="stat-chip"><div class="stat-chip-val" style="font-size:18px;color:var(--clr-success)" id="c-present">0</div><div class="stat-chip-lbl" style="font-size:9px">Present</div></div>
+          <div class="stat-chip"><div class="stat-chip-val" style="font-size:18px;color:var(--clr-warning)" id="c-late">0</div><div class="stat-chip-lbl" style="font-size:9px">Late</div></div>
+          <div class="stat-chip"><div class="stat-chip-val" style="font-size:18px;color:var(--clr-warning)" id="c-partial">0</div><div class="stat-chip-lbl" style="font-size:9px">Sehemu</div></div>
+          <div class="stat-chip"><div class="stat-chip-val" style="font-size:18px;color:var(--clr-purple)" id="c-left">0</div><div class="stat-chip-lbl" style="font-size:9px">Alitoka</div></div>
+          <div class="stat-chip"><div class="stat-chip-val" style="font-size:18px;color:var(--clr-danger)" id="c-fraud">0</div><div class="stat-chip-lbl" style="font-size:9px">Flagged</div></div>
+        </div>
+        <div style="padding:0 var(--s-5) 14px">
+          <div class="section-header" style="padding-left:0;padding-right:0">
+            <span class="section-title">QR Code ya sasa</span>
+            <span style="font-size:11px;color:var(--text-tertiary)">Inabadilika kila <strong id="qr-cd" style="color:var(--clr-cyan)">30s</strong></span>
+          </div>
+          <div class="card" style="padding:18px;display:flex;flex-direction:column;align-items:center;gap:10px">
+            <canvas id="qr-canvas" width="200" height="200" style="border-radius:10px;display:block"></canvas>
+            <p style="font-size:11px;color:var(--text-tertiary);text-align:center">Onyesha kwenye projekta — inabadilika kila 30 sekunde</p>
+          </div>
+        </div>
+        <div style="padding:0 var(--s-5) 14px">
+          <div class="section-header" style="padding-left:0;padding-right:0"><span class="section-title">Demo — Saini wanafunzi</span></div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px" id="demo-btns"></div>
+        </div>
+        <div class="section-header">
+          <span class="section-title">Orodha ya wanafunzi</span>
+          <button class="section-action" onclick="AttPage.exportCSV()">📊 Pakua CSV</button>
+        </div>
+        <div style="padding:0 var(--s-5);display:flex;flex-direction:column;gap:6px;margin-bottom:14px" id="d-std-list"></div>
+        <div style="padding:0 var(--s-5) 24px;display:flex;flex-direction:column;gap:10px">
+          <button class="btn btn-secondary btn-full" onclick="AttPage.startClosing()">⏰ Anza Kufunga</button>
+          <button class="btn btn-danger btn-full" onclick="AttPage.closeSession()">🔒 Funga Kipindi</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <nav class="bottom-nav" aria-label="Urambazaji mkuu">
+    <div class="nav-item" onclick="window.location.href=\"home.html\"" role="link" tabindex="0" aria-label="Nyumbani">
+      <div class="nav-icon-wrap">🏠</div>
+      <span class="nav-label">Nyumbani</span>
+    </div>
+    <div class="nav-item active" onclick="window.location.href=\"attendance.html\"" role="link" tabindex="0" aria-label="Mahudhurio" aria-current="page">
+      <div class="nav-icon-wrap">✅</div>
+      <span class="nav-label">Mahudhurio</span>
+    </div>
+    <button class="nav-fab" onclick="window.location.href=\"compose.html\"" aria-label="Andika tangazo">＋</button>
+    <div class="nav-item" onclick="window.location.href=\"announcements.html\"" role="link" tabindex="0" aria-label="Matangazo">
+      <div class="nav-icon-wrap">🔔</div>
+      <span class="nav-label">Matangazo</span>
+    </div>
+    <div class="nav-item" onclick="window.location.href=\"profile.html\"" role="link" tabindex="0" aria-label="Profile">
+      <div class="nav-icon-wrap">👤</div>
+      <span class="nav-label">Profile</span>
+    </div>
+  </nav>
+</div>
+<script src="../js/db.js"></script>
+<script src="../js/utils.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/router.js"></script>
+<script src="../js/app.js"></script>
+<script>
+const SAMPLE_STUDENTS = [
+  {id:'s01',uid:'FEMOS-MUST-MC-2024-004821',name:'Amina Hassan',   colorId:0},
+  {id:'s02',uid:'FEMOS-MUST-MC-2024-004822',name:'John Mwakyusa',  colorId:3},
+  {id:'s03',uid:'FEMOS-MUST-MC-2024-004823',name:'Fatuma Nkosi',   colorId:1},
+  {id:'s04',uid:'FEMOS-MUST-MC-2024-004824',name:'Peter Oloo',     colorId:5},
+  {id:'s05',uid:'FEMOS-MUST-MC-2024-004825',name:'Rose Mbwana',    colorId:4},
+  {id:'s06',uid:'FEMOS-MUST-MC-2024-004826',name:'David Kimani',   colorId:2},
+  {id:'s07',uid:'FEMOS-MUST-MC-2024-004827',name:'Mariam Salehe',  colorId:6},
+  {id:'s08',uid:'FEMOS-MUST-MC-2024-004828',name:'Emmanuel Pius',  colorId:7},
+];
+
+const COURSES = [
+  {code:'CS301',name:'Computer Networks II',  enrolled:82, room:'LH-B'},
+  {code:'CS204',name:'Operating Systems',      enrolled:74, room:'LH-A'},
+  {code:'CS401',name:'Software Engineering',   enrolled:65, room:'LAB-3'},
+  {code:'CS305',name:'Database Systems',       enrolled:78, room:'LH-C'},
+  {code:'CS102',name:'Intro to Programming',   enrolled:110,room:'AUD-1'},
+];
+
+const STC = {
+  present:     {label:'Alikuwepo', emoji:'✅', tag:'tag-green'},
+  late:        {label:'Alichelewa',emoji:'🟡', tag:'tag-amber'},
+  partial:     {label:'Sehemu',    emoji:'⚠️', tag:'tag-amber'},
+  'left-early':{label:'Alitoka',   emoji:'🚪', tag:'tag-purple'},
+  absent:      {label:'Hakuwepo', emoji:'❌', tag:'tag-red'},
+  fraud:       {label:'Flagged',   emoji:'🚫', tag:'tag-red'},
+};
+
+const AttPage = (() => {
+  let session=null, attList=[], _elInt=null, _qrInt=null, _qrCd=30;
+
+  function _genToken(){return btoa('FEMOS|'+(session?.id||'')+'|'+Math.floor(Date.now()/30000));}
+
+  function _drawQR(){
+    const c=document.getElementById('qr-canvas');
+    if(c&&session) Utils.QR.drawOnCanvas(c,session.qrToken,{modules:23});
+  }
+
+  function _renderDash(){
+    if(!session) return;
+    const pct=Math.round(attList.length/session.enrolled*100);
+    ['d-cname','d-ccode','d-room','d-enrolled','d-present','d-pct','d-status-tag'].forEach((id,i)=>{
+      const vals=[session.courseName,session.courseCode,session.room,session.enrolled,attList.length,pct+'%',
+                  session.status==='closing'?'⏰ Inafunga':'🟢 Inaendelea'];
+      Utils.DOM.setText(id,vals[i]);
+    });
+    const bar=document.getElementById('d-bar');
+    if(bar) bar.style.width=Math.min(pct,100)+'%';
+    const cnt={present:0,late:0,partial:0,'left-early':0,fraud:0};
+    attList.forEach(r=>{cnt[r.status]=(cnt[r.status]||0)+1;});
+    Object.keys(cnt).forEach(k=>{const el=document.getElementById('c-'+k);if(el)el.textContent=cnt[k];});
+    const sl=document.getElementById('d-std-list');
+    if(!sl) return;
+    if(!attList.length){
+      sl.innerHTML='<div style="padding:30px;text-align:center;color:var(--text-tertiary)"><div style="font-size:40px;margin-bottom:8px">👥</div><div style="font-size:15px;font-weight:600">Bado hakuna mwanafunzi</div><p style="font-size:13px;margin-top:4px">Onyesha QR kwenye projekta</p></div>';
+      return;
+    }
+    sl.innerHTML=attList.map((r,i)=>{
+      const sc=STC[r.status]||STC.present;
+      const c=Utils.AVATAR_COLORS[r.colorId||0];
+      const inT=Utils.DateTime.format(new Date(r.signInTime),'HH:MM');
+      const outT=r.signOutTime?Utils.DateTime.format(new Date(r.signOutTime),'HH:MM'):null;
+      return `<div style="display:flex;align-items:center;gap:10px;background:var(--bg-surface);border:1px solid var(--border-soft);border-radius:var(--r-md);padding:10px 12px;animation:fade-up var(--dur-lg) var(--ease-out) ${i*25}ms both">
+        <span style="font-size:11px;color:var(--text-tertiary);min-width:20px;text-align:right;font-family:var(--font-display);font-weight:600">${i+1}</span>
+        <div class="avatar avatar-xs" style="background:linear-gradient(135deg,${c.from},${c.to})">${Utils.Str.initials(r.name)}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:500;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.name}</div>
+          <div style="font-size:10px;color:var(--text-tertiary)">${r.uid}</div>
+        </div>
+        <div style="font-size:10px;text-align:right;flex-shrink:0">
+          <div style="color:var(--clr-success)">⬇ ${inT}</div>
+          ${outT?'<div style="color:var(--clr-purple)">⬆ '+outT+'</div>':''}
+        </div>
+        <span class="tag ${sc.tag}">${sc.emoji} ${sc.label}</span>
+      </div>`;
+    }).join('');
+  }
+
+  function _startLive(){
+    clearInterval(_elInt);clearInterval(_qrInt);
+    _elInt=setInterval(()=>{if(session)Utils.DOM.setText('d-elapsed',Utils.DateTime.elapsed(session.startTime));_renderDash();},2000);
+    _qrInt=setInterval(()=>{
+      if(!session)return;
+      if(Date.now()>=session.qrRefreshAt){session.qrToken=_genToken();session.qrRefreshAt=Date.now()+30000;_drawQR();_qrCd=30;}
+      else{_qrCd=Math.ceil((session.qrRefreshAt-Date.now())/1000);}
+      Utils.DOM.setText('qr-cd',_qrCd+'s');
+    },1000);
+  }
+
+  function _showDash(){
+    document.getElementById('att-select')?.classList.add('hidden');
+    document.getElementById('att-dash')?.classList.remove('hidden');
+    _renderDash();_drawQR();_startLive();
+    const db=document.getElementById('demo-btns');
+    if(db) db.innerHTML=SAMPLE_STUDENTS.map((s,i)=>`<button class="btn btn-ghost btn-sm" onclick="AttPage.demoSign(${i})" type="button">+${s.name.split(' ')[0]}</button>`).join('');
+  }
+
+  function openSession(code,name,enrolled,room){
+    const saved=DB.LS.get('femos_att_session');
+    if(saved&&saved.status!=='closed'){session=saved;attList=DB.LS.get('femos_att_list_'+session.id)||[];_showDash();return;}
+    session={id:Utils.ID.session(),courseCode:code,courseName:name,enrolled,room:room||'LH-B',startTime:Date.now(),qrToken:'',qrRefreshAt:0,status:'open'};
+    session.qrToken=_genToken();session.qrRefreshAt=Date.now()+30000;attList=[];
+    DB.LS.set('femos_att_session',session);
+    App.Toast.success('Kipindi cha '+code+' kimefunguliwa');
+    if(navigator.vibrate)navigator.vibrate([10]);
+    _showDash();
+  }
+
+  function _saveList(){DB.LS.set('femos_att_list_'+session.id,attList);}
+
+  async function _signIn(uid,name,colorId,method){
+    if(!session||session.status==='closed'){App.Toast.error('Hakuna kipindi kilichofunguliwa');return null;}
+    const existing=attList.find(r=>r.uid===uid);
+    if(existing){
+      if(session.status==='closing'&&!existing.signOutTime){return _signOut(uid);}
+      App.Toast.warning('Umeshathibitisha mahudhurio');return null;
+    }
+    const mins=(Date.now()-session.startTime)/60000;
+    const status=mins<=15?'present':mins<=30?'late':'partial';
+    const rec={id:Utils.ID.short(),uid,name,colorId:colorId||0,signInTime:Date.now(),signOutTime:null,status,method};
+    attList.push(rec);_saveList();return rec;
+  }
+
+  function _signOut(uid){
+    const idx=attList.findIndex(r=>r.uid===uid);
+    if(idx<0)return null;
+    attList[idx]={...attList[idx],signOutTime:Date.now()};
+    _saveList();return attList[idx];
+  }
+
+  async function signInQR(){
+    const user=Auth.Session.load();
+    if(!user){App.Toast.error('Ingia kwanza');return;}
+    if(!session){App.Toast.warning('Hakuna kipindi kilichofunguliwa');return;}
+    const rec=await _signIn(user.uniqueId||user.id,user.name,user.colorId||0,'qr');
+    if(rec){
+      const msgs={present:'✅ Umesajiliwa!',late:'🟡 Umechelewa — umesajiliwa',partial:'⚠️ Umesajiliwa (baada ya muda)'};
+      App.Toast.success(msgs[rec.status]||'✅ Umesajiliwa!');
+      if(navigator.vibrate)navigator.vibrate([15,50,15]);
+      _showSignedCard(rec);
+    }
+  }
+
+  async function signInManual(){
+    const inp=document.getElementById('man-id');
+    const val=inp?.value.trim().toUpperCase();
+    if(!val){App.Toast.error('Weka Unique ID yako');return;}
+    if(!session){App.Toast.warning('Hakuna kipindi kilichofunguliwa');return;}
+    const found=SAMPLE_STUDENTS.find(s=>s.uid===val);
+    if(!found){App.Toast.error('Unique ID haikupatikana');return;}
+    const rec=await _signIn(found.uid,found.name,found.colorId,'manual');
+    if(rec){App.Toast.success(found.name+' amesajiliwa');if(inp)inp.value='';}
+  }
+
+  async function demoSign(idx){
+    const s=SAMPLE_STUDENTS[idx%SAMPLE_STUDENTS.length];
+    if(!session){App.Toast.warning('Fungua kipindi kwanza');return;}
+    const rec=await _signIn(s.uid,s.name,s.colorId,'demo');
+    if(rec) App.Toast.info(s.name.split(' ')[0]+' amesajiliwa (demo)');
+  }
+
+  function _showSignedCard(rec){
+    const card=document.getElementById('stu-signed-card');
+    if(!card)return;
+    card.classList.remove('hidden');
+    const sc={present:{l:'Umesajiliwa',e:'✅',c:'var(--clr-success)'},late:{l:'Umechelewa',e:'🟡',c:'var(--clr-warning)'},partial:{l:'Baada ya muda',e:'⚠️',c:'var(--clr-warning)'}}[rec.status]||{l:'Umesajiliwa',e:'✅',c:'var(--clr-success)'};
+    const inT=Utils.DateTime.format(new Date(rec.signInTime),'HH:MM');
+    card.innerHTML=`<div style="font-size:36px;margin-bottom:8px">${sc.e}</div>
+      <div style="font-family:var(--font-display);font-size:17px;font-weight:700;color:${sc.c};margin-bottom:8px">${sc.l}</div>
+      <div style="font-size:13px;color:var(--text-secondary)">⬇ Uliingia: <strong>${inT}</strong></div>
+      <div style="font-size:10px;color:var(--text-tertiary);margin-top:6px;font-family:var(--font-display);letter-spacing:.04em">${rec.uid}</div>`;
+  }
+
+  function startClosing(){
+    if(!session)return;
+    session.status='closing';DB.LS.set('femos_att_session',session);
+    Utils.DOM.setText('d-status-tag','⏰ Inafunga');
+    App.Toast.warning('Darasa linafunga','Wanafunzi wanasaini kuondoka');
+  }
+
+  function closeSession(){
+    App.Confirm.show({
+      emoji:'🔒',title:'Funga kipindi?',
+      desc:'Wanafunzi wote wanaobaki watawekwa kama "Aliondoka Mapema".',
+      okLabel:'Funga',okClass:'btn-danger',
+      cb(){
+        clearInterval(_elInt);clearInterval(_qrInt);
+        const history=DB.LS.get('femos_att_history')||[];
+        history.unshift({...session,records:[...attList],closedAt:Date.now()});
+        DB.LS.set('femos_att_history',history.slice(0,50));
+        DB.LS.remove('femos_att_session');
+        session=null;attList=[];
+        document.getElementById('att-dash')?.classList.add('hidden');
+        document.getElementById('att-select')?.classList.remove('hidden');
+        App.Toast.success('Kipindi kimefungwa','Ripoti imehifadhiwa');
+      }
+    });
+  }
+
+  function exportCSV(){
+    if(!session||!attList.length){App.Toast.error('Hakuna data ya kupakuliwa');return;}
+    let csv='#,Jina,Unique ID,Wakati Kuingia,Wakati Kutoka,Hali,Njia\n';
+    attList.forEach((r,i)=>{
+      const sc=Utils.AttCalc.STATUS;
+      const inT=Utils.DateTime.format(new Date(r.signInTime),'HH:MM');
+      const outT=r.signOutTime?Utils.DateTime.format(new Date(r.signOutTime),'HH:MM'):'-';
+      csv+=`${i+1},"${r.name}",${r.uid},${inT},${outT},"${sc[r.status]?.label||r.status}",${r.method}\n`;
+    });
+    const blob=new Blob([csv],{type:'text/csv'});
+    const url=URL.createObjectURL(blob);const a=document.createElement('a');
+    a.href=url;a.download=`mahudhurio_${session.courseCode}_${Utils.DateTime.format(new Date(),'DD-Mo')}.csv`;
+    a.click();URL.revokeObjectURL(url);App.Toast.success('Ripoti imepakuliwa');
+  }
+
+  function init(){
+    const user=Auth.Session.load();if(!user)return;
+    const isLec=['lecturer','uni-admin','super-admin','hod'].includes(user.role);
+    Utils.DOM.setText('stu-uid',user.uniqueId||'Inasubiri idhini…');
+    const saved=DB.LS.get('femos_att_session');
+    if(saved&&saved.status!=='closed'){session=saved;attList=DB.LS.get('femos_att_list_'+session.id)||[];_showDash();return;}
+    if(isLec){
+      document.getElementById('lec-courses')?.classList.remove('hidden');
+      const cl=document.getElementById('course-list');
+      if(cl) cl.innerHTML=COURSES.map(c=>`
+        <div class="card card-interactive" style="padding:14px 16px" onclick="AttPage.openSession('${c.code}','${c.name}',${c.enrolled},'${c.room}')" role="button" tabindex="0">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span class="tag tag-blue" style="font-size:11px">${c.code}</span>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:14px;font-weight:500;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.name}</div>
+              <div style="font-size:11px;color:var(--text-tertiary)">${c.enrolled} wanafunzi · ${c.room}</div>
+            </div>
+            <span style="font-size:18px;color:var(--text-tertiary)">›</span>
+          </div>
+        </div>`).join('');
+    }
+  }
+
+  return {openSession,signInQR,signInManual,demoSign,startClosing,closeSession,exportCSV};
+})();
+
+document.addEventListener('DOMContentLoaded',()=>{
+  if(!Router.requireAuth())return;
+  AttPage.init();
+});
+</script>
+</body>
+</html>

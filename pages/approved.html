@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="sw" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="theme-color" content="#060C18">
+  <title>Umeidhinishwa — FeMOS</title>
+  <link rel="manifest" href="../manifest.json">
+  <link rel="icon" href="../assets/logo-48.png" type="image/png">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    body { overflow-y: auto; }
+    #femos-root { min-height: 100dvh; }
+  </style>
+</head>
+<body>
+<div class="femos-ambient" aria-hidden="true"></div>
+<div id="toast-portal" aria-live="polite"></div>
+
+<div id="femos-root">
+<main class="approved-screen page-enter" id="approved-page">
+
+  <div class="approved-confetti" aria-hidden="true">🎊</div>
+
+  <h1 class="heading-lg fade-in" style="margin-bottom:8px">Umeidhinishwa!</h1>
+  <p class="body-md text-secondary fade-in anim-1" style="margin-bottom:20px;text-align:center;max-width:300px;line-height:1.65">
+    Karibu FeMOS Campus. Hii ni Unique ID yako — hifadhi vizuri.
+  </p>
+
+  <!-- Unique ID display -->
+  <div class="uid-display fade-in anim-2" id="uid-display" aria-label="Unique ID yako ya FeMOS">
+    FEMOS-MUST-MC-2024-000000
+  </div>
+  <button class="uid-copy-btn fade-in anim-2" onclick="ApprovedPage.copyUID()" id="uid-copy-btn" aria-label="Nakili Unique ID">
+    📋 Bonyeza kunakili Unique ID
+  </button>
+
+  <!-- QR Code -->
+  <p class="caption text-tertiary fade-in anim-3" style="margin-bottom:8px">QR Code yako ya mahudhurio:</p>
+  <div class="qr-display-wrap fade-in anim-3">
+    <canvas id="qr-canvas" width="150" height="150" aria-label="QR Code ya Unique ID yako"></canvas>
+  </div>
+  <p class="caption text-tertiary fade-in anim-4" style="margin-bottom:20px;text-align:center;max-width:260px">
+    Hifadhi screenshot ya QR hii — itatumika kusaini mahudhurio darasani
+  </p>
+
+  <!-- Info strip -->
+  <div class="info-notice success fade-in anim-4" style="max-width:340px;width:100%;margin-bottom:20px">
+    <span aria-hidden="true">🏛️</span>
+    <span id="approved-uni-info">MUST · Main Campus · Computer Science · Year 3</span>
+  </div>
+
+  <!-- CTA -->
+  <button class="btn btn-primary btn-xl btn-full" style="max-width:340px"
+          onclick="ApprovedPage.enterApp()" id="enter-btn">
+    🚀 Ingia FeMOS Campus →
+  </button>
+
+  <p class="caption text-tertiary fade-in anim-5" style="margin-top:16px;text-align:center;max-width:280px">
+    Unique ID na QR Code zimetumwa pia kwenye barua pepe yako
+  </p>
+
+</main>
+</div>
+
+<script src="../js/db.js"></script>
+<script src="../js/utils.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/router.js"></script>
+<script src="../js/app.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const pending = Auth.Pending.load();
+    if (!pending || !pending.uniqueId) {
+      window.location.replace('register.html');
+      return;
+    }
+
+    // Show UID
+    const uidEl = document.getElementById('uid-display');
+    if (uidEl) uidEl.textContent = pending.uniqueId;
+
+    // Show uni info
+    const infoEl = document.getElementById('approved-uni-info');
+    if (infoEl) {
+      infoEl.textContent = [
+        pending.universityName || pending.university,
+        pending.campusName,
+        pending.courseName ? Utils.Str.truncate(pending.courseName, 35) : '',
+        pending.year ? 'Year ' + pending.year : '',
+      ].filter(Boolean).join(' · ');
+    }
+
+    // Draw QR
+    const canvas = document.getElementById('qr-canvas');
+    if (canvas) Utils.QR.drawOnCanvas(canvas, pending.uniqueId, { modules: 21 });
+  });
+
+  const ApprovedPage = {
+    copyUID() {
+      const uid = document.getElementById('uid-display')?.textContent;
+      if (!uid) return;
+      navigator.clipboard?.writeText(uid).then(() => {
+        App.Toast.success('Imenakiliwa!', 'Unique ID iko clipboard');
+        const btn = document.getElementById('uid-copy-btn');
+        if (btn) {
+          btn.textContent = '✅ Imenakiliwa!';
+          setTimeout(() => { btn.textContent = '📋 Bonyeza kunakili Unique ID'; }, 2000);
+        }
+      }).catch(() => App.Toast.info('Nakili: ' + uid));
+    },
+
+    enterApp() {
+      const pending = Auth.Pending.load();
+      if (!pending) { window.location.replace('login.html'); return; }
+
+      const btn = document.getElementById('enter-btn');
+      btn.classList.add('btn-loading');
+      btn.disabled = true;
+
+      // Auto-login the approved user
+      Auth.Session.save(pending);
+      Auth.Pending.clear();
+
+      setTimeout(() => {
+        window.location.replace('home.html');
+      }, 600);
+    },
+  };
+</script>
+</body>
+</html>

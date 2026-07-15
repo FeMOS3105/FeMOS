@@ -1,0 +1,22 @@
+{
+  "name": "FeMOS Campus",
+  "short_name": "FeMOS",
+  "description": "FastLine Enterprises Modern Operation System — Campus Edition",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#060C18",
+  "theme_color": "#060C18",
+  "lang": "sw",
+  "categories": ["education", "productivity"],
+  "icons": [
+    { "src": "assets/logo-48.png",  "sizes": "48x48",   "type": "image/png" },
+    { "src": "assets/logo-96.png",  "sizes": "96x96",   "type": "image/png" },
+    { "src": "assets/logo-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "assets/logo-512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "shortcuts": [
+    { "name": "Mahudhurio", "url": "/pages/attendance.html", "icons": [{ "src": "assets/logo-96.png", "sizes": "96x96" }] },
+    { "name": "Matangazo",  "url": "/pages/announcements.html", "icons": [{ "src": "assets/logo-96.png", "sizes": "96x96" }] }
+  ]
+}

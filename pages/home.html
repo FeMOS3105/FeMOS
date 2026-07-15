@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="sw" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#060C18">
+  <title>Nyumbani — FeMOS</title>
+  <link rel="manifest" href="../manifest.json">
+  <link rel="icon" href="../assets/logo-48.png" type="image/png">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="femos-ambient" aria-hidden="true"></div>
+<div id="toast-portal" aria-live="polite"></div>
+
+<!-- Confirm dialog -->
+<div id="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+  <div class="confirm-box">
+    <div class="confirm-emoji" id="confirm-emoji">⚠️</div>
+    <div class="confirm-title" id="confirm-title">Una uhakika?</div>
+    <div class="confirm-desc"  id="confirm-desc">Kitendo hiki hakiwezi kurudishwa.</div>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost"   id="confirm-cancel">Ghairi</button>
+      <button class="btn btn-danger"  id="confirm-ok">Thibitisha</button>
+    </div>
+  </div>
+</div>
+
+<div id="femos-root">
+
+  <!-- Page content -->
+  <div class="page-content">
+
+    <!-- Status bar -->
+    <div class="status-bar" aria-hidden="true">
+      <span class="time" data-live-clock>09:41</span>
+      <div class="indicators">
+        <span data-network-status>●●●●</span>
+        <span>WiFi</span>
+        <span class="battery">⚡ 87%</span>
+      </div>
+    </div>
+
+    <!-- Top nav -->
+    <nav class="top-nav" aria-label="Urambazaji wa juu">
+      <div class="wordmark">
+        <div class="wordmark-logo-wrap">
+          <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAW50lEQVR4nO2be5RcZZXof/s7px7dXf1I0gkJIbwJhMx15CEgyiQBZWS8iuKkkXGhMCjcceByZRBmfNDJKA6MinMvA2vizAoCjlc7oheRGSOSEEBUDIIC4TlJCHl00o/q7uqu1znf3vePU9XpYJgZO+mQxdRvrbOq6lTVqa/269vf/vaBBg0aNGjQoEGDBg0aNGjQoEGDBg0aNGjQoEGDBg0avJkwkzd6CBNxb/QADiSH3LWjpX1V/xIwobv7oPjvB8UgphwzwUyGmpsOKYWZPwUxWPZGjwp4syvATOixgH8ljYjFwnyfzZx/RPfaLMsw1luKHgsOtrD0puSUy9en3A8q98vPzML/V/z0Gz2eOm9SzZtgkLm790hpaT3LB+EZ3rlzNJWaTxSpOOdQ/3Pn9ZGgEv0i3L71seI1C3qT74odyJG+qUNQyiyr2AyPHGae2cRAFYwAvByqKnPM6NBMW/hGj/VNT27Ftk65p/IoD5hJT+lvOUi8/43RfH3Skyl29+5uB4sdpy8ORv9I+oNvjtxiIqe1b3z2xjwYPc+kYaFnKfqasQhmsGyCkpZhUz7eA46ZW7TWQsymNhR2dzvMhLuHj3d3ja1Ozk3iN82E7rUh7L+s6cC6oZkgYic+s2l2Ofa68a3H7to9EmHRmjXhusWL/ZRZ2t39bVkNzyt/rL2H7tp/X4jwLAIoy0XpNtfesbmtFLbM0uZwFoRBHLOTfN8O/vKY4fFrdZtjuei+DumAKmCRWbhOJD5hw5bPh7NmXOOHCz/HgjXlol+96S2zfzP+QbMAMGTf/+AeLO0JDjtjaXrrPKp0id/rZ1asT2UGW+ZKx/S5PgwXqgvPVpc6DxNnsf7Sef2evvzYHXz1D8f2hxLeEAUseO7Vz4SHzr5RR0eRdJZoaMRU3S98LN+uFEr3bDtj3lYAeizgWWzf/qQJPbjfvk53yDWfOBrkRGnOnWRjgz/ja0f9aK9C/cqu+bTl7iLXdDoVkFLpOcv3d/HZw5/ZVyUcsEl4qVmwa/PmEIhVRXwlMj9aqhqlACWUbPaMoDlzRspYfthTgz1Wqv79trdL4hVmAfI6Fvt6mAnLHgpYLjFdeIDsZ7fOK4fZJaidg8jpGMfgMqHlclDMLwN+xOBLKS5fr8wpGAsXGzMRlsiLXP3kezj2+KfBzbJU0wIybffRvekkljHMsiS0TkYuU68AM4eIrkoE6AEUcCqiSgASqjezQlHVimYu1R7kcp+IrHjJ7MeH/rm4Y+TGEZGXQaBb/zPWJvSYqyks5uonO1znvPPVBRdVjHeQzuVQgUq5dpTKxKnQlSkqwK3zK7sv1e1guaf7mTTLf29Ibur7vrV1XsXwcJGW9iMpVT6CyG10WwjEkxHP1GUftWrjvF9tmX3sizt+eezLvXce88yrl5+yfn1K1cyb4M2Z94KaEzUJVF3oK96ifD7WapSyltZL0rOnPzFt7chfsuiGkOWi9Fjw+r9pDjC6xDd9+rlD5Uv5L8ico5/RlmnfINXyh6bkKAx5hgdjxsaUamzEPiC2UKuxg27H769+Byc/1i2n/PQBjjt1DgAbADORku8lAmJzlNUk4kwAFjLppGHKV8IaVZxgp4bTp380mNm5YluxrUO9VFQdqiSHB/WSHCai6gJVLM7nY419Gx2tf9Oy7LqHc3duWkCXeNbab3tujwUsF+WUy1Pui33Xl2ce9pS1dHzOzM2lkPeMDnuqkRFbgLcQb47YhEiFqoG5EuQ6ycx4lKaZyyxIvQtf2q1sETOVw6kCkUFkQnXf0+cDMgeotzEdGMqYN8SrqTqkJnAUTEFNkkdNlGAqmEmosVqcH4mtqe3t/rA5P8307PyTyhL5EWstZIkkbt+9NqRLYq7fdJJMn75Cm9reRrEAIwMxngAlwJPEPm+7j1hBzUCh6g1Sgo+NeNBDVCFb+wMnLoxZtDY0b+dQKkFsQiBGVN0IUEtjJ8WUK0A0a6aBmEpotSjpI8ALGpuAwxTMasJPFIDVn6uIqaR0ZDTWIDPNpnX8MP2tvguqS+QH9PQEsBS6JHY3bLzQcp0rLcg0MzwQoxZgEuKtJnhNZiCvNeFb8jw2CBS8CoyBjwVxIeqrlEtJnrhcNLhy0wd8uuNYSgWPWQglsXLlYQA2TD4EHSAPQAzBPFjJiWZBPHifGE6iAMGsLvRaaEoUYKqImQu1EnlzoWNaW094d99ZcdfMXwK4GzZ+zNrmfMOqFSgNecyFKMlFPKATrH5vCjAPkQKj4D2IKqbNhBJwgzke+kZaU9kbiSIjNiVIh1LIv2qvPPcImLCKSaehU18NLYKPkzjvY2B0YtxPYr+pJO/Xzpmn5gE15fnkfTMJrBqrSjrjs03fxMzRvflszXXeYZWyp1pRVAJinSBo/Q+OCZ8B8BWFZkdUXkVrx06Wi8qJi75kzdNPoFRQolggK1KuruCH7y/STbAvJewD4gE+lqREHxuj2RZrjoBYUC+GJeEn8YBEOYknJEqoK8KSw0zF2VjZMDefVRtbxdIfsSAnjPYpJqnE6g0Mw5vsaf2v5wGaaJ+Kx7U5yjvvR1++mCeurrhLn+/SXOenKOZjFMGlnQz39WrvyG1JaYXfbX3yGqbcA4rVstSt3XuB8ph4dWgM5hGtWfd4JqSy+7EWhhJFgCliHsAJkfeMOTFPlSg2YpNxi04ELbsFXRf8BIuvK0Jr76l52o9slWrfA1Qe/2NevroSXvTkadbWeQfVshJ5R6wGWSdjo5/h3pOG6MLt6wbO1Clg4cIkwKezpnFNqB7ItphWtSZ4Matb+sTwM37Inq8VMJK4bpJcPzYhNhkX6EQLrwt6PNSMv297KEXVE8UtDG/qtVkjF/LK8nJ66ePH+47Z95rRTLUC3hthWyiD21brXQvuYKkFrPodV+d7YWpCUFL1TAZXAk2JURMwkKSePrFu6uFHwUgsvx6K1MZDD2bJ95Lprma5sGcsN0vSSkWSR5M9Uk6viuLwJO4Vq6EYLhMQxzF2SxmRUvq8X8yP2g/9sQWp2VSKHkMIMk4KQ33Z/oHLSmbCsslnPhPZ/x5QKzkfsnrzUUvNAvFmGpvUrZtCAY1fa+1mpq89J1bzCqsrYTyPH1cEe5tohVit9jx5jGIj9h7LOqoeosgTeUUByaVlYONK4uJKRIz3/ewt0Zy5D1oqezilUU9sDgtUqh6X3/mR0v1nbqOL/VKKhv2qAJNa3cdmPNx3sU+lp68SUfPO1QWrXoBW1Jztjvu1I7bxMGNexuO9KbJX4atBixqRJinkbytBiDxEPsbSgrQFUsg/KaOFhzBXQTJOYrwb3PopW3PqZaxbMsQHnzqbznlrLUwdRnnE4y3AE0NTKIPbr/Lff9sDLFob7o/QU2d/hSDBcIj4jkeHvuZVfzV09swnAEreLOVBpOYBALFK3dJrWZBY0shQy4J2H2gS9qnH//qhwJgTfLRnGpkoSlFVSIUEraGM5V+SkV0rjeAYa+64ENfcLGP9LwT53ivin5+7DsB9aMMntLXjNsRSlMc8EGBEZNpSMvjKjfr9U29jkYWsk0kV3V6P/eMBa5NyccdjhZUG04b+YPrdrLdU/W1TsfFJeBS8BrVwYzIhxRzP/23iOZMJVs9uRdQDQFV3p5iRKrGPsdARTAulFPW7/u3Xut5Xr9BM0xLrmPtxLGiV/PY7bNOT70iEf1VGul74O22f9XV8NaRc1prlewnbUzK45f/YPW/9HIvWhqzbf5ZfZ989oFaTaV07fKOZXDj8Un4GZm58dVgETQNmWGwUKZDVNqQWdur731CbdM0wEiVA8hqTCdY/PtlCtd3QXiOKPd48LhMiGcfo4C5XHrols/Glfy4dedT7mHXofWRnt0h+yyY3mr/erztrFUD63J+eEM2Y83Vr6jiLct5j5jAchpLKOAY3f83uPfmaJOOh5q/7l33zgB4LWCJx67/2vd8d0fYZX46v5dKjyjyE49ll44NVnwh/PARFoJFhKmbekiKcN+rPdz+yO96PH/XXKM1qmDiCXICFGSmOveAGt/8537n8CC0OrC6fcOK3mHH87Zi0SP/Lt9muDWfWhe8uePayaOa8xyzdchZjAzHe6itoQ0LHC78u270f+AJmwqoupqpha/Ie0G2OpWjLvf92CK0td/id5VHb1n8PAA9NqI2UwJosMVyf/Af1Ks6TKIVaKsprjbxm+UzwADXFo6AOCULKw6FUqlVGdq11+b6b/b2nrra3fW8GXf/wv8l0XG6uCclvftQV8jf4Ne9cC8C5jx0rHYfcrE2tFxAVoTTsk6JdrIQZR1yFF38Du7bCnEtbEclD95S1o0xeAQsRRDRc3f/XOqNpun915OHSR4/ta7t3y7Ej58vLSaUyIcn/DYuBApCuWzw1p66FHWqCT6xNzNQw0eSkOFzGkU47FCjltzJAk337e38By6v+XQ+0y0c23GySupamuU6Gtrwkxe036f033elZ5Tnijqw77fRPapD9nGVy0ygPe7w5jACNjbDVyWjfoL30dAvFSoaUg9HB/ZJq/ntMTgHd5ugS3/YvO4/RIPVRG8ZQ3QaYb29/L93dtzJzpgCUKJGKU97Uebw6ADVnxLXVqJmBM8PqRm81j3AEKUeqKSBwEClSKvbaWPkhKtVvc83MHwDGFc8eJ3rxVWbyScseGsjgli2y64Wv6Y5nVtrjF48ABB/69fmayd2g6baTqYxCMe8xCZJJB0/QEsjIrh8Hz973udhPf4RMDqIyWDzlTQuTU8BiHMtRVfkw6VxWSx6tmMNMokfGjsuefc3F5UXtd2IWZG/bFEYu3WqpJtDadquKmDkxj8MFggRiLoQgjQUpQCCqQrlUkMrIc5g8YhqvtjVr1rCqK5lJrnvl3Xj+DLIfNNeODGx7SXa+9PftG5+/M/9EV9K/86GnF5Ntvs6H2fMwSApqFmAEeA8uSMLa1s2Bvfzwqjh//wsc9rEMWp2QM08tk1WAAoiyWMtV84pYxR+JiOmPh75hLdnHgp8UtniRteWrXuwN3lJeaVV/sqg/nLAaaOyhGnnzGqPEoKNYNASlHWL8m3h5Wo1fMVJ8yv7qiHz9Z1Nf3HZy9Nbei4jtIppmzWWkgAwNPCzDvSt0w89X2RNXRHkguPDZczSdudpc6n1IFsrDWpu4Q3wtqrgQRvLwystQjqA5nSM/P4tGIA7wB6RlZxIKMEFEMQv0voEjtFgV87GapN6auWvLsZVzO9YHa4u3Mze3JlhT+kpYGLq9cv6cy2B3Dqfda2+lYv+XwUHItVR5vDzEqt+rjv9C/cmXd8zi73o/KGH4HvPuvCg9bR4epG/HDut79ZZUYeyb0T8sfNIATlmRchc/f6EFqSu8pJfg0lAaMXxZkzhfy6JckHjX9o3Grm1JDhy2QLGaVOZ2L0iA0r7I9j/F5Cfhrz/hovknhDLgsbKPtbk1E1fLXwQ+7Jc0fyp4YDS0uS3XVoNDrpUfldaJ9w+K8Utfqm7HdICRvmGC2Uamks78Ucuhlff3zcTLEYThceLlLaicbC49n+YMVgQZ6NvO4LZ/csXqKv/onWtYtzyOAK549jinTReZuYs0aD4Br4ngtaQoAWoBviZ4Afp7YdtmKI9BGBgmoHGy/s7BeKUQBdIH4xwgViu4xfpoqUBnBnuxFOhY3lu240J3a+/TetXsG/27c1cG3x9cbbnm660lu4g2FlkEjLVAUSHTnEzCwTSppFOQAgLAgxWA4dFhqZR/IkPDa7TsH7DrD10PtcaiP/nNNPc/L32v4T5sXs7WINdEuQSlEV8rNyeCVwNcIvyRfCL4kQFFsET4vla/yjrMp5HQ6goQ8/t/1bUXJucBDxEAMcXoKT0k+9+YmzO2FgP6816zbV/kb3qPwpc/7z84/T7gvvT3+hfEfenF5oKTQY7G20xU05iAj0cpRQN43e4iv1ni+JmgUt1Q/fMVLxjLdVwI1714GDSfI473WsxidbmZxAaVESgOxnh1eIJapwMghgTCaAF2bDEGd3rMC2E6oNZ6iiniRyOs0iu+3KvepdAIAjnIJ+G+mnHE8UqKfNRyGTg6JfSVA3aOelK5yxiN/zv/a+NK+se+U72g89fAc//RZccrzACf3XwUmStOwgdnCpxpar9PmGu2GIhGYWzYEyl4daiF4xsxSFL5Gy0IO7caA7s86kPC5hCLkGikgFbXi0YPiY0+2lLa+NTIyKpBA9KtlxwXWaRmzkHEgZgDJh/jenoCurp88MNCj87KLbWBahXn0sQGY1VPgYByGvp3GSX/AnH0a6f6HJlgq7aGfaTDCipCOmhx5jpVdQ7ejoTgSCI7CuFQUrkQC6FcgVIRqpEnNiPyAd5kvAxtJKvlyMPwEOzaYQz1e9RCggzEhZLEY6udL9/tex/8F1hXBqD14/NduvU0c+4ULLUAkcNx4fEmgYhGZYu2nED+7i21FsUpWZRNfhJeulQxc/6bL33cyWHzrL3pDAaqMWZCKhUwA0VNmTkzRNInYJygE5ujVGt1HUHN1Xp2DKoxaBmqlSSmx1rf73VJV5tCpJa4S62UVSpDfhD6d8FIPiklhy2h6PBOqQzcrkOv3m6jt/R7Tml2ned+wHjHh8zZO4XUbJUwcRozDI/gTXACPo1NfSo6eQWIJAWei+eP6M3PnRscf/gKbWq+KJloS4Y3Tbb+TJPKG8n2X7JZLuMCr+/RxuNl5WQzRU2I6wWyCRsx9W7AUgmGCzA4kFh9pQxYTDoXSjxaptr/ZXvlu39trIvDzr/4A9/0+U8i8h51mfZkoo2TJTceqTVRiMVgVYFqUXxlyFxpyieCfdew7W7NDu7sv0CbWq6F8O0WhFAFKhWoRpbsx5rhMVQFX1cG9W6FxMqTer+AS8KKknhFsQyjRRgqwNAQFEaTaydFCwNRSAdSGVhr5d5L2LF8CzP/6gKRpuvMudORgKQYZbV2jApYvA2Nn8fiZwS/QUU3YfkdTWL5kuVHyf+kAExJ6Kmzf1wsuelO6ne0hCt2numD9PsgPItYF0Aw3cKmxHqVpJF7j+4FD3EMcRUqFaVcUUZHheFhx9AIlFQox1AsWtK5JuCcIAKqWpsDnKsM3KCbr/wC0655p6TbbzaXORNxtf3QCmh5p1j8M9HSmsBXHouGN7wIjxX2iwwmyf6NcT0WcKHz4zssQK77+c5Ka9MRqpnDDZmt3maIt+nEcRPejMJYml298+gbnMfgyOFWjFoox1Aag6gIGseEKUfLdCHXmeT0Pk7Grqrgkp6XSt/5bL7pQZn1P261IHMpLgtaQeKxPqy62lnxHh/tfJiRVYN7DrrbMT6ZbDA4sTb45fXq+JQyNZNMT0/AzKXCYn6XG+4cnDEnCE5aSFvHmZrOvAsXnGauJYVF4CsxQdrROktItYCvJl9RlHLvuxne7mnq/BZB61z8GOLHnpS4vFLLO79L8c7e3T+zNIATk5vyDpCQ/z2mvuCU9NDIhLsRf5tlKEFQq8PsPp3O/dmCKNNxIUHmYxa0HIlFoFFMrjMgO01RwY1tulKL+Raa5n0FgGhwPb7wVfq/+l3G71rpCWAVsKq+o3zQcFDcLV5DoFtggyQWuszv3gZ8f6vrXPCnFjRdb0HLHKJCRG5OiMQPUtgxSNPRXUTb+4gLy+j78j+SrKKA7nDP6xx8HEwK2Av1+Lw8seSWDx8iTUfdZKm2S5IuZkZIzeiQuP8eq268Jlk0CfCdALoOTC3hvwiSWHOC6/zUJzhkmTH7S8bMT1+/+2PdB6Tb+78wNq6IYPpVf+w6r7woOd8T1LylwYFhabD35w0OIEuDhvAbNGjQoEGDBg0aNGjQoEGDBg0aNGjQoEGDBg0aNGjQoEGDBg0aNNgr/x/zCp14oHyNjgAAAABJRU5ErkJggg==" alt="FeMOS" width="22" height="22">
+        </div>
+        <span class="wordmark-title">FeMOS</span>
+        <span class="wordmark-pill" id="h-uni-pill">MUST</span>
+      </div>
+      <div class="top-nav-actions">
+        <button class="btn-icon" onclick="App.Theme.toggle()" aria-label="Badilisha mwonekano" data-theme-toggle>
+          <span data-theme-icon>🌙</span>
+        </button>
+        <button class="btn-icon" onclick="window.location.href='announcements.html'" aria-label="Matangazo" style="position:relative">
+          🔔
+          <span class="badge hidden" id="ann-badge" style="position:absolute;top:4px;right:4px;font-size:9px;min-width:16px;height:16px;padding:0 3px" aria-label="Matangazo mapya">0</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Scrollable content -->
+    <div class="scroll-area with-bnav" id="home-scroll">
+
+      <!-- Greeting -->
+      <div class="home-greeting page-enter">
+        <div class="home-greeting-label" id="h-greeting">Habari,</div>
+        <div class="home-greeting-name" id="h-name">Inapakia…</div>
+        <div class="home-pills" id="h-pills"></div>
+      </div>
+
+      <!-- Active session banner (hidden by default) -->
+      <div class="active-session-banner hidden" id="sess-banner" onclick="window.location.href='attendance.html'" role="button" tabindex="0" aria-label="Kuna kipindi kinachoendelea">
+        <div class="live-dot" aria-hidden="true"></div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;color:var(--clr-success)">Kipindi kinaendelea</div>
+          <div style="font-size:11px;color:var(--text-tertiary)" id="sess-course">—</div>
+        </div>
+        <span style="font-size:18px;color:var(--clr-success)" aria-hidden="true">›</span>
+      </div>
+
+      <!-- Stats row -->
+      <div class="stats-row fade-in anim-1" role="region" aria-label="Takwimu za haraka">
+        <div class="stat-chip">
+          <div class="stat-chip-val" style="color:var(--clr-success)" id="st-att">—</div>
+          <div class="stat-chip-lbl">Mahudhurio</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-chip-val" style="color:var(--clr-cyan)" id="st-cls">3</div>
+          <div class="stat-chip-lbl">Masomo leo</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-chip-val" style="color:var(--clr-purple)" id="st-unread">0</div>
+          <div class="stat-chip-lbl">Matangazo</div>
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="section-header fade-in anim-2">
+        <span class="section-title">Vitendo vya haraka</span>
+      </div>
+      <div class="quick-actions-grid fade-in anim-2" id="qa-grid" role="list" aria-label="Vitendo vya haraka"></div>
+
+      <!-- Pending announcements -->
+      <div class="section-header fade-in anim-3" id="ann-section-hd">
+        <span class="section-title">Matangazo yanayosubiri</span>
+        <button class="section-action" onclick="window.location.href='announcements.html'">Zote →</button>
+      </div>
+      <div style="padding:0 var(--s-5);display:flex;flex-direction:column;gap:8px;margin-bottom:24px" id="ann-preview" role="list" aria-label="Matangazo yanayohitaji uthibitisho"></div>
+
+      <!-- Recent history (lecturer only) -->
+      <div class="section-header hidden fade-in anim-4" id="hist-section-hd">
+        <span class="section-title">Historia ya hivi karibuni</span>
+        <button class="section-action" onclick="window.location.href='att-history.html'">Zote →</button>
+      </div>
+      <div style="padding:0 var(--s-5);display:flex;flex-direction:column;gap:8px;margin-bottom:24px" id="hist-preview" role="list"></div>
+
+      <!-- Offline notice -->
+      <div class="info-notice warning hidden" id="offline-notice" style="margin:0 var(--s-5) 16px" role="alert">
+        <span aria-hidden="true">📶</span>
+        <span>Uko offline — FeMOS inaendelea kufanya kazi bila intaneti</span>
+      </div>
+
+      <div style="height:12px"></div>
+    </div><!-- /scroll-area -->
+
+  </div><!-- /page-content -->
+
+  <!-- Bottom nav -->
+  <nav class="bottom-nav" aria-label="Urambazaji mkuu">
+    <div class="nav-item active" onclick="window.location.href='home.html'" role="link" tabindex="0" aria-label="Nyumbani" aria-current="page">
+      <div class="nav-icon-wrap">🏠</div>
+      <span class="nav-label">Nyumbani</span>
+    </div>
+    <div class="nav-item" onclick="window.location.href='attendance.html'" role="link" tabindex="0" aria-label="Mahudhurio">
+      <div class="nav-icon-wrap">✅</div>
+      <span class="nav-label">Mahudhurio</span>
+    </div>
+    <button class="nav-fab" onclick="window.location.href='compose.html'" aria-label="Andika tangazo">＋</button>
+    <div class="nav-item" onclick="window.location.href='announcements.html'" role="link" tabindex="0" aria-label="Matangazo" style="position:relative">
+      <div class="nav-icon-wrap" style="position:relative">
+        🔔
+        <span class="badge hidden" id="ann-badge-nav" style="position:absolute;top:-4px;right:-2px;font-size:9px;min-width:15px;height:15px;padding:0 3px">0</span>
+      </div>
+      <span class="nav-label">Matangazo</span>
+    </div>
+    <div class="nav-item" onclick="window.location.href='profile.html'" role="link" tabindex="0" aria-label="Profile">
+      <div class="nav-icon-wrap">👤</div>
+      <span class="nav-label">Profile</span>
+    </div>
+  </nav>
+
+</div><!-- /#femos-root -->
+
+<script src="../js/db.js"></script>
+<script src="../js/utils.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/router.js"></script>
+<script src="../js/app.js"></script>
+<script>
+
+  /* ── Demo announcements (shared store) ── */
+  const DEMO_ANN = [
+    { id:'a1', type:'emergency', title:'Zoezi la Dharura ya Moto', body:'Kutakuwa na zoezi la dharura ya moto leo saa 10 asubuhi. Wanafunzi wote wanatakiwa kutoka nje ya majengo kwa utaratibu.', sender:{name:'Ofisi ya VC',role:'vc',emoji:'🏛️'}, sentAt:Date.now()-7200000, requiresAck:true, readBy:[], ackedBy:[] },
+    { id:'a2', type:'academic',  title:'CAT ya CS301 Imebadilishwa', body:'Mtihani wa CAT wa Computer Networks II umebadilishwa kutoka Ijumaa hadi Jumatatu. Chumba: LH-B, Saa 4 asubuhi.', sender:{name:'Dr. David Mkwasa',role:'lecturer',emoji:'👨‍🏫'}, sentAt:Date.now()-18000000, requiresAck:true, readBy:['demo_student'], ackedBy:[] },
+    { id:'a3', type:'deadline',  title:'Assignment 3 — OS (Kesho)', body:'Ukumbusho: Assignment ya 3 ya Operating Systems inastahili kesho saa 11 usiku.', sender:{name:'Dr. David Mkwasa',role:'lecturer',emoji:'👨‍🏫'}, sentAt:Date.now()-3600000, requiresAck:false, readBy:[], ackedBy:[] },
+    { id:'a4', type:'general',   title:'Mkutano wa CR — Alhamisi', body:'Wawakilishi wote wanaalikwa mkutanoni Alhamisi saa 3 asubuhi, Admin Block Room 12.', sender:{name:'CR — CS Year 3',role:'cr',emoji:'🎓'}, sentAt:Date.now()-86400000, requiresAck:false, readBy:[], ackedBy:[] },
+    { id:'a5', type:'info',      title:'Vitabu Vipya — Maktaba', body:'Vitabu vipya vya Computer Networks (Tanenbaum 6th Ed) vimefika maktabani. Nakala 20 zinapatikana.', sender:{name:'Maktaba — MUST',role:'uni-admin',emoji:'📚'}, sentAt:Date.now()-172800000, requiresAck:false, readBy:[], ackedBy:[] },
+  ];
+
+  const ANN_CFG = {
+    emergency: { emoji:'🚨', color:'#FF4B6E', label:'Dharura' },
+    academic:  { emoji:'📝', color:'#00D4FF', label:'Kitaaluma' },
+    general:   { emoji:'📢', color:'#9B6DFF', label:'Jumla' },
+    info:      { emoji:'📰', color:'#4A5568', label:'Habari' },
+    deadline:  { emoji:'⏰', color:'#FFB830', label:'Tarehe' },
+    poll:      { emoji:'🗳️', color:'#FFB830', label:'Kura' },
+  };
+
+  function getAnns() {
+    const stored = DB.LS.get('femos_announcements');
+    return stored || DEMO_ANN;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!Router.requireAuth('../pages/login.html')) return;
+    const user = Auth.Session.load();
+    renderHome(user);
+
+    // Network check
+    window.addEventListener('offline', () => {
+      document.getElementById('offline-notice')?.classList.remove('hidden');
+    });
+    window.addEventListener('online', () => {
+      document.getElementById('offline-notice')?.classList.add('hidden');
+    });
+  });
+
+  function renderHome(user) {
+    if (!user) return;
+    const isLec = ['lecturer','uni-admin','super-admin','hod'].includes(user.role);
+
+    // Greeting
+    Utils.DOM.setText('h-greeting', Utils.DateTime.greeting());
+    Utils.DOM.setText('h-name', user.firstName + ' 👋');
+    Utils.DOM.setText('h-uni-pill', user.university || 'MUST');
+
+    // Pills
+    const roleLabels = {
+      student:'🧑‍💻 Mwanafunzi', lecturer:'👨‍🏫 Mwalimu',
+      cr:'🎓 CR', hod:'🏛️ HOD', 'uni-admin':'🧑‍💼 Admin', 'super-admin':'⚡ Super Admin'
+    };
+    const pillsEl = document.getElementById('h-pills');
+    if (pillsEl) {
+      pillsEl.innerHTML = `
+        <span class="tag tag-cyan">${roleLabels[user.role] || user.role}</span>
+        <span class="tag tag-blue">${user.university || 'MUST'}</span>
+        <span class="tag tag-green"><span class="live-dot" style="width:5px;height:5px;display:inline-block;margin-right:3px" aria-hidden="true"></span>Online</span>
+      `;
+    }
+
+    // Stats
+    Utils.DOM.setText('st-att', isLec ? '3 vip.' : '94%');
+
+    // Unread count
+    const anns   = getAnns();
+    const uid    = user.id || 'demo_student';
+    const unread = anns.filter(a => a.requiresAck && !a.ackedBy.includes(uid)).length;
+    Utils.DOM.setText('st-unread', unread);
+    if (unread > 0) {
+      ['ann-badge','ann-badge-nav'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.textContent = unread; el.classList.remove('hidden'); }
+      });
+    }
+
+    // Quick actions
+    renderQA(isLec);
+
+    // Announcement previews
+    renderAnnPreviews(user);
+
+    // History (lecturer)
+    if (isLec) renderHistPreview();
+  }
+
+  function renderQA(isLec) {
+    const el = document.getElementById('qa-grid');
+    if (!el) return;
+    const acts = isLec ? [
+      { ico:'📂', bg:'rgba(0,229,160,.12)', bc:'rgba(0,229,160,.25)', title:'Fungua Kipindi', desc:'Anza mahudhurio ya darasa', href:'attendance.html' },
+      { ico:'📢', bg:'rgba(0,212,255,.10)', bc:'rgba(0,212,255,.22)', title:'Tuma Tangazo',   desc:'Wasiliana na wanafunzi',  href:'compose.html' },
+      { ico:'📊', bg:'rgba(255,184,48,.10)', bc:'rgba(255,184,48,.22)', title:'Ripoti',       desc:'Historia ya vipindi',     href:'att-history.html' },
+      { ico:'✅', bg:'rgba(155,109,255,.12)', bc:'rgba(155,109,255,.25)', title:'Maombi',     desc:'Wanafunzi wanaoomba',    href:'approvals.html' },
+    ] : [
+      { ico:'✅', bg:'rgba(0,229,160,.12)', bc:'rgba(0,229,160,.25)', title:'Saini Mahudhurio', desc:'Thibiti uwepo wako', href:'attendance.html' },
+      { ico:'📢', bg:'rgba(0,212,255,.10)', bc:'rgba(0,212,255,.22)', title:'Matangazo',        desc:'Matangazo ya chuo',  href:'announcements.html' },
+      { ico:'📋', bg:'rgba(155,109,255,.12)', bc:'rgba(155,109,255,.25)', title:'Historia',    desc:'Rekodi za mahudhurio', href:'att-history.html' },
+      { ico:'👤', bg:'rgba(21,101,255,.12)', bc:'rgba(21,101,255,.25)', title:'Profile',       desc:'Mipangilio na taarifa', href:'profile.html' },
+    ];
+    el.innerHTML = acts.map(a => `
+      <div class="qa-card card-interactive" onclick="window.location.href='${a.href}'" role="link" tabindex="0" aria-label="${a.title}">
+        <div class="qa-icon-wrap" style="background:${a.bg};border:1px solid ${a.bc}" aria-hidden="true">${a.ico}</div>
+        <div class="qa-card-title">${a.title}</div>
+        <div class="qa-card-desc">${a.desc}</div>
+      </div>
+    `).join('');
+  }
+
+  function renderAnnPreviews(user) {
+    const el = document.getElementById('ann-preview');
+    const hd = document.getElementById('ann-section-hd');
+    if (!el) return;
+
+    const uid     = user.id || 'demo_student';
+    const pending = getAnns().filter(a => a.requiresAck && !a.ackedBy.includes(uid)).slice(0, 3);
+
+    if (!pending.length) {
+      if (hd) hd.classList.add('hidden');
+      el.innerHTML = '<div style="padding:8px 0;font-size:13px;color:var(--text-tertiary);text-align:center">✅ Hakuna matangazo yanayosubiri</div>';
+      return;
+    }
+    if (hd) hd.classList.remove('hidden');
+
+    el.innerHTML = pending.map(a => {
+      const cfg = ANN_CFG[a.type] || ANN_CFG.info;
+      return `
+        <div style="display:flex;align-items:center;gap:12px;background:var(--bg-surface);border:1px solid var(--border-soft);border-radius:var(--r-md);padding:12px 14px;cursor:pointer;transition:background var(--dur-sm)"
+             onclick="window.location.href='announcements.html'"
+             role="link" tabindex="0" aria-label="${a.title}">
+          <span style="font-size:20px" aria-hidden="true">${cfg.emoji}</span>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:500;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${Utils.Str.escape(a.title)}</div>
+            <div style="font-size:10px;color:var(--text-tertiary)">${a.sender.name} · ${Utils.DateTime.timeAgo(a.sentAt)}</div>
+          </div>
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--clr-danger);flex-shrink:0;animation:live-pulse 2s infinite" aria-hidden="true"></div>
+        </div>`;
+    }).join('');
+  }
+
+  function renderHistPreview() {
+    const el = document.getElementById('hist-preview');
+    const hd = document.getElementById('hist-section-hd');
+    const history = DB.LS.get('femos_att_history') || [];
+    if (!history.length) return;
+    hd?.classList.remove('hidden');
+    el.innerHTML = history.slice(0, 2).map(s => {
+      const pct = Math.round((s.records?.length || 0) / s.enrolled * 100);
+      return `
+        <div class="card card-interactive" style="padding:14px 16px" onclick="window.location.href='att-history.html'">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <span class="tag tag-cyan">${s.courseCode}</span>
+            <span style="font-size:11px;color:var(--text-tertiary)">${Utils.DateTime.format(new Date(s.startTime),'DD/Mo HH:MM')}</span>
+          </div>
+          <div style="font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:8px">${s.courseName}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <span class="tag tag-green">${s.records?.length || 0}/${s.enrolled} wanafunzi</span>
+            <span class="tag ${pct>=75?'tag-green':'tag-red'}">${pct}%</span>
+          </div>
+        </div>`;
+    }).join('');
+  }
+</script>
+</body>
+</html>

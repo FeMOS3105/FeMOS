@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="sw" data-theme="dark">
+<head>
+  <title>Profile — FeMOS</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#060C18">
+  <link rel="manifest" href="../manifest.json">
+  <link rel="icon" href="../assets/logo-48.png" type="image/png">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="femos-ambient" aria-hidden="true"></div>
+<div id="toast-portal" aria-live="polite"></div>
+<div id="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+  <div class="confirm-box">
+    <div class="confirm-emoji" id="confirm-emoji">⚠️</div>
+    <div class="confirm-title" id="confirm-title">Una uhakika?</div>
+    <div class="confirm-desc"  id="confirm-desc">Kitendo hiki hakiwezi kurudishwa.</div>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost" id="confirm-cancel">Ghairi</button>
+      <button class="btn btn-danger" id="confirm-ok">Thibitisha</button>
+    </div>
+  </div>
+</div>
+<div id="femos-root">
+  <div class="page-content">
+    <div class="status-bar" aria-hidden="true">
+      <span class="time" data-live-clock>09:41</span>
+      <div class="indicators"><span data-network-status>●●●●</span><span class="battery">⚡ 87%</span></div>
+    </div>
+    
+    <div class="top-nav">
+      <span style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--text-primary);letter-spacing:-.03em">Profile</span>
+      <div class="top-nav-actions">
+        <button class="btn-icon" onclick="App.Theme.toggle()" data-theme-toggle aria-label="Badilisha mwonekano">
+          <span data-theme-icon>🌙</span>
+        </button>
+      </div>
+    </div>
+    <div class="scroll-area with-bnav">
+      <!-- Hero -->
+      <div style="display:flex;flex-direction:column;align-items:center;padding:20px var(--s-5) 22px;gap:8px;text-align:center;background:linear-gradient(180deg,var(--bg-elevated) 0%,transparent 100%);border-bottom:1px solid var(--divider);margin-bottom:4px">
+        <div class="avatar avatar-xl avatar-ring" id="pr-av" style="background:linear-gradient(135deg,#00D4FF,#1565FF)" aria-hidden="true">👤</div>
+        <div style="font-family:var(--font-display);font-size:22px;font-weight:700;letter-spacing:-.03em;color:var(--text-primary)" id="pr-name">—</div>
+        <div style="font-size:13px;color:var(--text-secondary)" id="pr-role">—</div>
+        <div style="font-family:var(--font-display);font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--clr-cyan);background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.15);border-radius:999px;padding:4px 12px" id="pr-uid">FEMOS-—</div>
+        <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:4px" id="pr-tags"></div>
+      </div>
+      <!-- Stats -->
+      <div class="stats-row" style="margin:12px 0 20px">
+        <div class="stat-chip"><div class="stat-chip-val" style="color:var(--clr-success)" id="pr-att">94%</div><div class="stat-chip-lbl">Mahudhurio</div></div>
+        <div class="stat-chip"><div class="stat-chip-val" style="color:var(--clr-cyan)" id="pr-courses">6</div><div class="stat-chip-lbl">Kozi</div></div>
+        <div class="stat-chip"><div class="stat-chip-val" style="color:var(--clr-purple)" id="pr-days">1</div><div class="stat-chip-lbl">Siku FeMOS</div></div>
+      </div>
+      <!-- Settings -->
+      <div class="section-header"><span class="section-title">Mipangilio</span></div>
+      <div class="card" style="margin:0 var(--s-5) 16px">
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--divider);cursor:pointer" onclick="App.Theme.toggle()">
+          <div style="width:36px;height:36px;border-radius:10px;background:rgba(155,109,255,.12);border:1px solid rgba(155,109,255,.22);display:flex;align-items:center;justify-content:center;font-size:18px">🎨</div>
+          <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text-primary)">Mwonekano</div><div style="font-size:11px;color:var(--text-tertiary)" data-theme-label>Dark mode</div></div>
+          <label class="toggle" onclick="event.stopPropagation()" aria-label="Badilisha mwonekano">
+            <input type="checkbox" data-theme-toggle>
+            <div class="toggle-track"></div>
+          </label>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--divider);cursor:pointer">
+          <div style="width:36px;height:36px;border-radius:10px;background:rgba(0,212,255,.10);border:1px solid rgba(0,212,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px">🌐</div>
+          <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text-primary)">Lugha</div><div style="font-size:11px;color:var(--text-tertiary)">Kiswahili · English</div></div>
+          <span style="font-size:12px;color:var(--text-tertiary)">SW ›</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--divider)">
+          <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,184,48,.10);border:1px solid rgba(255,184,48,.18);display:flex;align-items:center;justify-content:center;font-size:18px">🔔</div>
+          <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text-primary)">Arifa</div><div style="font-size:11px;color:var(--text-tertiary)">Matangazo · Mahudhurio</div></div>
+          <label class="toggle" aria-label="Arifa">
+            <input type="checkbox" checked>
+            <div class="toggle-track"></div>
+          </label>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--divider)">
+          <div style="width:36px;height:36px;border-radius:10px;background:rgba(0,229,160,.10);border:1px solid rgba(0,229,160,.18);display:flex;align-items:center;justify-content:center;font-size:18px">📶</div>
+          <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text-primary)">Offline Mode</div><div style="font-size:11px;color:var(--text-tertiary)">Pakua maudhui moja kwa moja</div></div>
+          <label class="toggle" aria-label="Offline mode">
+            <input type="checkbox" checked>
+            <div class="toggle-track"></div>
+          </label>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 16px">
+          <div style="width:36px;height:36px;border-radius:10px;background:rgba(21,101,255,.12);border:1px solid rgba(21,101,255,.20);display:flex;align-items:center;justify-content:center;font-size:18px">👆</div>
+          <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text-primary)">Biometric</div><div style="font-size:11px;color:var(--text-tertiary)">Face ID · Fingerprint</div></div>
+          <label class="toggle" aria-label="Biometric">
+            <input type="checkbox">
+            <div class="toggle-track"></div>
+          </label>
+        </div>
+      </div>
+      <!-- Uni info -->
+      <div class="section-header"><span class="section-title">Chuo kikuu</span></div>
+      <div class="card" style="margin:0 var(--s-5) 16px">
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--divider)">
+          <div style="width:36px;height:36px;border-radius:10px;background:rgba(0,212,255,.10);border:1px solid rgba(0,212,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px">🏛️</div>
+          <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text-primary)" id="pr-uni">MUST</div><div style="font-size:11px;color:var(--text-tertiary)" id="pr-campus">Main Campus · must.femos.ac.tz</div></div>
+          <span class="tag tag-green">Active</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--divider)">
+          <div style="width:36px;height:36px;border-radius:10px;background:rgba(155,109,255,.12);border:1px solid rgba(155,109,255,.22);display:flex;align-items:center;justify-content:center;font-size:18px">📚</div>
+          <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text-primary)" id="pr-course">Computer Science</div><div style="font-size:11px;color:var(--text-tertiary)" id="pr-year">Year 3 · 2024</div></div>
+          <span style="font-size:14px;color:var(--text-tertiary)">›</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 16px">
+          <div style="width:36px;height:36px;border-radius:10px;background:var(--glass-soft);border:1px solid var(--border-soft);display:flex;align-items:center;justify-content:center;font-size:18px">ℹ️</div>
+          <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text-primary)">Kuhusu FeMOS</div><div style="font-size:11px;color:var(--text-tertiary)">v1.0.0 · JSL FastLine Enterprises</div></div>
+          <span style="font-size:14px;color:var(--text-tertiary)">›</span>
+        </div>
+      </div>
+      <!-- Danger zone -->
+      <div class="section-header"><span class="section-title" style="color:var(--clr-danger)">Eneo la hatari</span></div>
+      <div class="card" style="margin:0 var(--s-5) 24px">
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer" onclick="ProfilePage.logout()">
+          <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,75,110,.10);border:1px solid rgba(255,75,110,.18);display:flex;align-items:center;justify-content:center;font-size:18px">🚪</div>
+          <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--clr-danger)">Toka (Sign out)</div><div style="font-size:11px;color:var(--text-tertiary)">Funga kipindi chako cha sasa</div></div>
+          <span style="font-size:14px;color:var(--clr-danger)">›</span>
+        </div>
+      </div>
+      <div style="height:12px"></div>
+    </div>
+
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="window.location.href=\"home.html\"" role="link" tabindex="0" aria-label="Nyumbani">
+      <div class="nav-icon-wrap">🏠</div>
+      <span class="nav-label">Nyumbani</span>
+    </div>
+    <div class="nav-item" onclick="window.location.href=\"attendance.html\"" role="link" tabindex="0" aria-label="Mahudhurio">
+      <div class="nav-icon-wrap">✅</div>
+      <span class="nav-label">Mahudhurio</span>
+    </div>
+    <button class="nav-fab" onclick="window.location.href=\"compose.html\"" aria-label="Andika tangazo">＋</button>
+    <div class="nav-item" onclick="window.location.href=\"announcements.html\"" role="link" tabindex="0" aria-label="Matangazo">
+      <div class="nav-icon-wrap">🔔</div>
+      <span class="nav-label">Matangazo</span>
+    </div>
+    <div class="nav-item active" onclick="window.location.href=\"profile.html\"" role="link" tabindex="0" aria-label="Profile" aria-current="page">
+      <div class="nav-icon-wrap">👤</div>
+      <span class="nav-label">Profile</span>
+    </div>
+  </nav>
+</div>
+<script src="../js/db.js"></script>
+<script src="../js/utils.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/router.js"></script>
+<script src="../js/app.js"></script>
+
+<script>
+const ProfilePage = {
+  init() {
+    const user = Auth.Session.load(); if (!user) return;
+    const c = Utils.AVATAR_COLORS[user.colorId||0];
+    const av = document.getElementById('pr-av');
+    if (av) {
+      av.style.background = `linear-gradient(135deg,${c.from},${c.to})`;
+      av.textContent = user.emoji || Utils.Str.initials(user.name);
+      av.style.fontSize = user.emoji ? '32px' : '26px';
+    }
+    const roleMap = {student:'🧑‍💻 Mwanafunzi',lecturer:'👨‍🏫 Mwalimu',cr:'🎓 CR',hod:'🏛️ HOD','uni-admin':'🧑‍💼 Admin','super-admin':'⚡ Super Admin'};
+    Utils.DOM.setText('pr-name',   user.name);
+    Utils.DOM.setText('pr-role',   (roleMap[user.role]||user.role) + (user.campusName ? ' · '+user.campusName : ''));
+    Utils.DOM.setText('pr-uid',    user.uniqueId || 'Inasubiri idhini…');
+    Utils.DOM.setText('pr-uni',    user.universityName || user.university || 'MUST');
+    Utils.DOM.setText('pr-campus', (user.campusName||'Main Campus') + ' · ' + (user.university?.toLowerCase()||'must') + '.femos.ac.tz');
+    Utils.DOM.setText('pr-course', user.courseName || 'Computer Science & Engineering');
+    Utils.DOM.setText('pr-year',   user.year ? 'Year '+user.year+' · 2024' : 'Lecturer · Staff');
+    const tags = document.getElementById('pr-tags');
+    if (tags) {
+      tags.innerHTML = [
+        `<span class="tag tag-cyan">${user.university||'MUST'}</span>`,
+        user.campusCode && user.campusCode!=='MC' ? `<span class="tag tag-amber">🏫 ${user.campusName||user.campusCode}</span>` : '',
+        user.year ? `<span class="tag tag-neutral">Year ${user.year}</span>` : '',
+      ].filter(Boolean).join('');
+    }
+    const days = Math.max(1, Math.floor((Date.now()-(user.loginAt||Date.now()))/86400000));
+    Utils.DOM.setText('pr-days', days);
+  },
+
+  logout() {
+    App.Confirm.show({
+      emoji:'🚪', title:'Toka FeMOS?',
+      desc:'Kipindi chako cha sasa kitafungwa.',
+      okLabel:'Toka', okClass:'btn-danger',
+      cb() {
+        Auth.logout();
+        App.Toast.info('Umesalimika. Kwa heri! 👋');
+        setTimeout(()=>window.location.replace('login.html'),800);
+      }
+    });
+  },
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (!Router.requireAuth()) return;
+  ProfilePage.init();
+});
+</script>
+</body>
+</html>
