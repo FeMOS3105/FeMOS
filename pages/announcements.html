@@ -1,27 +1,27 @@
 <!DOCTYPE html>
-<html lang="sw" data-theme="dark">
+<html lang="en" data-theme="dark">
 <head>
-  <title>Matangazo — FeMOS</title>
+  <title>Announcements — FeMOS</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#060C18">
+  <meta name="theme-color" content="#0A1628">
   <link rel="manifest" href="../manifest.json">
   <link rel="icon" href="../assets/logo-48.png" type="image/png">
   <link rel="stylesheet" href="../css/style.css">
-<style>.filter-chip.active{background:rgba(0,212,255,.12)!important;border-color:rgba(0,212,255,.28)!important;color:var(--clr-cyan)!important;}</style>
+<style>.filter-chip.active{background:rgba(79,195,247,.12)!important;border-color:rgba(79,195,247,.28)!important;color:var(--clr-cyan)!important;}</style>
 </head>
 <body>
 <div class="femos-ambient" aria-hidden="true"></div>
 <div id="toast-portal" aria-live="polite"></div>
 <div id="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
   <div class="confirm-box">
-    <div class="confirm-emoji" id="confirm-emoji">⚠️</div>
-    <div class="confirm-title" id="confirm-title">Una uhakika?</div>
-    <div class="confirm-desc"  id="confirm-desc">Kitendo hiki hakiwezi kurudishwa.</div>
+    <div class="confirm-emoji" id="confirm-emoji"></div>
+    <div class="confirm-title" id="confirm-title">Are you sure?</div>
+    <div class="confirm-desc"  id="confirm-desc">This action cannot be undone.</div>
     <div class="confirm-actions">
-      <button class="btn btn-ghost" id="confirm-cancel">Ghairi</button>
-      <button class="btn btn-danger" id="confirm-ok">Thibitisha</button>
+      <button class="btn btn-ghost" id="confirm-cancel">Cancel</button>
+      <button class="btn btn-danger" id="confirm-ok">Confirm</button>
     </div>
   </div>
 </div>
@@ -29,23 +29,23 @@
   <div class="page-content">
     <div class="status-bar" aria-hidden="true">
       <span class="time" data-live-clock>09:41</span>
-      <div class="indicators"><span data-network-status>●●●●</span><span class="battery">⚡ 87%</span></div>
+      <div class="indicators"><span data-network-status></span><span class="battery">87%</span></div>
     </div>
     
     <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--s-2) var(--s-5) 6px;flex-shrink:0">
-      <span style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--text-primary);letter-spacing:-.03em">Matangazo</span>
-      <button class="btn-icon" onclick="window.location.href='compose.html'" aria-label="Andika tangazo">✏️</button>
+      <span style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--text-primary);letter-spacing:-.03em">Announcements</span>
+      <button class="btn-icon" onclick="window.location.href='compose.html'" aria-label="Compose announcement">✏️</button>
     </div>
-    <div id="pend-banner" class="hidden" style="display:flex;align-items:center;gap:10px;padding:12px var(--s-5);background:rgba(255,75,110,.08);border-bottom:1px solid rgba(255,75,110,.15);font-size:13px;color:var(--clr-danger);cursor:pointer;font-weight:500;flex-shrink:0" onclick="window.location.href='announcements.html'" role="alert">
-      ⚠️ <span id="pend-cnt">0</span> matangazo yanahitaji uthibitisho wako ›
+    <div id="pend-banner" class="hidden" style="display:flex;align-items:center;gap:10px;padding:12px var(--s-5);background:rgba(239,83,80,.08);border-bottom:1px solid rgba(239,83,80,.15);font-size:13px;color:var(--clr-danger);cursor:pointer;font-weight:500;flex-shrink:0" onclick="window.location.href='announcements.html'" role="alert">
+      <span id="pend-cnt">0</span> announcements require your confirmation ›
     </div>
     <div style="display:flex;gap:8px;padding:10px var(--s-5) 12px;overflow-x:auto;flex-shrink:0;scrollbar-width:none" id="filter-row">
-      <button class="btn btn-secondary btn-sm filter-chip active" data-filter="all"       onclick="AnnPage.filter('all',this)">Zote</button>
-      <button class="btn btn-ghost btn-sm filter-chip" data-filter="emergency" onclick="AnnPage.filter('emergency',this)">🚨 Dharura</button>
-      <button class="btn btn-ghost btn-sm filter-chip" data-filter="academic"  onclick="AnnPage.filter('academic',this)">📝 Kitaaluma</button>
-      <button class="btn btn-ghost btn-sm filter-chip" data-filter="general"   onclick="AnnPage.filter('general',this)">📢 Jumla</button>
-      <button class="btn btn-ghost btn-sm filter-chip" data-filter="deadline"  onclick="AnnPage.filter('deadline',this)">⏰ Tarehe</button>
-      <button class="btn btn-ghost btn-sm filter-chip" data-filter="info"      onclick="AnnPage.filter('info',this)">📰 Habari</button>
+      <button class="btn btn-secondary btn-sm filter-chip active" data-filter="all"       onclick="AnnPage.filter('all',this)">All</button>
+      <button class="btn btn-ghost btn-sm filter-chip" data-filter="emergency" onclick="AnnPage.filter('emergency',this)">Emergency</button>
+      <button class="btn btn-ghost btn-sm filter-chip" data-filter="academic"  onclick="AnnPage.filter('academic',this)">Academic</button>
+      <button class="btn btn-ghost btn-sm filter-chip" data-filter="general"   onclick="AnnPage.filter('general',this)">General</button>
+      <button class="btn btn-ghost btn-sm filter-chip" data-filter="deadline"  onclick="AnnPage.filter('deadline',this)">Deadline</button>
+      <button class="btn btn-ghost btn-sm filter-chip" data-filter="info"      onclick="AnnPage.filter('info',this)">Info</button>
     </div>
     <!-- Ann detail modal -->
     <div class="modal-overlay" id="ann-modal">
@@ -61,15 +61,15 @@
         <div style="padding:16px var(--s-6);font-size:14px;color:var(--text-secondary);line-height:1.7" id="m-body"></div>
         <div id="m-stats" class="hidden" style="padding:0 var(--s-6) 16px">
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
-            <div class="stat-chip"><div class="stat-chip-val" style="color:var(--clr-cyan)" id="ms-read">0</div><div class="stat-chip-lbl">Wamesoma</div></div>
-            <div class="stat-chip"><div class="stat-chip-val" style="color:var(--clr-success)" id="ms-acked">0</div><div class="stat-chip-lbl">Walikubali</div></div>
-            <div class="stat-chip"><div class="stat-chip-val" style="color:var(--clr-danger)" id="ms-pending">0</div><div class="stat-chip-lbl">Hawajakubali</div></div>
+            <div class="stat-chip"><div class="stat-chip-val" style="color:var(--clr-cyan)" id="ms-read">0</div><div class="stat-chip-lbl">Read</div></div>
+            <div class="stat-chip"><div class="stat-chip-val" style="color:var(--clr-success)" id="ms-acked">0</div><div class="stat-chip-lbl">Acknowledged</div></div>
+            <div class="stat-chip"><div class="stat-chip-val" style="color:var(--clr-danger)" id="ms-pending">0</div><div class="stat-chip-lbl">Pending</div></div>
           </div>
         </div>
         <div style="padding:0 var(--s-6) 16px;display:flex;flex-direction:column;gap:10px">
-          <button class="btn btn-primary btn-full hidden" id="m-ack-btn">✅ Nimeelewa na Kukubali Tangazo Hili</button>
-          <div class="hidden" id="m-acked-badge" style="text-align:center"><span class="tag tag-green">✅ Umekubali tangazo hili</span></div>
-          <button class="btn btn-ghost btn-full" onclick="App.Modal.close('ann-modal')">Funga</button>
+          <button class="btn btn-primary btn-full hidden" id="m-ack-btn">I understand and acknowledge this announcement</button>
+          <div class="hidden" id="m-acked-badge" style="text-align:center"><span class="tag tag-green">You have acknowledged this announcement</span></div>
+          <button class="btn btn-ghost btn-full" onclick="App.Modal.close('ann-modal')">Close</button>
         </div>
       </div>
     </div>
@@ -79,26 +79,27 @@
     </div>
 
   </div>
-  <nav class="bottom-nav" aria-label="Urambazaji mkuu">
-    <div class="nav-item" onclick="window.location.href=\"home.html\"" role="link" tabindex="0" aria-label="Nyumbani">
-      <div class="nav-icon-wrap">🏠</div>
-      <span class="nav-label">Nyumbani</span>
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <div class="nav-item" onclick="window.location.href=\"home.html\"" role="link" tabindex="0" aria-label="Home">
+      <div class="nav-icon-wrap"></div>
+      <span class="nav-label">Home</span>
     </div>
-    <div class="nav-item" onclick="window.location.href=\"attendance.html\"" role="link" tabindex="0" aria-label="Mahudhurio">
-      <div class="nav-icon-wrap">✅</div>
-      <span class="nav-label">Mahudhurio</span>
+    <div class="nav-item" onclick="window.location.href=\"attendance.html\"" role="link" tabindex="0" aria-label="Attendance">
+      <div class="nav-icon-wrap"></div>
+      <span class="nav-label">Attendance</span>
     </div>
-    <button class="nav-fab" onclick="window.location.href=\"compose.html\"" aria-label="Andika tangazo">＋</button>
-    <div class="nav-item active" onclick="window.location.href=\"announcements.html\"" role="link" tabindex="0" aria-label="Matangazo" aria-current="page">
-      <div class="nav-icon-wrap">🔔</div>
-      <span class="nav-label">Matangazo</span>
+    <button class="nav-fab" onclick="window.location.href=\"compose.html\"" aria-label="Compose announcement">＋</button>
+    <div class="nav-item active" onclick="window.location.href=\"announcements.html\"" role="link" tabindex="0" aria-label="Announcements" aria-current="page">
+      <div class="nav-icon-wrap"></div>
+      <span class="nav-label">Announcements</span>
     </div>
     <div class="nav-item" onclick="window.location.href=\"profile.html\"" role="link" tabindex="0" aria-label="Profile">
-      <div class="nav-icon-wrap">👤</div>
+      <div class="nav-icon-wrap"></div>
       <span class="nav-label">Profile</span>
     </div>
   </nav>
 </div>
+<script src="../js/icons.js"></script>
 <script src="../js/db.js"></script>
 <script src="../js/utils.js"></script>
 <script src="../js/auth.js"></script>
@@ -107,19 +108,19 @@
 <script>
 
 const ANN_CFG = {
-  emergency:{emoji:'🚨',color:'#FF4B6E',label:'Dharura',    requiresAck:true},
-  academic: {emoji:'📝',color:'#00D4FF',label:'Kitaaluma',  requiresAck:true},
-  general:  {emoji:'📢',color:'#9B6DFF',label:'Jumla',      requiresAck:false},
-  info:     {emoji:'📰',color:'#4A5568',label:'Habari',     requiresAck:false},
-  deadline: {emoji:'⏰',color:'#FFB830',label:'Tarehe',     requiresAck:false},
-  poll:     {emoji:'🗳️',color:'#FFB830',label:'Kura',       requiresAck:true},
+  emergency:{color:'#EF5350',label:'Emergency',    requiresAck:true},
+  academic: {color:'#4FC3F7',label:'Academic',     requiresAck:true},
+  general:  {color:'#7E57C2',label:'General',      requiresAck:false},
+  info:     {color:'#546E7A',label:'Info',         requiresAck:false},
+  deadline: {color:'#FFB74D',label:'Deadline',     requiresAck:false},
+  poll:     {color:'#FFB74D',label:'Poll',         requiresAck:true},
 };
 const DEMO_ANN = [
-  {id:'a1',type:'emergency',title:'Zoezi la Dharura ya Moto',body:'Kutakuwa na zoezi la dharura ya moto leo saa 10 asubuhi. Wanafunzi wote wanatakiwa kutoka nje ya majengo kwa utaratibu na kwenda Assembly Point A karibu na lango la mashariki.',sender:{name:'Ofisi ya VC',role:'vc',emoji:'🏛️'},sentAt:Date.now()-7200000,requiresAck:true,readBy:[],ackedBy:[]},
-  {id:'a2',type:'academic', title:'CAT ya CS301 Imebadilishwa',body:'Mtihani wa CAT wa Computer Networks II umebadilishwa kutoka Ijumaa hadi Jumatatu tarehe 22. Chumba kinabaki LH-B. Muda ni saa 10 asubuhi.',sender:{name:'Dr. David Mkwasa',role:'lecturer',emoji:'👨‍🏫'},sentAt:Date.now()-18000000,requiresAck:true,readBy:['demo_student'],ackedBy:[]},
-  {id:'a3',type:'deadline', title:'Assignment 3 — OS Concepts (Kesho)',body:'Ukumbusho: Assignment ya 3 ya Operating Systems inastahili kesho saa 11 usiku. Wasilisha kupitia FeMOS Local Cloud au kwa mkono ofisini.',sender:{name:'Dr. David Mkwasa',role:'lecturer',emoji:'👨‍🏫'},sentAt:Date.now()-3600000,requiresAck:false,readBy:[],ackedBy:[]},
-  {id:'a4',type:'general',  title:'Mkutano wa CR — Alhamisi',body:'Wawakilishi wote wa madarasa wanaalikwa kwenye mkutano Alhamisi saa 3 asubuhi katika chumba cha mikutano cha Admin Block. Agenda kuu ni kupanga ratiba ya mitihani.',sender:{name:'CR — CS Year 3',role:'cr',emoji:'🎓'},sentAt:Date.now()-86400000,requiresAck:false,readBy:[],ackedBy:[]},
-  {id:'a5',type:'info',     title:'Vitabu Vipya — Maktaba',body:'Vitabu vipya vya Computer Networks (Tanenbaum 6th Ed) vimefika maktabani. Nakala 20 zinapatikana. Jisajilishe mapema.',sender:{name:'Maktaba — MUST',role:'uni-admin',emoji:'📚'},sentAt:Date.now()-172800000,requiresAck:false,readBy:[],ackedBy:[]},
+  {id:'a1',type:'emergency',title:'Emergency Fire Drill',body:'There will be an emergency fire drill today at 10 AM. All students are required to evacuate buildings in an orderly manner and proceed to Assembly Point A near the east gate.',sender:{name:'VC Office',role:'vc'},sentAt:Date.now()-7200000,requiresAck:true,readBy:[],ackedBy:[]},
+  {id:'a2',type:'academic', title:'CS301 CAT Rescheduled',body:'The Computer Networks II CAT has been rescheduled from Friday to Monday the 22nd. The venue remains LH-B. Duration is 10 AM.',sender:{name:'Dr. David Mkwasa',role:'lecturer'},sentAt:Date.now()-18000000,requiresAck:true,readBy:['demo_student'],ackedBy:[]},
+  {id:'a3',type:'deadline', title:'Assignment 3 — OS Concepts (Tomorrow)',body:'Reminder: Assignment 3 for Operating Systems is due tomorrow at 11 PM. Submit via FeMOS Local Cloud or hand in at the office.',sender:{name:'Dr. David Mkwasa',role:'lecturer'},sentAt:Date.now()-3600000,requiresAck:false,readBy:[],ackedBy:[]},
+  {id:'a4',type:'general',  title:'CR Meeting — Thursday',body:'All class representatives are invited to a meeting on Thursday at 3 AM in the Admin Block conference room. The main agenda is to plan the exam timetable.',sender:{name:'CR — CS Year 3',role:'cr'},sentAt:Date.now()-86400000,requiresAck:false,readBy:[],ackedBy:[]},
+  {id:'a5',type:'info',     title:'New Books — Library',body:'New copies of Computer Networks (Tanenbaum 6th Ed) have arrived at the library. 20 copies are available. Register early.',sender:{name:'Library — MUST',role:'uni-admin'},sentAt:Date.now()-172800000,requiresAck:false,readBy:[],ackedBy:[]},
 ];
 function getAnns(){return DB.LS.get('femos_announcements')||DEMO_ANN;}
 function saveAnns(list){DB.LS.set('femos_announcements',list);}
@@ -151,7 +152,7 @@ const AnnPage = (() => {
 
     const el = document.getElementById('ann-list'); if (!el) return;
     if (!list.length) {
-      el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-tertiary)"><div style="font-size:40px;margin-bottom:8px">📭</div><div style="font-size:15px;font-weight:600;color:var(--text-secondary)">Hakuna matangazo</div></div>';
+      el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-tertiary)"><div style="font-size:40px;margin-bottom:8px"></div><div style="font-size:15px;font-weight:600;color:var(--text-secondary)">No announcements</div></div>';
       return;
     }
     el.innerHTML = list.map(a => {
@@ -162,10 +163,10 @@ const AnnPage = (() => {
       return `<div class="card" style="padding:14px 16px;cursor:pointer;position:relative;overflow:hidden;transition:background var(--dur-sm);${unread?'border-color:var(--border-mid)':''}" onclick="AnnPage.openDetail('${a.id}')" role="button" tabindex="0">
         ${unread?'<div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--clr-danger)"></div>':''}
         <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px">
-          <div style="width:36px;height:36px;border-radius:var(--r-sm);background:${cfg.color}22;border:1px solid ${cfg.color}44;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${cfg.emoji}</div>
+          <div style="width:36px;height:36px;border-radius:var(--r-sm);background:${cfg.color}22;border:1px solid ${cfg.color}44;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0"></div>
           <div style="flex:1;min-width:0">
             <div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:${cfg.color};margin-bottom:2px">${cfg.label}</div>
-            <div style="font-size:11px;color:var(--text-tertiary)">${a.sender.emoji} ${a.sender.name}</div>
+            <div style="font-size:11px;color:var(--text-tertiary)">${a.sender.name}</div>
           </div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
             ${unread?'<div style="width:8px;height:8px;border-radius:50%;background:var(--clr-danger)"></div>':''}
@@ -175,8 +176,8 @@ const AnnPage = (() => {
         <div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:4px;letter-spacing:-.01em">${Utils.Str.escape(a.title)}</div>
         <div style="font-size:12px;color:var(--text-tertiary);line-height:1.5;margin-bottom:10px">${Utils.Str.truncate(a.body,100)}</div>
         <div style="display:flex;align-items:center;justify-content:space-between">
-          ${a.requiresAck ? (isAck?'<span class="tag tag-green">✅ Umethibitisha</span>':'<span class="tag tag-red">⚠️ Inahitaji uthibitisho</span>') : '<span class="tag tag-neutral">📰 Habari</span>'}
-          <span style="font-size:10px;color:var(--text-tertiary)">${a.readBy.length} wamesoma</span>
+          ${a.requiresAck ? (isAck?'<span class="tag tag-green">Acknowledged</span>':'<span class="tag tag-red">Requires acknowledgment</span>') : '<span class="tag tag-neutral">Info</span>'}
+          <span style="font-size:10px;color:var(--text-tertiary)">${a.readBy.length} read</span>
         </div>
       </div>`;
     }).join('');
@@ -197,9 +198,9 @@ const AnnPage = (() => {
       saveAnns(list);
     }
 
-    Utils.DOM.setHTML('m-type',   `<span style="color:${cfg.color}">${cfg.emoji} ${cfg.label}</span>`);
+    Utils.DOM.setHTML('m-type',   `<span style="color:${cfg.color}">${cfg.label}</span>`);
     Utils.DOM.setText('m-title',  a.title);
-    Utils.DOM.setText('m-sender', a.sender.emoji + ' ' + a.sender.name);
+    Utils.DOM.setText('m-sender', a.sender.name);
     Utils.DOM.setText('m-time',   Utils.DateTime.timeAgo(a.sentAt));
     Utils.DOM.setText('m-body',   a.body);
 
@@ -235,7 +236,7 @@ const AnnPage = (() => {
     saveAnns(list);
     document.getElementById('m-ack-btn')?.classList.add('hidden');
     document.getElementById('m-acked-badge')?.classList.remove('hidden');
-    App.Toast.success('Umekubali tangazo hili');
+    App.Toast.success('Acknowledged this announcement');
     if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
     App.Modal.close('ann-modal');
     render();

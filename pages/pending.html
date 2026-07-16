@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="sw" data-theme="dark">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-  <meta name="theme-color" content="#060C18">
-  <title>Inasubiri Idhini — FeMOS</title>
+  <meta name="theme-color" content="#0A1628">
+  <title>Pending Approval — FeMOS</title>
   <link rel="manifest" href="../manifest.json">
   <link rel="icon" href="../assets/logo-48.png" type="image/png">
   <link rel="stylesheet" href="../css/style.css">
@@ -20,11 +20,11 @@
 <div id="femos-root">
 <main class="pending-screen page-enter" id="pending-page">
 
-  <div class="pending-hero" aria-hidden="true">⏳</div>
+  <div class="pending-hero" aria-hidden="true"><span></span></div>
 
-  <h1 class="heading-lg fade-in" style="margin-bottom:8px">Ombi Limetumwa!</h1>
+  <h1 class="heading-lg fade-in" style="margin-bottom:8px">Application Submitted!</h1>
   <p class="body-md text-secondary fade-in anim-1" style="margin-bottom:24px;max-width:300px;text-align:center;line-height:1.65">
-    Subiri idhini ya mwezeshaji wako. Utaarifiwa mara ukiidhinishwa.
+    Awaiting your facilitator's approval. You will be notified once approved.
   </p>
 
   <!-- Summary card -->
@@ -34,11 +34,11 @@
       <span class="pending-row-val" id="pnd-regno">—</span>
     </div>
     <div class="pending-row">
-      <span class="pending-row-label">Jina</span>
+      <span class="pending-row-label">Name</span>
       <span class="pending-row-val" id="pnd-name">—</span>
     </div>
     <div class="pending-row">
-      <span class="pending-row-label">Chuo</span>
+      <span class="pending-row-label">University</span>
       <span class="pending-row-val" id="pnd-uni">—</span>
     </div>
     <div class="pending-row">
@@ -46,75 +46,76 @@
       <span class="pending-row-val" id="pnd-campus">—</span>
     </div>
     <div class="pending-row">
-      <span class="pending-row-label">Kozi</span>
+      <span class="pending-row-label">Course</span>
       <span class="pending-row-val" id="pnd-course">—</span>
     </div>
     <div class="pending-row">
-      <span class="pending-row-label">Mwaka</span>
+      <span class="pending-row-label">Year</span>
       <span class="pending-row-val" id="pnd-year">—</span>
     </div>
     <div class="pending-row">
-      <span class="pending-row-label">Hali</span>
+      <span class="pending-row-label">Status</span>
       <span style="display:flex;align-items:center;gap:7px;color:var(--clr-warning);font-weight:600;font-size:13px">
         <span class="live-dot" style="background:var(--clr-warning)"></span>
-        Inasubiri idhini
+        Awaiting approval
       </span>
     </div>
   </div>
 
   <!-- Facilitator card -->
   <div class="facilitator-card fade-in anim-3">
-    <div class="facilitator-avatar" aria-hidden="true">👨‍🏫</div>
+    <div class="facilitator-avatar" aria-hidden="true"><span></span></div>
     <div class="facilitator-info">
       <div class="facilitator-name" id="pnd-lec">Dr. David Mkwasa</div>
       <div class="facilitator-status">
-        Mwezeshaji wa kozi ·
-        <span class="facilitator-online" id="pnd-lec-status">🟢 Online</span>
+        Course Facilitator ·
+        <span class="facilitator-online" id="pnd-lec-status">Online</span>
       </div>
     </div>
   </div>
 
   <!-- Progress steps -->
-  <div class="progress-steps fade-in anim-4" role="list" aria-label="Hatua za usajili">
+  <div class="progress-steps fade-in anim-4" role="list" aria-label="Registration steps">
     <div class="progress-step" role="listitem">
-      <div class="step-icon done" aria-label="Imekamilika">✓</div>
-      <span>Akaunti imeundwa</span>
+      <div class="step-icon done" aria-label="Completed">✓</div>
+      <span>Account created</span>
     </div>
     <div class="progress-step" role="listitem">
-      <div class="step-icon done" aria-label="Imekamilika">✓</div>
-      <span>Ombi limetumwa kwa mwezeshaji</span>
+      <div class="step-icon done" aria-label="Completed">✓</div>
+      <span>Application sent to facilitator</span>
     </div>
     <div class="progress-step" role="listitem">
-      <div class="step-icon current" aria-label="Inaendelea">⏳</div>
-      <span>Inasubiri idhini ya mwezeshaji</span>
+      <div class="step-icon current" aria-label="In progress"><span></span></div>
+      <span>Awaiting facilitator approval</span>
     </div>
     <div class="progress-step" role="listitem">
-      <div class="step-icon waiting" aria-label="Inangoja">4</div>
-      <span>Unique ID ya FeMOS itazalishwa</span>
+      <div class="step-icon waiting" aria-label="Waiting">4</div>
+      <span>FeMOS Unique ID will be generated</span>
     </div>
     <div class="progress-step" role="listitem">
-      <div class="step-icon waiting" aria-label="Inangoja">5</div>
-      <span>Ingia FeMOS Campus</span>
+      <div class="step-icon waiting" aria-label="Waiting">5</div>
+      <span>Enter FeMOS Campus</span>
     </div>
   </div>
 
   <!-- Demo approve button -->
   <div style="width:100%;max-width:340px;display:flex;flex-direction:column;gap:10px">
     <button class="btn btn-primary btn-full" onclick="PendingPage.simulateApproval()" id="demo-approve-btn">
-      🎯 Demo: Jiidhinishe mwenyewe
+      Demo: Approve Yourself
     </button>
     <button class="btn btn-ghost btn-full" onclick="window.location.replace('login.html')">
-      Rudi kwenye kuingia
+      Back to Login
     </button>
   </div>
 
   <p class="caption text-tertiary fade-in anim-5" style="margin-top:20px;text-align:center;max-width:280px">
-    📱 Utapata arifa kwenye simu yako ukiidhinishwa. Unaweza kufunga programu hii sasa.
+    You will receive a notification on your device once approved. You can close this app now.
   </p>
 
 </main>
 </div>
 
+<script src="../js/icons.js"></script>
 <script src="../js/db.js"></script>
 <script src="../js/utils.js"></script>
 <script src="../js/auth.js"></script>
@@ -122,7 +123,6 @@
 <script src="../js/app.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    // Load pending user data
     const pending = Auth.Pending.load();
     if (!pending) {
       window.location.replace('register.html');
@@ -133,7 +133,6 @@
       return;
     }
 
-    // Fill UI
     const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '—'; };
     set('pnd-regno',  pending.regNo);
     set('pnd-name',   pending.name);
@@ -142,8 +141,7 @@
     set('pnd-course', pending.courseName);
     set('pnd-year',   pending.year ? 'Year ' + pending.year : '—');
 
-    // Simulate online status fluctuation
-    const statuses = ['🟢 Online', '🟡 Busy', '🟢 Online'];
+    const statuses = ['Online', 'Busy', 'Online'];
     let si = 0;
     setInterval(() => {
       si = (si + 1) % statuses.length;
@@ -162,17 +160,15 @@
         const pending = Auth.Pending.load();
         if (!pending) return;
 
-        // Approve the user
         const result = Auth.approve(pending.id, 'Dr. David Mkwasa');
 
         if (result.ok) {
-          // Save as session for the approved screen
           Auth.Pending.save(result.user);
-          App.Toast.success('Umeidhinishwa!', 'Unique ID yako ipo tayari 🎉');
+          App.Toast.success('Approved!', 'Your Unique ID is ready');
           if (navigator.vibrate) navigator.vibrate([50, 30, 50, 30, 100]);
           setTimeout(() => window.location.replace('approved.html'), 800);
         } else {
-          App.Toast.error('Hitilafu', result.error);
+          App.Toast.error('Error', result.error);
           btn.classList.remove('btn-loading');
           btn.disabled = false;
         }

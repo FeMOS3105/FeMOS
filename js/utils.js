@@ -49,10 +49,10 @@ const Utils = (() => {
     /** Human-readable "time ago" */
     timeAgo(ts) {
       const secs = Math.floor((Date.now() - ts) / 1000);
-      if (secs < 60)    return 'Sasa hivi';
-      if (secs < 3600)  return `Dakika ${Math.floor(secs / 60)} zilizopita`;
-      if (secs < 86400) return `Saa ${Math.floor(secs / 3600)} zilizopita`;
-      if (secs < 604800)return `Siku ${Math.floor(secs / 86400)} zilizopita`;
+      if (secs < 60)    return 'Just now';
+      if (secs < 3600)  return `${Math.floor(secs / 60)}m ago`;
+      if (secs < 86400) return `${Math.floor(secs / 3600)}h ago`;
+      if (secs < 604800)return `${Math.floor(secs / 86400)}d ago`;
       return this.format(new Date(ts), 'DD/Mo/YYYY');
     },
 
@@ -67,11 +67,11 @@ const Utils = (() => {
     /** Today's greeting based on hour */
     greeting() {
       const h = new Date().getHours();
-      if (h < 5)  return 'Usiku mwema,';
-      if (h < 12) return 'Habari za asubuhi,';
-      if (h < 17) return 'Habari za mchana,';
-      if (h < 21) return 'Habari za jioni,';
-      return 'Habari za usiku,';
+      if (h < 5)  return 'Good night,';
+      if (h < 12) return 'Good morning,';
+      if (h < 17) return 'Good afternoon,';
+      if (h < 21) return 'Good evening,';
+      return 'Good night,';
     },
 
     /** Current time string HH:MM */
@@ -136,14 +136,14 @@ const Utils = (() => {
 
   /* ── Color palette ── */
   const AVATAR_COLORS = [
-    { id: 0, from: '#00D4FF', to: '#1565FF', class: 'av-1' },
-    { id: 1, from: '#9B6DFF', to: '#1565FF', class: 'av-2' },
-    { id: 2, from: '#00E5A0', to: '#00B4D8', class: 'av-3' },
-    { id: 3, from: '#FFB830', to: '#FF6B2B', class: 'av-4' },
-    { id: 4, from: '#FF4B6E', to: '#9B6DFF', class: 'av-5' },
-    { id: 5, from: '#1565FF', to: '#2D31FA', class: 'av-6' },
-    { id: 6, from: '#FF4B6E', to: '#FFB830', class: 'av-7' },
-    { id: 7, from: '#00D4FF', to: '#9B6DFF', class: 'av-8' },
+    { id: 0, from: '#4FC3F7', to: '#29B6F6', class: 'av-1' },
+    { id: 1, from: '#7E57C2', to: '#29B6F6', class: 'av-2' },
+    { id: 2, from: '#26A69A', to: '#4FC3F7', class: 'av-3' },
+    { id: 3, from: '#FFB74D', to: '#FF8A65', class: 'av-4' },
+    { id: 4, from: '#EF5350', to: '#7E57C2', class: 'av-5' },
+    { id: 5, from: '#29B6F6', to: '#5C6BC0', class: 'av-6' },
+    { id: 6, from: '#EF5350', to: '#FFB74D', class: 'av-7' },
+    { id: 7, from: '#4FC3F7', to: '#7E57C2', class: 'av-8' },
   ];
 
   const AVATAR_EMOJIS = [
@@ -269,7 +269,7 @@ const Utils = (() => {
       }
       return new Promise((resolve, reject) => {
         if (!navigator.geolocation) {
-          reject(new Error('Geolocation haipatikani kwenye kivinjari hiki'));
+          reject(new Error('Geolocation is not available in this browser'));
           return;
         }
         navigator.geolocation.getCurrentPosition(
@@ -334,9 +334,9 @@ const Utils = (() => {
       const ctx     = canvas.getContext('2d');
       const size    = canvas.width;
       const isDark  = document.documentElement.getAttribute('data-theme') !== 'light';
-      const bg      = isDark ? '#0F1E38' : '#FFFFFF';
+      const bg      = isDark ? '#101F3A' : '#FFFFFF';
       const fg      = isDark ? '#F0F4FF' : '#080F1E';
-      const accent  = '#1565FF';
+      const accent  = '#29B6F6';
       const modules = opts.modules || 23;
       const cell    = size / modules;
 
@@ -400,12 +400,12 @@ const Utils = (() => {
     },
 
     STATUS: {
-      present:      { label: 'Alikuwepo',   emoji: '✅', tagClass: 'tag-green'  },
-      late:         { label: 'Alichelewa',  emoji: '🟡', tagClass: 'tag-amber'  },
-      partial:      { label: 'Sehemu',      emoji: '⚠️', tagClass: 'tag-amber'  },
-      'left-early': { label: 'Alitoka',     emoji: '🚪', tagClass: 'tag-purple' },
-      absent:       { label: 'Hakuwepo',    emoji: '❌', tagClass: 'tag-red'    },
-      fraud:        { label: 'Flagged',     emoji: '🚫', tagClass: 'tag-red'    },
+      present:      { label: 'Present',    tagClass: 'tag-green'  },
+      late:         { label: 'Late',       tagClass: 'tag-amber'  },
+      partial:      { label: 'Partial',    tagClass: 'tag-amber'  },
+      'left-early': { label: 'Left Early', tagClass: 'tag-purple' },
+      absent:       { label: 'Absent',     tagClass: 'tag-red'    },
+      fraud:        { label: 'Flagged',    tagClass: 'tag-red'    },
     },
 
     summary(list) {

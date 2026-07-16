@@ -25,7 +25,7 @@ const App = (() => {
       const next = this.get() === 'dark' ? 'light' : 'dark';
       this.set(next);
       Toast.show({
-        icon:  next === 'dark' ? '🌙' : '☀️',
+        icon:  next === 'dark' ? Icons.moon(20) : Icons.sun(20),
         title: next === 'dark' ? 'Dark mode' : 'Light mode',
       });
       if (navigator.vibrate) navigator.vibrate([12]);
@@ -50,7 +50,7 @@ const App = (() => {
       });
       // Sync icons
       document.querySelectorAll('[data-theme-icon]').forEach(el => {
-        el.textContent = isDark ? '🌙' : '☀️';
+        el.innerHTML = isDark ? Icons.moon(18) : Icons.sun(18);
       });
     },
   };
@@ -99,10 +99,10 @@ const App = (() => {
      * @param {string} type - 'success' | 'error' | 'warning' | 'info'
      */
     show(opts, type = 'success') {
-      if (typeof opts === 'string') opts = { title: opts, icon: type === 'error' ? '❌' : type === 'warning' ? '⚠️' : '✅' };
+      if (typeof opts === 'string') opts = { title: opts, icon: type === 'error' ? Icons.xCircle(20) : type === 'warning' ? Icons.alertTriangle(20) : Icons.checkCircle(20) };
 
-      const ICONS = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
-      const icon  = opts.icon || ICONS[opts.type || type] || '✅';
+      const ICON_SVG = { success: Icons.checkCircle(20), error: Icons.xCircle(20), warning: Icons.alertTriangle(20), info: Icons.info(20) };
+      const icon  = opts.icon || ICON_SVG[opts.type || type] || ICON_SVG.success;
 
       const el = document.createElement('div');
       el.className = `toast ${opts.type || type}`;
@@ -118,21 +118,21 @@ const App = (() => {
       setTimeout(() => el.remove(), 3500);
     },
 
-    success(title, desc)   { this.show({ title, desc, type: 'success', icon: '✅' }); },
-    error(title, desc)     { this.show({ title, desc, type: 'error',   icon: '❌' }); },
-    warning(title, desc)   { this.show({ title, desc, type: 'warning', icon: '⚠️' }); },
-    info(title, desc)      { this.show({ title, desc, type: 'info',    icon: 'ℹ️' }); },
+    success(title, desc)   { this.show({ title, desc, type: 'success', icon: Icons.checkCircle(20) }); },
+    error(title, desc)     { this.show({ title, desc, type: 'error',   icon: Icons.xCircle(20) }); },
+    warning(title, desc)   { this.show({ title, desc, type: 'warning', icon: Icons.alertTriangle(20) }); },
+    info(title, desc)      { this.show({ title, desc, type: 'info',    icon: Icons.info(20) }); },
   };
 
   /* ── Confirm Dialog ── */
   const Confirm = {
     _cb: null,
 
-    show({ emoji = '⚠️', title, desc, okLabel = 'Thibitisha', okClass = 'btn-danger', cb }) {
+    show({ title, desc, okLabel = 'Confirm', okClass = 'btn-danger', cb }) {
       const dialog = document.getElementById('confirm-dialog');
       if (!dialog) return;
 
-      Utils.DOM.setText('confirm-emoji', emoji);
+      Utils.DOM.setText('confirm-emoji', '');
       Utils.DOM.setText('confirm-title', title);
       Utils.DOM.setText('confirm-desc',  desc);
 
@@ -215,17 +215,17 @@ const App = (() => {
       const update = () => {
         const online = navigator.onLine;
         document.querySelectorAll('[data-network-status]').forEach(el => {
-          el.textContent = online ? '●●●●' : '○○○○';
+          el.innerHTML = online ? Icons.signal(14) : '○○○○';
           el.style.color = online ? '' : 'var(--clr-warning)';
         });
         if (!online) {
-          Toast.warning('Offline', 'FeMOS inaendelea kufanya kazi bila intaneti');
+          Toast.warning('Offline', 'FeMOS continues working without internet');
         }
       };
 
       window.addEventListener('online',  () => {
         update();
-        Toast.success('Mtandao umerejea', 'Data inasync sasa');
+        Toast.success('Network restored', 'Data is now syncing');
       });
       window.addEventListener('offline', update);
     },
@@ -295,7 +295,7 @@ const App = (() => {
       el.addEventListener('click', () => Theme.toggle());
     });
 
-    console.log('%c⚡ FeMOS v1.0', 'color:#00D4FF;font-weight:800;font-size:13px;');
+    console.log('%c⚡ FeMOS v1.0', 'color:#4FC3F7;font-weight:800;font-size:13px;');
   }
 
   return {

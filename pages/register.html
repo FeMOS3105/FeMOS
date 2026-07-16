@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="sw" data-theme="dark">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#060C18">
-  <title>Jisajili — FeMOS</title>
+  <meta name="theme-color" content="#0A1628">
+  <title>Register — FeMOS</title>
   <link rel="manifest" href="../manifest.json">
   <link rel="icon" href="../assets/logo-48.png" type="image/png">
   <link rel="stylesheet" href="../css/style.css">
@@ -45,7 +45,7 @@
           autocorrect="off"
           spellcheck="false"
           placeholder="MUST/25101133930002"
-          aria-label="Weka Reg No ya chuo chako"
+          aria-label="Enter your university Reg No"
           oninput="RegPage.onRegNoInput(this.value)"
           onkeydown="if(event.key==='Enter') RegPage.submitRegNo()"
         >
@@ -53,17 +53,17 @@
 
       <!-- Detection strip -->
       <div class="regno-detect-strip" id="regno-detect" aria-live="polite">
-        <span id="regno-detect-icon">✅</span>
-        <span id="regno-detect-text">MUST inatambuliwa</span>
+        <span id="regno-detect-icon"></span>
+        <span id="regno-detect-text">MUST recognized</span>
       </div>
 
       <p class="regno-hint fade-in anim-4">
-        Weka: <strong>CHUO/Reg_No</strong> au nambari ya usajili peke yake.<br>
-        Mfumo utaitambua chuo chako moja kwa moja.
+        Enter: <strong>UNIVERSITY/Reg_No</strong> or registration number only.<br>
+        The system will detect your university automatically.
       </p>
 
       <!-- Quick-fill examples -->
-      <div class="regno-examples fade-in anim-4" role="list" aria-label="Mifano ya Reg No">
+      <div class="regno-examples fade-in anim-4" role="list" aria-label="Reg No examples">
         <div class="regno-example" role="listitem" onclick="RegPage.fillExample('MUST/25101133930002')" tabindex="0">
           <span class="regno-ex-lbl">MUST — Mbeya</span>
           <span class="regno-ex-val">MUST/25101133930002</span>
@@ -83,11 +83,11 @@
       </div>
 
       <button class="btn btn-primary" style="width:100%;max-width:340px" id="regno-btn" onclick="RegPage.submitRegNo()">
-        Endelea →
+        Continue →
       </button>
 
       <div class="auth-switch" style="margin-top:16px">
-        Una akaunti tayari? <a href="login.html">Ingia →</a>
+        Already have an account?? <a href="login.html">Sign in →</a>
       </div>
     </div>
   </div>
@@ -101,74 +101,74 @@
       <div class="indicators"><span class="battery">⚡ 87%</span></div>
     </div>
     <div class="back-bar">
-      <button class="btn-icon" id="sig-back-btn" onclick="RegPage.prevStep()" aria-label="Rudi nyuma">←</button>
-      <span class="back-title" id="sig-page-title">Jisajili</span>
+      <button class="btn-icon" id="sig-back-btn" onclick="RegPage.prevStep()" aria-label="Go back">←</button>
+      <span class="back-title" id="sig-page-title">Register</span>
       <div style="width:40px"></div>
     </div>
 
     <!-- Progress -->
     <div class="step-progress">
       <div class="step-track"><div class="step-fill" id="sig-prog-fill" style="width:20%"></div></div>
-      <div class="step-label" id="sig-prog-label">Hatua 1 ya 5</div>
+      <div class="step-label" id="sig-prog-label">Step 1 of 5</div>
     </div>
 
     <!-- ── STEP 1: Personal Info ── -->
     <div class="sig-step-panel active" id="sig-step-1">
       <div class="step-header">
-        <span class="step-emoji-big">👤</span>
-        <h2 class="step-heading">Taarifa zako</h2>
+        <span class="step-emoji-big"></span>
+        <h2 class="step-heading">Your Information</h2>
         <p class="step-subhead">Tutakutambua kwa taarifa hizi</p>
       </div>
 
       <!-- Avatar preview -->
       <div class="avatar-preview-row">
-        <div class="avatar avatar-lg avatar-ring" id="av-preview" style="background:linear-gradient(135deg,#00D4FF,#1565FF);font-size:28px" aria-label="Picha ya profile">
+        <div class="avatar avatar-lg avatar-ring" id="av-preview" style="background:linear-gradient(135deg,#4FC3F7,#29B6F6);font-size:28px" aria-label="Picha ya profile">
           👤
         </div>
-        <span class="avatar-preview-label">Chagua picha na rangi ya profile yako</span>
+        <span class="avatar-preview-label">Choose your profile picture and color</span>
       </div>
 
       <!-- Emoji picker -->
       <div class="step-body">
-        <label class="form-label">Picha / Avatar</label>
+        <label class="form-label">Picture / Avatar</label>
       </div>
-      <div class="emoji-picker-grid" id="emoji-grid" role="radiogroup" aria-label="Chagua emoji"></div>
+      <div class="emoji-picker-grid" id="emoji-grid" role="radiogroup" aria-label="Choose emoji"></div>
 
       <div class="step-body" style="padding-top:4px">
-        <label class="form-label">Rangi ya profile</label>
+        <label class="form-label">Profile color</label>
       </div>
-      <div class="color-swatch-row" id="color-row" role="radiogroup" aria-label="Chagua rangi"></div>
+      <div class="color-swatch-row" id="color-row" role="radiogroup" aria-label="Choose color"></div>
 
       <!-- Fields -->
       <div class="step-body">
         <div class="form-group">
-          <label class="form-label" for="sig-fname">Jina la kwanza *</label>
+          <label class="form-label" for="sig-fname">First name *</label>
           <div class="form-field">
-            <span class="field-icon-left">✍️</span>
-            <input class="form-input" id="sig-fname" type="text" autocomplete="given-name" placeholder="Jina lako la kwanza">
+            <span class="field-icon-left field-icon"></span>
+            <input class="form-input" id="sig-fname" type="text" autocomplete="given-name" placeholder="Your first name">
           </div>
           <div class="form-message hidden error" id="fname-err"></div>
         </div>
         <div class="form-group">
-          <label class="form-label" for="sig-lname">Jina la familia *</label>
+          <label class="form-label" for="sig-lname">Last name *</label>
           <div class="form-field">
-            <span class="field-icon-left">✍️</span>
-            <input class="form-input" id="sig-lname" type="text" autocomplete="family-name" placeholder="Jina la familia">
+            <span class="field-icon-left field-icon"></span>
+            <input class="form-input" id="sig-lname" type="text" autocomplete="family-name" placeholder="Last name">
           </div>
           <div class="form-message hidden error" id="lname-err"></div>
         </div>
         <div class="form-group">
-          <label class="form-label" for="sig-email">Barua pepe ya chuo *</label>
+          <label class="form-label" for="sig-email">University email *</label>
           <div class="form-field">
-            <span class="field-icon-left">📧</span>
+            <span class="field-icon-left field-icon"></span>
             <input class="form-input" id="sig-email" type="email" autocomplete="email" autocapitalize="none" placeholder="jina@must.ac.tz">
           </div>
           <div class="form-message hidden error" id="email-err"></div>
         </div>
         <div class="form-group">
-          <label class="form-label" for="sig-phone">Namba ya simu</label>
+          <label class="form-label" for="sig-phone">Phone number</label>
           <div class="form-field">
-            <span class="field-icon-left">📱</span>
+            <span class="field-icon-left field-icon"></span>
             <input class="form-input" id="sig-phone" type="tel" autocomplete="tel" placeholder="+255 7XX XXX XXX">
           </div>
         </div>
@@ -178,42 +178,42 @@
     <!-- ── STEP 2: University ── -->
     <div class="sig-step-panel" id="sig-step-2" style="display:none">
       <div class="step-header">
-        <span class="step-emoji-big">🏛️</span>
-        <h2 class="step-heading">Chagua chuo chako</h2>
-        <p class="step-subhead">Vyuo vyote vilivyosajiliwa Tanzania (TCU 2024)</p>
+        <span class="step-emoji-big"></span>
+        <h2 class="step-heading">Choose your university</h2>
+        <p class="step-subhead">All registered universities in Tanzania (TCU 2024)</p>
       </div>
 
       <div class="uni-search-container">
-        <span class="uni-search-icon" aria-hidden="true">🔍</span>
+        <span class="uni-search-icon field-icon" aria-hidden="true"></span>
         <input
           class="uni-search-input"
           id="uni-search"
           type="search"
-          placeholder="Tafuta chuo — jina au kifupisho..."
+          placeholder="Search university — name or abbreviation..."
           oninput="RegPage.filterUnis(this.value)"
           autocomplete="off"
-          aria-label="Tafuta chuo"
+          aria-label="Search university"
         >
       </div>
 
-      <div class="uni-list" id="uni-list" role="radiogroup" aria-label="Orodha ya vyuo"></div>
+      <div class="uni-list" id="uni-list" role="radiogroup" aria-label="University list"></div>
     </div>
 
     <!-- ── STEP 3: Campus ── -->
     <div class="sig-step-panel" id="sig-step-3" style="display:none">
       <div class="step-header">
-        <span class="step-emoji-big">📍</span>
-        <h2 class="step-heading">Chagua campus</h2>
-        <p class="step-subhead" id="campus-desc">Uko campus gani?</p>
+        <span class="step-emoji-big"></span>
+        <h2 class="step-heading">Choose campus</h2>
+        <p class="step-subhead" id="campus-desc">Which campus are you at??</p>
       </div>
 
-      <div class="campus-list" id="campus-list" role="radiogroup" aria-label="Orodha ya campuses"></div>
+      <div class="campus-list" id="campus-list" role="radiogroup" aria-label="Campus list"></div>
 
       <!-- Branch campus info -->
       <div class="step-body" style="padding-top:16px">
-        <div class="info-notice" aria-label="Habari kuhusu campus">
-          <span aria-hidden="true">📡</span>
-          <span>Kila campus ina eneo lake la kijiografia (GPS). Mahudhurio yanafanywa kwenye campus unayosoma peke yake.</span>
+        <div class="info-notice" aria-label="Campus information">
+          <span aria-hidden="true"></span>
+          <span>Each campus has its own geographical location (GPS). Attendance is taken only at your campus.</span>
         </div>
       </div>
     </div>
@@ -221,38 +221,38 @@
     <!-- ── STEP 4: Course ── -->
     <div class="sig-step-panel" id="sig-step-4" style="display:none;flex-direction:column">
       <div class="step-header">
-        <span class="step-emoji-big">📚</span>
-        <h2 class="step-heading">Chagua kozi yako</h2>
+        <span class="step-emoji-big"></span>
+        <h2 class="step-heading">Choose your course</h2>
         <p class="step-subhead" id="course-uni-label">Programmes za MUST</p>
       </div>
 
       <div class="course-search-container">
-        <span class="course-search-icon" aria-hidden="true">🔍</span>
+        <span class="course-search-icon field-icon" aria-hidden="true"></span>
         <input
           class="course-search-input"
           id="course-search"
           type="search"
-          placeholder="Tafuta kozi yako..."
+          placeholder="Search your course..."
           oninput="RegPage.filterCourses(this.value)"
           autocomplete="off"
-          aria-label="Tafuta kozi"
+          aria-label="Search course"
         >
       </div>
 
-      <div id="faculty-list" role="radiogroup" aria-label="Orodha ya kozi"></div>
+      <div id="faculty-list" role="radiogroup" aria-label="Course list"></div>
 
       <div class="step-body">
-        <label class="form-label">Mwaka wa masomo</label>
+        <label class="form-label">Academic year</label>
       </div>
-      <div class="year-picker" id="year-picker" role="radiogroup" aria-label="Chagua mwaka"></div>
+      <div class="year-picker" id="year-picker" role="radiogroup" aria-label="Choose year"></div>
 
       <div class="step-body">
-        <label class="form-label" for="sig-role">Nafasi yako</label>
-        <select class="form-select" id="sig-role" aria-label="Chagua nafasi yako">
-          <option value="student">🧑‍💻 Mwanafunzi</option>
-          <option value="lecturer">👨‍🏫 Mwalimu / Lecturer</option>
-          <option value="cr">🎓 Class Representative (CR)</option>
-          <option value="hod">🏛️ Mkuu wa Idara (HOD)</option>
+        <label class="form-label" for="sig-role">Your role</label>
+        <select class="form-select" id="sig-role" aria-label="Choose your role">
+          <option value="student">🧑‍💻 Student</option>
+          <option value="lecturer">👨‍🏫 Lecturer</option>
+          <option value="cr">Class Representative (CR)</option>
+          <option value="hod">🏛️ Head of Department (HOD)</option>
         </select>
       </div>
     </div>
@@ -260,48 +260,48 @@
     <!-- ── STEP 5: Security ── -->
     <div class="sig-step-panel" id="sig-step-5" style="display:none">
       <div class="step-header">
-        <span class="step-emoji-big">🔐</span>
-        <h2 class="step-heading">Usalama wa akaunti</h2>
-        <p class="step-subhead">Nywila salama itakulinda</p>
+        <span class="step-emoji-big"></span>
+        <h2 class="step-heading">Account Security</h2>
+        <p class="step-subhead">A secure password will protect you</p>
       </div>
       <div class="step-body">
         <div class="form-group">
-          <label class="form-label" for="sig-pw">Nywila *</label>
+          <label class="form-label" for="sig-pw">Password *</label>
           <div class="form-field">
-            <span class="field-icon-left">🔐</span>
-            <input class="form-input" id="sig-pw" type="password" autocomplete="new-password" placeholder="Herufi 6 au zaidi">
-            <button class="field-icon-right" type="button" onclick="RegPage.togglePw('sig-pw',this)" aria-label="Onyesha nywila">👁️</button>
+            <span class="field-icon-left field-icon"></span>
+            <input class="form-input" id="sig-pw" type="password" autocomplete="new-password" placeholder="6 characters or more">
+            <button class="field-icon-right" type="button" onclick="RegPage.togglePw('sig-pw',this)" aria-label="Show password">></button>
           </div>
           <div class="form-message hidden error" id="pw-err"></div>
         </div>
         <div class="form-group">
-          <label class="form-label" for="sig-pw2">Thibitisha nywila *</label>
+          <label class="form-label" for="sig-pw2">Confirm password *</label>
           <div class="form-field">
-            <span class="field-icon-left">🔁</span>
-            <input class="form-input" id="sig-pw2" type="password" autocomplete="new-password" placeholder="Rudia nywila">
+            <span class="field-icon-left field-icon"></span>
+            <input class="form-input" id="sig-pw2" type="password" autocomplete="new-password" placeholder="Repeat password">
           </div>
           <div class="form-message hidden error" id="pw2-err"></div>
         </div>
 
         <div class="info-notice" style="margin-bottom:12px">
-          <span>🪪</span>
-          <span>Unique ID yako ya FeMOS itazalishwa moja kwa moja baada ya kuidhinishwa na mwalimu wa kozi yako.</span>
+          <span></span>
+          <span>Your FeMOS Unique ID will be generated automatically after approval by your course lecturer.</span>
         </div>
         <div class="info-notice warning">
-          <span>⏳</span>
-          <span>Ombi lako litasubiri idhini ya mwezeshaji kabla ya kuingia kwenye mfumo. Kawaida inachukua masaa 2–24.</span>
+          <span></span>
+          <span>Your application will await supervisor approval before accessing the system. Usually takes 2–24 hours.</span>
         </div>
       </div>
     </div>
 
     <!-- Navigation buttons -->
     <div class="sig-nav">
-      <button class="btn btn-ghost" id="sig-prev-btn" onclick="RegPage.prevStep()" style="display:none">← Rudi</button>
-      <button class="btn btn-primary" id="sig-next-btn" onclick="RegPage.nextStep()">Endelea →</button>
+      <button class="btn btn-ghost" id="sig-prev-btn" onclick="RegPage.prevStep()" style="display:none">← Back</button>
+      <button class="btn btn-primary" id="sig-next-btn" onclick="RegPage.nextStep()">Continue →</button>
     </div>
 
     <div class="auth-switch" style="padding:4px var(--s-5) 28px">
-      Una akaunti tayari? <a href="login.html">Ingia →</a>
+      Already have an account?? <a href="login.html">Sign in →</a>
     </div>
 
   </div><!-- /screen-signup -->
@@ -309,6 +309,7 @@
 </div>
 </div>
 
+<script src="../js/icons.js"></script>
 <script src="../js/db.js"></script>
 <script src="../js/utils.js"></script>
 <script src="../js/auth.js"></script>
@@ -369,13 +370,13 @@ const RegPage = (() => {
     if (result) {
       S.detectedUni = result.uni;
       icon.textContent = '✅';
-      text.textContent = result.uni.short + ' — ' + result.uni.name + ' inatambuliwa';
+      text.textContent = result.uni.short + ' — ' + result.uni.name + ' recognized';
       strip.classList.add('visible');
       strip.classList.remove('error');
     } else {
       S.detectedUni = null;
       icon.textContent = '❓';
-      text.textContent = 'Weka: CHUO/Reg_No (mfano: MUST/25101133930002)';
+      text.textContent = 'Enter: UNIVERSITY/Reg_No (e.g., MUST/25101133930002)';
       strip.classList.add('visible','error');
     }
   }
@@ -387,7 +388,7 @@ const RegPage = (() => {
 
   function submitRegNo() {
     const val = (document.getElementById('regno-input')?.value || '').trim();
-    if (!val) { App.Toast.error('Weka Reg No yako kwanza'); return; }
+    if (!val) { App.Toast.error('Enter your Reg No first'); return; }
 
     const result = Auth.detectUniversity(val);
     if (result) {
@@ -409,13 +410,13 @@ const RegPage = (() => {
     // Progress
     const pct = (S.step / S.totalSteps * 100).toFixed(0);
     document.getElementById('sig-prog-fill').style.width   = pct + '%';
-    document.getElementById('sig-prog-label').textContent  = `Hatua ${S.step} ya ${S.totalSteps}`;
+    document.getElementById('sig-prog-label').textContent  = `Step ${S.step} of ${S.totalSteps}`;
 
     // Back/next buttons
     const prevBtn = document.getElementById('sig-prev-btn');
     const nextBtn = document.getElementById('sig-next-btn');
     if (prevBtn) prevBtn.style.display = S.step > 1 ? '' : 'none';
-    if (nextBtn) nextBtn.textContent = S.step === S.totalSteps ? '🚀 Omba Kujiunga' : 'Endelea →';
+    if (nextBtn) nextBtn.textContent = S.step === S.totalSteps ? '🚀 Apply to Join' : 'Continue →';
 
     // Show correct step panel
     for (let i = 1; i <= S.totalSteps; i++) {
@@ -483,7 +484,7 @@ const RegPage = (() => {
       : Auth.UNIVERSITIES;
 
     if (!filtered.length) {
-      el.innerHTML = '<div class="empty" style="padding:32px;text-align:center;color:var(--text-tertiary);font-size:13px">Hakuna chuo kinacholingana na utafutaji wako</div>';
+      el.innerHTML = '<div class="empty" style="padding:32px;text-align:center;color:var(--text-tertiary);font-size:13px">No university matches your search</div>';
       return;
     }
 
@@ -493,7 +494,7 @@ const RegPage = (() => {
            onclick="RegPage.selectUni('${u.code}')"
            role="radio" aria-checked="${S.selectedUni?.code === u.code}"
            tabindex="0">
-        <div class="uni-item-icon">🏛️</div>
+        <div class="uni-item-icon"></div>
         <div class="uni-item-info">
           <div class="uni-item-name">${u.name}</div>
           <div class="uni-item-meta">${u.short} · ${u.type} · ${u.location} · ${u.campuses.length} campus${u.campuses.length > 1 ? 'es' : ''}</div>
@@ -517,7 +518,7 @@ const RegPage = (() => {
     if (!el) return;
 
     if (!uni) {
-      el.innerHTML = '<div style="padding:20px;text-align:center;font-size:13px;color:var(--text-tertiary)">Rudi na uchague chuo kwanza</div>';
+      el.innerHTML = '<div style="padding:20px;text-align:center;font-size:13px;color:var(--text-tertiary)">Go back and select a university first</div>';
       return;
     }
 
@@ -531,8 +532,8 @@ const RegPage = (() => {
         <div class="campus-radio-wrap"></div>
         <div class="campus-item-info">
           <div class="campus-item-name">${c.name}</div>
-          <div class="campus-item-loc">📍 ${c.city}, Tanzania</div>
-          ${c.code !== 'MC' ? '<span class="tag tag-amber campus-item-badge">Tawi / Branch</span>' : '<span class="tag tag-cyan campus-item-badge">Makao Makuu</span>'}
+          <div class="campus-item-loc">${c.city}, Tanzania</div>
+          ${c.code !== 'MC' ? '<span class="tag tag-amber campus-item-badge">Branch</span>' : '<span class="tag tag-cyan campus-item-badge">Main Campus</span>'}
         </div>
       </div>
     `).join('');
@@ -583,7 +584,7 @@ const RegPage = (() => {
       </div>`;
     });
 
-    el.innerHTML = html || '<div style="padding:20px;text-align:center;font-size:13px;color:var(--text-tertiary)">Hakuna kozi inayolingana</div>';
+    el.innerHTML = html || '<div style="padding:20px;text-align:center;font-size:13px;color:var(--text-tertiary)">No matching courses found</div>';
 
     // Year picker
     const yp = document.getElementById('year-picker');
@@ -625,7 +626,7 @@ const RegPage = (() => {
       el.classList.toggle('selected', isThis);
       el.setAttribute('aria-checked', isThis);
     });
-    if (S.selectedUni) App.Toast.info(S.selectedUni.short + ' imechaguliwa ✅');
+    if (S.selectedUni) App.Toast.info(S.selectedUni.short + ' selected');
   }
 
   function selectCampus(code) {
@@ -653,7 +654,7 @@ const RegPage = (() => {
       el.classList.toggle('selected', isThis);
       el.setAttribute('aria-checked', isThis);
     });
-    if (found) App.Toast.info(Utils.Str.truncate(found.name, 40) + ' ✅');
+    if (found) App.Toast.info(Utils.Str.truncate(found.name, 40) +  selected');
   }
 
   function selectYear(y) {
@@ -677,7 +678,7 @@ const RegPage = (() => {
     if (!inp) return;
     const show = inp.type === 'password';
     inp.type   = show ? 'text' : 'password';
-    if (btn) { btn.textContent = show ? '🙈' : '👁️'; btn.setAttribute('aria-label', show ? 'Ficha nywila' : 'Onyesha nywila'); }
+    if (btn) { btn.textContent = show ? '🙈' : '👁️'; btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password'); }
   }
 
   /* ── Validation per step ── */
@@ -687,28 +688,28 @@ const RegPage = (() => {
       const fn = document.getElementById('sig-fname')?.value.trim();
       const ln = document.getElementById('sig-lname')?.value.trim();
       const em = document.getElementById('sig-email')?.value.trim();
-      if (!fn)              { showError('fname-err','Weka jina lako la kwanza'); return false; }
-      if (!ln)              { showError('lname-err','Weka jina la familia'); return false; }
-      if (!em || !Utils.Validate.email(em)) { showError('email-err','Weka barua pepe sahihi ya chuo'); return false; }
+      if (!fn)              { showError('fname-err','Enter your first name'); return false; }
+      if (!ln)              { showError('lname-err','Enter your last name'); return false; }
+      if (!em || !Utils.Validate.email(em)) { showError('email-err','Enter a valid university email'); return false; }
       return true;
     }
     if (S.step === 2) {
-      if (!S.selectedUni) { App.Toast.error('Chagua chuo chako kwanza'); return false; }
+      if (!S.selectedUni) { App.Toast.error('Choose your university kwanza'); return false; }
       return true;
     }
     if (S.step === 3) {
-      if (!S.selectedCampus) { App.Toast.error('Chagua campus yako'); return false; }
+      if (!S.selectedCampus) { App.Toast.error('Choose campus yako'); return false; }
       return true;
     }
     if (S.step === 4) {
-      if (!S.selectedCourse) { App.Toast.error('Chagua kozi yako'); return false; }
+      if (!S.selectedCourse) { App.Toast.error('Choose your course'); return false; }
       return true;
     }
     if (S.step === 5) {
       const pw  = document.getElementById('sig-pw')?.value;
       const pw2 = document.getElementById('sig-pw2')?.value;
-      if (!pw || pw.length < 6) { showError('pw-err','Nywila lazima iwe herufi 6 au zaidi'); return false; }
-      if (pw !== pw2)           { showError('pw2-err','Nywila mbili hazifanani'); return false; }
+      if (!pw || pw.length < 6) { showError('pw-err','Password must be 6 characters or more'); return false; }
+      if (pw !== pw2)           { showError('pw2-err','Passwords do not match'); return false; }
       return true;
     }
     return true;
@@ -764,12 +765,12 @@ const RegPage = (() => {
     btn.disabled = false;
 
     if (result.ok) {
-      App.Toast.success('Ombi limetumwa!', 'Subiri idhini ya mwalimu wako');
+      App.Toast.success('Application submitted!', 'Wait for your lecturer's approval');
       if (navigator.vibrate) navigator.vibrate([15, 50, 15]);
       setTimeout(() => window.location.replace('pending.html'), 900);
     } else {
-      App.Toast.error('Hitilafu', result.error);
-      btn.textContent = '🚀 Omba Kujiunga';
+      App.Toast.error('Error', result.error);
+      btn.textContent = '🚀 Apply to Join';
     }
   }
 

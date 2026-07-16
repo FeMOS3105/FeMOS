@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="sw" data-theme="dark">
+<html lang="en" data-theme="dark">
 <head>
-  <title>Historia ya Mahudhurio — FeMOS</title>
+  <title>Attendance History — FeMOS</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#060C18">
+  <meta name="theme-color" content="#0A1628">
   <link rel="manifest" href="../manifest.json">
   <link rel="icon" href="../assets/logo-48.png" type="image/png">
   <link rel="stylesheet" href="../css/style.css">
@@ -15,12 +15,12 @@
 <div id="toast-portal" aria-live="polite"></div>
 <div id="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
   <div class="confirm-box">
-    <div class="confirm-emoji" id="confirm-emoji">⚠️</div>
-    <div class="confirm-title" id="confirm-title">Una uhakika?</div>
-    <div class="confirm-desc"  id="confirm-desc">Kitendo hiki hakiwezi kurudishwa.</div>
+    <div class="confirm-icon" id="confirm-icon"></div>
+    <div class="confirm-title" id="confirm-title">Are you sure?</div>
+    <div class="confirm-desc"  id="confirm-desc">This action cannot be undone.</div>
     <div class="confirm-actions">
-      <button class="btn btn-ghost" id="confirm-cancel">Ghairi</button>
-      <button class="btn btn-danger" id="confirm-ok">Thibitisha</button>
+      <button class="btn btn-ghost" id="confirm-cancel">Cancel</button>
+      <button class="btn btn-danger" id="confirm-ok">Confirm</button>
     </div>
   </div>
 </div>
@@ -28,41 +28,42 @@
   <div class="page-content">
     <div class="status-bar" aria-hidden="true">
       <span class="time" data-live-clock>09:41</span>
-      <div class="indicators"><span data-network-status>●●●●</span><span class="battery">⚡ 87%</span></div>
+      <div class="indicators"><span data-network-status>&#9679;&#9679;&#9679;&#9679;</span><span class="battery"><span data-icon="bolt"></span> 87%</span></div>
     </div>
     <div class="back-bar">
-      <button class="btn-icon" onclick="window.location.href=\"home.html\"" aria-label="Rudi nyuma">←</button>
-      <span class="back-title">Historia ya Mahudhurio</span>
+      <button class="btn-icon" onclick="window.location.href='home.html'" aria-label="Go back">&larr;</button>
+      <span class="back-title">Attendance History</span>
       <div style="width:40px"></div>
     </div>
     <div class="cant-get-page" role="main">
-      <div class="cant-get-icon" aria-hidden="true">🚧</div>
+      <div class="cant-get-icon" aria-hidden="true"><span data-icon="construction"></span></div>
       <div class="cant-get-code">Soon</div>
-      <div class="cant-get-title">Ukurasa huu unakuja hivi karibuni</div>
-      <p class="cant-get-desc">Sehemu hii ya FeMOS bado ipo kwenye ujenzi.<br>Itapatikana katika toleo lijalo la FeMOS Campus.</p>
-      <button class="btn btn-primary" onclick="history.back()" style="margin-top:8px">← Rudi Nyuma</button>
+      <div class="cant-get-title">This page is coming soon</div>
+      <p class="cant-get-desc">This section of FeMOS is still under construction.<br>It will be available in the next version of FeMOS Campus.</p>
+      <button class="btn btn-primary" onclick="history.back()" style="margin-top:8px">&larr; Go Back</button>
     </div>
   </div>
   <nav class="bottom-nav">
-    <div class="nav-item" onclick="window.location.href=\"home.html\"" role="link" tabindex="0" aria-label="Nyumbani">
-      <div class="nav-icon-wrap">🏠</div>
-      <span class="nav-label">Nyumbani</span>
+    <div class="nav-item" onclick="window.location.href='home.html'" role="link" tabindex="0" aria-label="Home">
+      <div class="nav-icon-wrap"><span data-icon="home"></span></div>
+      <span class="nav-label">Home</span>
     </div>
-    <div class="nav-item active" onclick="window.location.href=\"attendance.html\"" role="link" tabindex="0" aria-label="Mahudhurio" aria-current="page">
-      <div class="nav-icon-wrap">✅</div>
-      <span class="nav-label">Mahudhurio</span>
+    <div class="nav-item active" onclick="window.location.href='attendance.html'" role="link" tabindex="0" aria-label="Attendance" aria-current="page">
+      <div class="nav-icon-wrap"><span data-icon="check-circle"></span></div>
+      <span class="nav-label">Attendance</span>
     </div>
-    <button class="nav-fab" onclick="window.location.href=\"compose.html\"" aria-label="Andika tangazo">＋</button>
-    <div class="nav-item" onclick="window.location.href=\"announcements.html\"" role="link" tabindex="0" aria-label="Matangazo">
-      <div class="nav-icon-wrap">🔔</div>
-      <span class="nav-label">Matangazo</span>
+    <button class="nav-fab" onclick="window.location.href='compose.html'" aria-label="Compose announcement">+</button>
+    <div class="nav-item" onclick="window.location.href='announcements.html'" role="link" tabindex="0" aria-label="Announcements">
+      <div class="nav-icon-wrap"><span data-icon="bell"></span></div>
+      <span class="nav-label">Announcements</span>
     </div>
-    <div class="nav-item" onclick="window.location.href=\"profile.html\"" role="link" tabindex="0" aria-label="Profile">
-      <div class="nav-icon-wrap">👤</div>
+    <div class="nav-item" onclick="window.location.href='profile.html'" role="link" tabindex="0" aria-label="Profile">
+      <div class="nav-icon-wrap"><span data-icon="user"></span></div>
       <span class="nav-label">Profile</span>
     </div>
   </nav>
 </div>
+<script src="../js/icons.js"></script>
 <script src="../js/db.js"></script>
 <script src="../js/utils.js"></script>
 <script src="../js/auth.js"></script>

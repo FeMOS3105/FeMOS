@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="sw" data-theme="dark">
+<html lang="en" data-theme="dark">
 <head>
-  <title>Usanidi wa Profile — FeMOS</title>
+  <title>Profile Setup — FeMOS</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#060C18">
+  <meta name="theme-color" content="#0A1628">
   <link rel="manifest" href="../manifest.json">
   <link rel="icon" href="../assets/logo-48.png" type="image/png">
   <link rel="stylesheet" href="../css/style.css">
@@ -33,119 +33,119 @@
   <!-- Progress bar at top -->
   <div class="step-progress" style="padding-top:var(--s-5)">
     <div class="step-track"><div class="step-fill" id="setup-prog" style="width:25%"></div></div>
-    <div class="step-label" id="setup-prog-lbl">Hatua 1 ya 4 — Usanidi wa Profile</div>
+    <div class="step-label" id="setup-prog-lbl">Step 1 of 4 — Profile Setup</div>
   </div>
 
   <!-- ══ STEP 1: Picha & Bio ══ -->
   <div class="setup-step active" id="setup-s1">
     <div class="step-header" style="padding-top:8px">
-      <span class="step-emoji-big">🎨</span>
-      <h1 class="step-heading">Personalise Profile yako</h1>
-      <p class="step-subhead">Chagua avatar na jaza bio yako ya chuo</p>
+      <span class="step-emoji-big"></span>
+      <h1 class="step-heading">Personalise Your Profile</h1>
+      <p class="step-subhead">Choose an avatar and fill in your campus bio</p>
     </div>
 
     <!-- Live avatar preview -->
     <div class="avatar-preview-row" style="padding:0 var(--s-5) 16px;flex-direction:row;gap:16px;align-items:center;justify-content:flex-start">
-      <div class="avatar avatar-xl avatar-ring" id="setup-av-preview" style="background:linear-gradient(135deg,#00D4FF,#1565FF);font-size:32px;flex-shrink:0">👤</div>
+      <div class="avatar avatar-xl avatar-ring" id="setup-av-preview" style="background:linear-gradient(135deg,#00D4FF,#1565FF);font-size:32px;flex-shrink:0"></div>
       <div>
-        <div style="font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--text-primary)" id="setup-name-preview">Jina lako</div>
-        <div style="font-size:12px;color:var(--text-tertiary)" id="setup-role-preview">Mwanafunzi · MUST</div>
+        <div style="font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--text-primary)" id="setup-name-preview">Your Name</div>
+        <div style="font-size:12px;color:var(--text-tertiary)" id="setup-role-preview">Student · MUST</div>
         <div style="font-family:var(--font-display);font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--clr-cyan);margin-top:4px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.15);border-radius:999px;padding:2px 8px;display:inline-block" id="setup-uid-preview">FEMOS-MUST-MC-2024-XXXXXX</div>
       </div>
     </div>
 
     <!-- Emoji picker -->
-    <div style="padding:0 var(--s-5) 8px"><label class="form-label">Chagua Avatar</label></div>
-    <div class="emoji-picker-grid" id="setup-emoji-grid" role="radiogroup" aria-label="Chagua emoji ya avatar"></div>
+    <div style="padding:0 var(--s-5) 8px"><label class="form-label">Choose Avatar</label></div>
+    <div class="emoji-picker-grid" id="setup-emoji-grid" role="radiogroup" aria-label="Choose avatar emoji"></div>
 
     <!-- Color picker -->
-    <div style="padding:8px var(--s-5) 6px"><label class="form-label">Rangi ya profile</label></div>
-    <div class="color-swatch-row" id="setup-color-row" role="radiogroup" aria-label="Chagua rangi"></div>
+    <div style="padding:8px var(--s-5) 6px"><label class="form-label">Profile Color</label></div>
+    <div class="color-swatch-row" id="setup-color-row" role="radiogroup" aria-label="Choose color"></div>
 
     <!-- Display name override -->
     <div style="padding:8px var(--s-5) 0">
       <div class="form-group">
-        <label class="form-label" for="setup-display-name">Jina linaloonekana (optional)</label>
+        <label class="form-label" for="setup-display-name">Display Name (optional)</label>
         <div class="form-field">
-          <span class="field-icon-left">✍️</span>
-          <input class="form-input" id="setup-display-name" type="text" placeholder="Jina unalotaka kujulikana nacho" oninput="SetupPage.updatePreview()">
+          <span class="field-icon-left"></span>
+          <input class="form-input" id="setup-display-name" type="text" placeholder="Name you want to be known by" oninput="SetupPage.updatePreview()">
         </div>
-        <div class="form-message info">Likiwa wazi, jina lako la kweli litatumika</div>
+        <div class="form-message info">If left blank, your real name will be used</div>
       </div>
       <div class="form-group">
-        <label class="form-label" for="setup-bio">Bio fupi (optional)</label>
-        <textarea class="form-textarea" id="setup-bio" placeholder="Kuhusu mimi: ninasomea BCSE, maslahi yangu ni AI na robotics..." style="min-height:80px;resize:none" maxlength="160"></textarea>
-        <div class="form-message info"><span id="bio-count">0</span>/160 herufi</div>
+        <label class="form-label" for="setup-bio">Short Bio (optional)</label>
+        <textarea class="form-textarea" id="setup-bio" placeholder="About me: studying BCSE, interests include AI and robotics..." style="min-height:80px;resize:none" maxlength="160"></textarea>
+        <div class="form-message info"><span id="bio-count">0</span>/160 characters</div>
       </div>
     </div>
   </div>
 
-  <!-- ══ STEP 2: Mapendeleo ya Arifa ══ -->
+  <!-- ══ STEP 2: Notification Preferences ══ -->
   <div class="setup-step" id="setup-s2" style="padding:0 var(--s-5)">
     <div class="step-header" style="padding:var(--s-4) 0 var(--s-3)">
-      <span class="step-emoji-big">🔔</span>
-      <h1 class="step-heading">Arifa na Taarifa</h1>
-      <p class="step-subhead">Chagua aina za arifa unazotaka kupokea</p>
+      <span class="step-emoji-big"></span>
+      <h1 class="step-heading">Notifications & Information</h1>
+      <p class="step-subhead">Choose the types of notifications you want to receive</p>
     </div>
 
     <div class="info-notice" style="margin-bottom:16px">
-      <span>📱</span>
-      <span>Arifa zinakusaidia kukaa updated bila kufungua app kila wakati. Unaweza kubadilisha mipangilio hii wakati wowote.</span>
+      <span></span>
+      <span>Notifications help you stay updated without opening the app every time. You can change these settings at any time.</span>
     </div>
 
     <div class="card" style="padding:0 var(--s-4)">
       <div class="notif-row">
-        <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,75,110,.10);border:1px solid rgba(255,75,110,.18);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🚨</div>
-        <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text-primary)">Matangazo ya Dharura</div><div style="font-size:11px;color:var(--text-tertiary)">Taarifa za haraka zinazohitaji hatua ya haraka</div></div>
+        <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,75,110,.10);border:1px solid rgba(255,75,110,.18);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0"></div>
+        <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text-primary)">Emergency Alerts</div><div style="font-size:11px;color:var(--text-tertiary)">Urgent information requiring immediate action</div></div>
         <label class="toggle"><input type="checkbox" id="notif-emergency" checked><div class="toggle-track"></div></label>
       </div>
       <div class="notif-row">
-        <div style="width:36px;height:36px;border-radius:10px;background:rgba(0,212,255,.10);border:1px solid rgba(0,212,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📝</div>
-        <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text-primary)">Matangazo ya Kitaaluma</div><div style="font-size:11px;color:var(--text-tertiary)">Mitihani, assignments, mabadiliko ya ratiba</div></div>
+        <div style="width:36px;height:36px;border-radius:10px;background:rgba(0,212,255,.10);border:1px solid rgba(0,212,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0"></div>
+        <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text-primary)">Academic Announcements</div><div style="font-size:11px;color:var(--text-tertiary)">Exams, assignments, schedule changes</div></div>
         <label class="toggle"><input type="checkbox" id="notif-academic" checked><div class="toggle-track"></div></label>
       </div>
       <div class="notif-row">
-        <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,184,48,.10);border:1px solid rgba(255,184,48,.18);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">⏰</div>
-        <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text-primary)">Ukumbusho wa Tarehe</div><div style="font-size:11px;color:var(--text-tertiary)">Deadlines za assignments na mitihani</div></div>
+        <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,184,48,.10);border:1px solid rgba(255,184,48,.18);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0"></div>
+        <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text-primary)">Deadline Reminders</div><div style="font-size:11px;color:var(--text-tertiary)">Assignment and exam deadlines</div></div>
         <label class="toggle"><input type="checkbox" id="notif-deadline" checked><div class="toggle-track"></div></label>
       </div>
       <div class="notif-row">
-        <div style="width:36px;height:36px;border-radius:10px;background:rgba(0,229,160,.10);border:1px solid rgba(0,229,160,.18);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">✅</div>
-        <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text-primary)">Ukumbusho wa Mahudhurio</div><div style="font-size:11px;color:var(--text-tertiary)">Kipindi kinapoanza — dakika 10 kabla</div></div>
+        <div style="width:36px;height:36px;border-radius:10px;background:rgba(0,229,160,.10);border:1px solid rgba(0,229,160,.18);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0"></div>
+        <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text-primary)">Attendance Reminders</div><div style="font-size:11px;color:var(--text-tertiary)">When class starts — 10 minutes before</div></div>
         <label class="toggle"><input type="checkbox" id="notif-attendance" checked><div class="toggle-track"></div></label>
       </div>
       <div class="notif-row">
-        <div style="width:36px;height:36px;border-radius:10px;background:rgba(155,109,255,.12);border:1px solid rgba(155,109,255,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📢</div>
-        <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text-primary)">Matangazo ya Jumla</div><div style="font-size:11px;color:var(--text-tertiary)">Habari na taarifa za chuo</div></div>
+        <div style="width:36px;height:36px;border-radius:10px;background:rgba(155,109,255,.12);border:1px solid rgba(155,109,255,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0"></div>
+        <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text-primary)">General Announcements</div><div style="font-size:11px;color:var(--text-tertiary)">News and campus information</div></div>
         <label class="toggle"><input type="checkbox" id="notif-general"><div class="toggle-track"></div></label>
       </div>
     </div>
   </div>
 
-  <!-- ══ STEP 3: Mwonekano & Lugha ══ -->
+  <!-- ══ STEP 3: Appearance & Language ══ -->
   <div class="setup-step" id="setup-s3" style="padding:0 var(--s-5)">
     <div class="step-header" style="padding:var(--s-4) 0 var(--s-3)">
-      <span class="step-emoji-big">🌐</span>
-      <h1 class="step-heading">Mwonekano na Lugha</h1>
-      <p class="step-subhead">Sanidi uzoefu wako wa FeMOS</p>
+      <span class="step-emoji-big"></span>
+      <h1 class="step-heading">Appearance & Language</h1>
+      <p class="step-subhead">Customise your FeMOS experience</p>
     </div>
 
     <div style="margin-bottom:16px">
-      <label class="form-label" style="margin-bottom:10px">Mandhari (Theme)</label>
+      <label class="form-label" style="margin-bottom:10px">Theme</label>
       <div style="display:flex;flex-direction:column;gap:10px">
         <div class="pref-card" id="theme-dark" onclick="SetupPage.selectTheme('dark',this)">
           <div class="pref-radio"></div>
           <div style="flex:1">
-            <div style="font-size:14px;font-weight:600;color:var(--text-primary)">🌙 Dark Mode</div>
-            <div style="font-size:12px;color:var(--text-tertiary)">Bora usiku na mazingira ya mwanga mdogo</div>
+            <div style="font-size:14px;font-weight:600;color:var(--text-primary)">Dark Mode</div>
+            <div style="font-size:12px;color:var(--text-tertiary)">Best for night and low-light environments</div>
           </div>
-          <div style="width:48px;height:28px;background:#060C18;border:1px solid rgba(0,212,255,.3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#00D4FF">Aa</div>
+          <div style="width:48px;height:28px;background:#0A1628;border:1px solid rgba(0,212,255,.3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#00D4FF">Aa</div>
         </div>
         <div class="pref-card" id="theme-light" onclick="SetupPage.selectTheme('light',this)">
           <div class="pref-radio"></div>
           <div style="flex:1">
-            <div style="font-size:14px;font-weight:600;color:var(--text-primary)">☀️ Light Mode</div>
-            <div style="font-size:12px;color:var(--text-tertiary)">Bora mchana na mazingira ya mwanga mkali</div>
+            <div style="font-size:14px;font-weight:600;color:var(--text-primary)">Light Mode</div>
+            <div style="font-size:12px;color:var(--text-tertiary)">Best for daytime and bright environments</div>
           </div>
           <div style="width:48px;height:28px;background:#EEF3FA;border:1px solid rgba(21,101,255,.3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#1565FF">Aa</div>
         </div>
@@ -153,19 +153,19 @@
     </div>
 
     <div style="margin-bottom:16px">
-      <label class="form-label" style="margin-bottom:10px">Lugha / Language</label>
+      <label class="form-label" style="margin-bottom:10px">Language</label>
       <div style="display:flex;flex-direction:column;gap:10px">
-        <div class="pref-card selected" id="lang-sw" onclick="SetupPage.selectLang('sw',this)">
+        <div class="pref-card" id="lang-sw" onclick="SetupPage.selectLang('sw',this)">
           <div class="pref-radio"></div>
           <div style="flex:1">
-            <div style="font-size:14px;font-weight:600;color:var(--text-primary)">🇹🇿 Kiswahili</div>
-            <div style="font-size:12px;color:var(--text-tertiary)">Kiswahili cha Kawaida</div>
+            <div style="font-size:14px;font-weight:600;color:var(--text-primary)">Kiswahili</div>
+            <div style="font-size:12px;color:var(--text-tertiary)">Standard Swahili</div>
           </div>
         </div>
-        <div class="pref-card" id="lang-en" onclick="SetupPage.selectLang('en',this)">
+        <div class="pref-card selected" id="lang-en" onclick="SetupPage.selectLang('en',this)">
           <div class="pref-radio"></div>
           <div style="flex:1">
-            <div style="font-size:14px;font-weight:600;color:var(--text-primary)">🇬🇧 English</div>
+            <div style="font-size:14px;font-weight:600;color:var(--text-primary)">English</div>
             <div style="font-size:12px;color:var(--text-tertiary)">Standard English</div>
           </div>
         </div>
@@ -173,75 +173,76 @@
     </div>
 
     <div>
-      <label class="form-label" style="margin-bottom:10px">Ukubwa wa maandishi</label>
+      <label class="form-label" style="margin-bottom:10px">Text Size</label>
       <input type="range" id="font-size-slider" min="1" max="3" value="2" step="1"
              style="width:100%;accent-color:var(--clr-cyan);margin-bottom:8px" oninput="SetupPage.previewFontSize(this.value)">
       <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-tertiary)">
-        <span>Ndogo</span><span>Wastani</span><span>Kubwa</span>
+        <span>Small</span><span>Medium</span><span>Large</span>
       </div>
     </div>
   </div>
 
-  <!-- ══ STEP 4: Usalama wa Ziada ══ -->
+  <!-- ══ STEP 4: Extra Security ══ -->
   <div class="setup-step" id="setup-s4" style="padding:0 var(--s-5)">
     <div class="step-header" style="padding:var(--s-4) 0 var(--s-3)">
-      <span class="step-emoji-big">🔐</span>
-      <h1 class="step-heading">Usalama wa Ziada</h1>
-      <p class="step-subhead">Linda akaunti yako vizuri zaidi</p>
+      <span class="step-emoji-big"></span>
+      <h1 class="step-heading">Extra Security</h1>
+      <p class="step-subhead">Protect your account further</p>
     </div>
 
     <div class="info-notice warning" style="margin-bottom:16px">
-      <span>⚠️</span>
-      <span>Unique ID yako ni <strong>siri ya kibinafsi</strong>. Usimwambie mtu mwingine. Inatumika kusaini mahudhurio — ukiigawana, mtu anaweza kusaini kwa jina lako.</span>
+      <span></span>
+      <span>Your Unique ID is a <strong>private secret</strong>. Do not share it with anyone. It is used to sign attendance — if shared, someone could sign in your name.</span>
     </div>
 
     <div class="card" style="padding:0 var(--s-4);margin-bottom:16px">
       <div class="notif-row">
-        <div style="width:36px;height:36px;border-radius:10px;background:rgba(21,101,255,.12);border:1px solid rgba(21,101,255,.20);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">👆</div>
-        <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text-primary)">Biometric Login</div><div style="font-size:11px;color:var(--text-tertiary)">Face ID · Fingerprint (ingia bila nywila)</div></div>
+        <div style="width:36px;height:36px;border-radius:10px;background:rgba(21,101,255,.12);border:1px solid rgba(21,101,255,.20);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0"></div>
+        <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text-primary)">Biometric Login</div><div style="font-size:11px;color:var(--text-tertiary)">Face ID · Fingerprint (sign in without password)</div></div>
         <label class="toggle"><input type="checkbox" id="sec-biometric"><div class="toggle-track"></div></label>
       </div>
       <div class="notif-row">
-        <div style="width:36px;height:36px;border-radius:10px;background:rgba(0,229,160,.10);border:1px solid rgba(0,229,160,.18);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📱</div>
-        <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text-primary)">Lock Screen</div><div style="font-size:11px;color:var(--text-tertiary)">Funga app ukiitoka kwa dakika 5</div></div>
+        <div style="width:36px;height:36px;border-radius:10px;background:rgba(0,229,160,.10);border:1px solid rgba(0,229,160,.18);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0"></div>
+        <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text-primary)">Lock Screen</div><div style="font-size:11px;color:var(--text-tertiary)">Lock app when inactive for 5 minutes</div></div>
         <label class="toggle"><input type="checkbox" id="sec-autolock" checked><div class="toggle-track"></div></label>
       </div>
       <div class="notif-row">
-        <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,184,48,.10);border:1px solid rgba(255,184,48,.18);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🔍</div>
-        <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text-primary)">Arifa za Uingiliano</div><div style="font-size:11px;color:var(--text-tertiary)">Pokea taarifa ukiingiwa kwenye akaunti yako</div></div>
+        <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,184,48,.10);border:1px solid rgba(255,184,48,.18);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0"></div>
+        <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text-primary)">Login Alerts</div><div style="font-size:11px;color:var(--text-tertiary)">Receive notification when someone logs into your account</div></div>
         <label class="toggle"><input type="checkbox" id="sec-login-alert" checked><div class="toggle-track"></div></label>
       </div>
     </div>
 
     <!-- Completion preview -->
     <div class="card card-gradient" style="padding:20px;text-align:center">
-      <div style="font-size:44px;margin-bottom:12px" aria-hidden="true">🚀</div>
-      <div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--text-primary);margin-bottom:6px">Uko tayari!</div>
+      <div style="font-size:44px;margin-bottom:12px" aria-hidden="true"></div>
+      <div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--text-primary);margin-bottom:6px">You're All Set!</div>
       <p style="font-size:13px;color:var(--text-secondary);line-height:1.65;margin-bottom:14px">
-        Profile yako imesanidiwa. Bonyeza kitufe hapa chini kuanza kutumia FeMOS Campus.
+        Your profile has been set up. Press the button below to start using FeMOS Campus.
       </p>
       <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap">
-        <span class="tag tag-green">✅ Profile</span>
-        <span class="tag tag-cyan">✅ Arifa</span>
-        <span class="tag tag-blue">✅ Mwonekano</span>
-        <span class="tag tag-amber">✅ Usalama</span>
+        <span class="tag tag-green">Profile</span>
+        <span class="tag tag-cyan">Notifications</span>
+        <span class="tag tag-blue">Appearance</span>
+        <span class="tag tag-amber">Security</span>
       </div>
     </div>
   </div>
 
   <!-- ── Navigation ── -->
   <div style="display:flex;gap:10px;padding:var(--s-3) var(--s-5) max(24px,env(safe-area-inset-bottom));flex-shrink:0;margin-top:auto">
-    <button class="btn btn-ghost" id="setup-prev" onclick="SetupPage.prev()" style="display:none">← Rudi</button>
-    <button class="btn btn-primary" id="setup-next" onclick="SetupPage.next()" style="flex:1">Endelea →</button>
+    <button class="btn btn-ghost" id="setup-prev" onclick="SetupPage.prev()" style="display:none">← Back</button>
+    <button class="btn btn-primary" id="setup-next" onclick="SetupPage.next()" style="flex:1">Continue →</button>
   </div>
 
   <p class="caption text-tertiary" style="text-align:center;padding:0 var(--s-5) 20px">
-    Unaweza kubadilisha mipangilio hii wakati wowote kwenye Profile → Mipangilio
+    You can change these settings at any time in Profile → Settings
   </p>
 
 </main>
 </div>
 
+<script src="../js/icons.js"></script>
 <script src="../js/db.js"></script>
 <script src="../js/utils.js"></script>
 <script src="../js/auth.js"></script>
@@ -254,14 +255,14 @@ const SetupPage = (() => {
   let selEmoji   = '👤';
   let selColor   = 0;
   let selTheme   = 'dark';
-  let selLang    = 'sw';
+  let selLang    = 'en';
 
   /* ── Progress ── */
   function _updateProgress() {
     const pct = (step/STEPS*100).toFixed(0);
-    const labels = ['Usanidi wa Profile','Mipangilio ya Arifa','Mwonekano na Lugha','Usalama wa Ziada'];
+    const labels = ['Profile Setup','Notification Settings','Appearance & Language','Extra Security'];
     document.getElementById('setup-prog').style.width = pct + '%';
-    document.getElementById('setup-prog-lbl').textContent = `Hatua ${step} ya ${STEPS} — ${labels[step-1]}`;
+    document.getElementById('setup-prog-lbl').textContent = `Step ${step} of ${STEPS} — ${labels[step-1]}`;
     for (let i=1;i<=STEPS;i++) {
       const el = document.getElementById('setup-s'+i);
       if (el) el.style.display = i===step?'flex':'none';
@@ -270,7 +271,7 @@ const SetupPage = (() => {
     const prev = document.getElementById('setup-prev');
     const next = document.getElementById('setup-next');
     if (prev) prev.style.display = step>1?'':'none';
-    if (next) next.textContent = step===STEPS?'🚀 Anza Kutumia FeMOS!':'Endelea →';
+    if (next) next.textContent = step===STEPS?'Start Using FeMOS!':'Continue →';
   }
 
   /* ── Avatar pickers init ── */
@@ -281,7 +282,7 @@ const SetupPage = (() => {
       selColor = user.colorId || 0;
       Utils.DOM.setText('setup-name-preview', user.displayName || user.name);
       Utils.DOM.setText('setup-role-preview',
-        ({student:'Mwanafunzi',lecturer:'Mwalimu',cr:'CR','uni-admin':'Admin','super-admin':'Super Admin'}[user.role]||'Mwanafunzi') +
+        ({student:'Student',lecturer:'Lecturer',cr:'CR','uni-admin':'Admin','super-admin':'Super Admin'}[user.role]||'Student') +
         ' · ' + (user.university||'MUST'));
       Utils.DOM.setText('setup-uid-preview', user.uniqueId||'FEMOS-MUST-MC-2024-XXXXXX');
       const displayInp = document.getElementById('setup-display-name');
@@ -365,13 +366,13 @@ const SetupPage = (() => {
   function previewFontSize(val) {
     const sizes = {1:'small',2:'medium',3:'large'};
     document.documentElement.style.fontSize = {1:'13px',2:'15px',3:'17px'}[val]||'15px';
-    App.Toast.info('Ukubwa: '+sizes[val]);
+    App.Toast.info('Size: '+sizes[val]);
   }
 
   function updatePreview() {
     const val = document.getElementById('setup-display-name')?.value.trim();
     const user = Auth.Session.load();
-    const name = val || user?.name || 'Jina lako';
+    const name = val || user?.name || 'Your Name';
     Utils.DOM.setText('setup-name-preview', name);
   }
 
@@ -431,7 +432,7 @@ const SetupPage = (() => {
     await new Promise(r => setTimeout(r, 800));
     btn.classList.remove('btn-loading'); btn.disabled = false;
 
-    App.Toast.success('Profile imesanidiwa! 🎉', 'Karibu FeMOS Campus');
+    App.Toast.success('Profile set up successfully!', 'Welcome to FeMOS Campus');
     if (navigator.vibrate) navigator.vibrate([15, 50, 15]);
     setTimeout(() => window.location.replace('home.html'), 900);
   }

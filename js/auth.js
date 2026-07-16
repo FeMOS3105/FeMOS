@@ -101,7 +101,7 @@ const Auth = (() => {
 
   /* ── MUST Courses (from Almanac) ── */
   const MUST_COURSES = [
-    { faculty: 'Faculty of Science & Technology', icon: '⚙️', depts: [
+    { faculty: 'Faculty of Science & Technology', icon: 'code', depts: [
       { name: 'Computer Science & Engineering', courses: [
         { code:'BCSE', name:'Bachelor of Science in Computer Science & Engineering', years:4, nta:8 },
         { code:'BELE', name:'Bachelor of Science in Electrical Engineering',          years:4, nta:8 },
@@ -113,7 +113,7 @@ const Auth = (() => {
         { code:'BMIN', name:'Bachelor of Science in Mining Engineering',              years:4, nta:8 },
       ]},
     ]},
-    { faculty: 'Faculty of Science', icon: '🔬', depts: [
+    { faculty: 'Faculty of Science', icon: 'search', depts: [
       { name: 'Pure & Applied Sciences', courses: [
         { code:'BSCS', name:'Bachelor of Science in Computer Science',          years:3, nta:8 },
         { code:'BSIT', name:'Bachelor of Science in Information Technology',    years:3, nta:8 },
@@ -125,7 +125,7 @@ const Auth = (() => {
         { code:'BSCH', name:'Bachelor of Science in Chemistry',                 years:3, nta:8 },
       ]},
     ]},
-    { faculty: 'Faculty of Business & Management', icon: '💼', depts: [
+    { faculty: 'Faculty of Business & Management', icon: 'briefcase', depts: [
       { name: 'Business & Management', courses: [
         { code:'BBAM', name:'Bachelor of Business Administration & Management', years:3, nta:8 },
         { code:'BACC', name:'Bachelor of Accounting & Finance',                  years:3, nta:8 },
@@ -135,7 +135,7 @@ const Auth = (() => {
         { code:'BECO', name:'Bachelor of Economics',                             years:3, nta:8 },
       ]},
     ]},
-    { faculty: 'Faculty of Education', icon: '📖', depts: [
+    { faculty: 'Faculty of Education', icon: 'book', depts: [
       { name: 'Education', courses: [
         { code:'BEDU', name:'Bachelor of Education (Science)',                  years:3, nta:8 },
         { code:'BEDS', name:'Bachelor of Education (Secondary)',                years:3, nta:8 },
@@ -143,7 +143,7 @@ const Auth = (() => {
         { code:'BSED', name:'Bachelor of Science Education',                    years:3, nta:8 },
       ]},
     ]},
-    { faculty: 'Faculty of Earth Sciences & Engineering', icon: '🌍', depts: [
+    { faculty: 'Faculty of Earth Sciences & Engineering', icon: 'mapPin', depts: [
       { name: 'Earth Sciences', courses: [
         { code:'BSUR', name:'Bachelor of Science in Surveying & Mapping',       years:4, nta:8 },
         { code:'BGEO', name:'Bachelor of Science in Geology',                   years:3, nta:8 },
@@ -152,7 +152,7 @@ const Auth = (() => {
         { code:'BMIN2','name':'Bachelor of Science in Mineral Processing',       years:4, nta:8 },
       ]},
     ]},
-    { faculty: 'Postgraduate Programmes', icon: '🎓', depts: [
+    { faculty: 'Postgraduate Programmes', icon: 'award', depts: [
       { name: 'Postgraduate', courses: [
         { code:'MSCE',  name:'Master of Science in Computer Engineering',          years:2, nta:9 },
         { code:'MSEE',  name:'Master of Science in Electrical Engineering',        years:2, nta:9 },
@@ -166,32 +166,32 @@ const Auth = (() => {
 
   /* ── Generic courses for other universities ── */
   const GENERIC_COURSES = [
-    { faculty: 'Faculty of Science & Technology', icon: '⚙️', depts: [{ name: 'Technology', courses: [
+    { faculty: 'Faculty of Science & Technology', icon: 'code', depts: [{ name: 'Technology', courses: [
       { code:'BCS',  name:'Bachelor of Computer Science',           years:3, nta:8 },
       { code:'BIT',  name:'Bachelor of Information Technology',     years:3, nta:8 },
       { code:'BEE',  name:'Bachelor of Electrical Engineering',     years:4, nta:8 },
       { code:'BCE',  name:'Bachelor of Civil Engineering',          years:4, nta:8 },
       { code:'BME',  name:'Bachelor of Mechanical Engineering',     years:4, nta:8 },
     ]}]},
-    { faculty: 'Faculty of Business', icon: '💼', depts: [{ name: 'Business', courses: [
+    { faculty: 'Faculty of Business', icon: 'briefcase', depts: [{ name: 'Business', courses: [
       { code:'BBA',  name:'Bachelor of Business Administration',    years:3, nta:8 },
       { code:'BAF',  name:'Bachelor of Accounting & Finance',       years:3, nta:8 },
       { code:'BEC',  name:'Bachelor of Economics',                  years:3, nta:8 },
       { code:'BHRM', name:'Bachelor of Human Resource Management',  years:3, nta:8 },
     ]}]},
-    { faculty: 'Faculty of Education', icon: '📖', depts: [{ name: 'Education', courses: [
+    { faculty: 'Faculty of Education', icon: 'book', depts: [{ name: 'Education', courses: [
       { code:'BED',  name:'Bachelor of Education',                  years:3, nta:8 },
       { code:'BEDS', name:'Bachelor of Education (Secondary)',       years:3, nta:8 },
     ]}]},
-    { faculty: 'Faculty of Law', icon: '⚖️', depts: [{ name: 'Law', courses: [
+    { faculty: 'Faculty of Law', icon: 'shield', depts: [{ name: 'Law', courses: [
       { code:'LLB',  name:'Bachelor of Laws (LLB)',                 years:3, nta:8 },
     ]}]},
-    { faculty: 'Faculty of Social Sciences', icon: '🌐', depts: [{ name: 'Social Sciences', courses: [
+    { faculty: 'Faculty of Social Sciences', icon: 'globe', depts: [{ name: 'Social Sciences', courses: [
       { code:'BSS',  name:'Bachelor of Social Sciences',            years:3, nta:8 },
       { code:'BCM',  name:'Bachelor of Communication & Media',      years:3, nta:8 },
       { code:'BSW',  name:'Bachelor of Social Work',                years:3, nta:8 },
     ]}]},
-    { faculty: 'Postgraduate', icon: '🎓', depts: [{ name: 'Postgraduate', courses: [
+    { faculty: 'Postgraduate', icon: 'award', depts: [{ name: 'Postgraduate', courses: [
       { code:'MBA',  name:'Master of Business Administration',      years:2, nta:9 },
       { code:'MCS',  name:'Master of Computer Science',             years:2, nta:9 },
       { code:'PHD',  name:'Doctor of Philosophy',                   years:3, nta:10},
@@ -200,11 +200,11 @@ const Auth = (() => {
 
   /* ── Role definitions ── */
   const ROLES = {
-    student:      { label: 'Mwanafunzi',              emoji: '🧑‍💻' },
-    lecturer:     { label: 'Mwalimu / Lecturer',       emoji: '👨‍🏫' },
-    cr:           { label: 'Class Representative (CR)',emoji: '🎓'  },
-    hod:          { label: 'Mkuu wa Idara (HOD)',      emoji: '🏛️'  },
-    'uni-admin':  { label: 'Msimamizi wa Chuo',        emoji: '🧑‍💼' },
+    student:      { label: 'Student',                  icon: 'user' },
+    lecturer:     { label: 'Lecturer',                 icon: 'teacher' },
+    cr:           { label: 'Class Representative (CR)',icon: 'award' },
+    hod:          { label: 'Head of Department (HOD)',  icon: 'building' },
+    'uni-admin':  { label: 'University Administrator', icon: 'briefcase' },
   };
 
   /* ── Session management ── */
@@ -284,12 +284,12 @@ const Auth = (() => {
 
     // Check duplicate email
     if (users.find(u => u.email.toLowerCase() === data.email.toLowerCase())) {
-      return { ok: false, error: 'Barua pepe hiyo tayari imesajiliwa. Ingia badala yake.' };
+      return { ok: false, error: 'That email is already registered. Please sign in instead.' };
     }
 
     // Check duplicate reg no
     if (users.find(u => u.regNo === data.regNo)) {
-      return { ok: false, error: 'Nambari ya usajili hiyo tayari ipo. Wasiliana na msimamizi.' };
+      return { ok: false, error: 'That registration number already exists. Contact your supervisor.' };
     }
 
     const newUser = {
@@ -309,7 +309,7 @@ const Auth = (() => {
       courseCode:      data.courseCode,
       courseName:      data.courseName,
       year:            data.year || 1,
-      emoji:           data.emoji || '👤',
+      emoji:           data.emoji || '',
       colorId:         data.colorId ?? 0,
       uniqueId:        null,          // assigned after approval
       status:          'pending',     // pending | approved | rejected
@@ -329,7 +329,7 @@ const Auth = (() => {
   function approve(userId, approvedBy = 'system') {
     const users  = DB.LS.get('users') || [];
     const idx    = users.findIndex(u => u.id === userId);
-    if (idx < 0) return { ok: false, error: 'Mwanafunzi hakupatikana.' };
+    if (idx < 0) return { ok: false, error: 'Student not found.' };
 
     const user   = users[idx];
     const uid    = Utils.ID.femsUID(user.university, user.campusCode);
@@ -364,7 +364,7 @@ const Auth = (() => {
         universityName:'Mbeya University of Science and Technology',
         campusCode:'MC', campusName:'Main Campus',
         courseCode:'BCSE', courseName:'Bachelor of Science in Computer Science & Engineering',
-        year:3, emoji:'🧑‍💻', colorId:0,
+        year:3, emoji:'', colorId:0,
         uniqueId:'FEMOS-MUST-MC-2024-004821', status:'approved',
         createdAt:Date.now()-86400000*60, approvedAt:Date.now()-86400000*59,
       },
@@ -376,7 +376,7 @@ const Auth = (() => {
         universityName:'Mbeya University of Science and Technology',
         campusCode:'MC', campusName:'Main Campus',
         courseCode:'BCSE', courseName:'Computer Science & Engineering Dept.',
-        year:null, emoji:'👨‍🏫', colorId:3,
+        year:null, emoji:'', colorId:3,
         uniqueId:'FEMOS-MUST-MC-2018-000042', status:'approved',
         createdAt:Date.now()-86400000*180, approvedAt:Date.now()-86400000*179,
       },
@@ -388,7 +388,7 @@ const Auth = (() => {
         universityName:'Mbeya University of Science and Technology',
         campusCode:'MC', campusName:'Main Campus',
         courseCode:'ADMIN', courseName:'Administration',
-        year:null, emoji:'🧑‍💼', colorId:5,
+        year:null, emoji:'', colorId:5,
         uniqueId:'FEMOS-MUST-MC-2020-000001', status:'approved',
         createdAt:Date.now()-86400000*365, approvedAt:Date.now()-86400000*365,
       },
@@ -404,10 +404,10 @@ const Auth = (() => {
       (u.university && `${u.university}/${u.regNo}`.toLowerCase() === id_low)
     );
 
-    if (!user) return { ok: false, error: 'Akaunti haikupatikana. Angalia barua pepe au Unique ID.' };
-    if (user.password !== password) return { ok: false, error: 'Nywila si sahihi. Jaribu tena.' };
-    if (user.status === 'pending') return { ok: false, error: 'Akaunti yako bado inasubiri idhini ya mwalimu.', pending: true };
-    if (user.status === 'rejected') return { ok: false, error: 'Ombi lako lilikataliwa. Wasiliana na msimamizi wa chuo.', rejected: true };
+    if (!user) return { ok: false, error: 'Account not found. Check your email or Unique ID.' };
+    if (user.password !== password) return { ok: false, error: 'Incorrect password. Please try again.' };
+    if (user.status === 'pending') return { ok: false, error: 'Your account is still awaiting lecturer approval.', pending: true };
+    if (user.status === 'rejected') return { ok: false, error: 'Your application was rejected. Contact your university administrator.', rejected: true };
 
     Session.save(user);
     return { ok: true, user };

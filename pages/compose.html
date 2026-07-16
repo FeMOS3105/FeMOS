@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="sw" data-theme="dark">
+<html lang="en" data-theme="dark">
 <head>
-  <title>Andika Tangazo — FeMOS</title>
+  <title>Compose Announcement — FeMOS</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#060C18">
+  <meta name="theme-color" content="#0A1628">
   <link rel="manifest" href="../manifest.json">
   <link rel="icon" href="../assets/logo-48.png" type="image/png">
   <link rel="stylesheet" href="../css/style.css">
@@ -15,12 +15,12 @@
 <div id="toast-portal" aria-live="polite"></div>
 <div id="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
   <div class="confirm-box">
-    <div class="confirm-emoji" id="confirm-emoji">⚠️</div>
-    <div class="confirm-title" id="confirm-title">Una uhakika?</div>
-    <div class="confirm-desc"  id="confirm-desc">Kitendo hiki hakiwezi kurudishwa.</div>
+    <div class="confirm-emoji" id="confirm-emoji"></div>
+    <div class="confirm-title" id="confirm-title">Are you sure?</div>
+    <div class="confirm-desc"  id="confirm-desc">This action cannot be undone.</div>
     <div class="confirm-actions">
-      <button class="btn btn-ghost" id="confirm-cancel">Ghairi</button>
-      <button class="btn btn-danger" id="confirm-ok">Thibitisha</button>
+      <button class="btn btn-ghost" id="confirm-cancel">Cancel</button>
+      <button class="btn btn-danger" id="confirm-ok">Confirm</button>
     </div>
   </div>
 </div>
@@ -32,75 +32,76 @@
     </div>
     
     <div class="back-bar">
-      <button class="btn-icon" onclick="window.location.href=\"announcements.html\"" aria-label="Rudi nyuma">←</button>
-      <span class="back-title">Andika Tangazo</span>
+      <button class="btn-icon" onclick="window.location.href=\"announcements.html\"" aria-label="Go back">←</button>
+      <span class="back-title">Compose Announcement</span>
       <div style="width:40px"></div>
     </div>
     <div class="scroll-area with-bnav">
       <div style="padding:0 var(--s-5)">
         <div class="form-group">
-          <label class="form-label" for="cp-type">Aina ya tangazo</label>
+          <label class="form-label" for="cp-type">Announcement type</label>
           <select class="form-select" id="cp-type"></select>
         </div>
         <div class="form-group">
-          <label class="form-label" for="cp-title">Kichwa cha tangazo *</label>
-          <input class="form-input" id="cp-title" type="text" placeholder="Kichwa cha tangazo...">
+          <label class="form-label" for="cp-title">Subject *</label>
+          <input class="form-input" id="cp-title" type="text" placeholder="Announcement subject...">
         </div>
         <div class="form-group">
-          <label class="form-label" for="cp-target">Inaelekea nani</label>
+          <label class="form-label" for="cp-target">Target audience</label>
           <select class="form-select" id="cp-target">
-            <option value="all">Wanafunzi wote</option>
+            <option value="all">All Students</option>
             <option value="cs301">CS301 — Computer Networks II</option>
             <option value="cs204">CS204 — Operating Systems</option>
-            <option value="dept_cs">Idara ya Computer Science</option>
+            <option value="dept_cs">Department of Computer Science</option>
             <option value="cs_y3">CS Year 3</option>
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label" for="cp-body">Maandishi ya tangazo *</label>
-          <textarea class="form-textarea" id="cp-body" placeholder="Andika tangazo lako hapa... (herufi 20+)" style="min-height:140px"></textarea>
+          <label class="form-label" for="cp-body">Body *</label>
+          <textarea class="form-textarea" id="cp-body" placeholder="Write your announcement here... (20+ characters)" style="min-height:140px"></textarea>
         </div>
         <div class="form-group">
-          <label class="form-label" for="cp-exp">Muda wa kutoweka</label>
+          <label class="form-label" for="cp-exp">Expiration</label>
           <select class="form-select" id="cp-exp">
-            <option value="24">Masaa 24</option>
-            <option value="72">Siku 3</option>
-            <option value="168" selected>Wiki 1</option>
-            <option value="720">Mwezi 1</option>
+            <option value="24">24 Hours</option>
+            <option value="72">3 Days</option>
+            <option value="168" selected>1 Week</option>
+            <option value="720">1 Month</option>
           </select>
         </div>
         <div class="info-notice" style="margin-bottom:16px">
-          <span>🔔</span>
-          <span>Tangazo litawasilishwa kwa push notification. Kama wanafunzi wako offline, litawaka watakapounganika.</span>
+          <span></span>
+          <span>This announcement will be delivered via push notification. If students are offline, it will appear when they reconnect.</span>
         </div>
-        <button class="btn btn-primary btn-full" onclick="ComposePage.submit()" id="send-btn">📢 Tuma Tangazo</button>
+        <button class="btn btn-primary btn-full" onclick="ComposePage.submit()" id="send-btn">Send Announcement</button>
         <div style="height:10px"></div>
-        <button class="btn btn-ghost btn-full" onclick="history.back()">Ghairi</button>
+        <button class="btn btn-ghost btn-full" onclick="history.back()">Cancel</button>
       </div>
       <div style="height:24px"></div>
     </div>
 
   </div>
-  <nav class="bottom-nav" aria-label="Urambazaji mkuu">
-    <div class="nav-item" onclick="window.location.href=\"home.html\"" role="link" tabindex="0" aria-label="Nyumbani">
-      <div class="nav-icon-wrap">🏠</div>
-      <span class="nav-label">Nyumbani</span>
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <div class="nav-item" onclick="window.location.href=\"home.html\"" role="link" tabindex="0" aria-label="Home">
+      <div class="nav-icon-wrap"></div>
+      <span class="nav-label">Home</span>
     </div>
-    <div class="nav-item" onclick="window.location.href=\"attendance.html\"" role="link" tabindex="0" aria-label="Mahudhurio">
-      <div class="nav-icon-wrap">✅</div>
-      <span class="nav-label">Mahudhurio</span>
+    <div class="nav-item" onclick="window.location.href=\"attendance.html\"" role="link" tabindex="0" aria-label="Attendance">
+      <div class="nav-icon-wrap"></div>
+      <span class="nav-label">Attendance</span>
     </div>
-    <button class="nav-fab" onclick="window.location.href=\"compose.html\"" aria-label="Andika tangazo">＋</button>
-    <div class="nav-item" onclick="window.location.href=\"announcements.html\"" role="link" tabindex="0" aria-label="Matangazo">
-      <div class="nav-icon-wrap">🔔</div>
-      <span class="nav-label">Matangazo</span>
+    <button class="nav-fab" onclick="window.location.href=\"compose.html\"" aria-label="Compose announcement">＋</button>
+    <div class="nav-item" onclick="window.location.href=\"announcements.html\"" role="link" tabindex="0" aria-label="Announcements">
+      <div class="nav-icon-wrap"></div>
+      <span class="nav-label">Announcements</span>
     </div>
     <div class="nav-item" onclick="window.location.href=\"profile.html\"" role="link" tabindex="0" aria-label="Profile">
-      <div class="nav-icon-wrap">👤</div>
+      <div class="nav-icon-wrap"></div>
       <span class="nav-label">Profile</span>
     </div>
   </nav>
 </div>
+<script src="../js/icons.js"></script>
 <script src="../js/db.js"></script>
 <script src="../js/utils.js"></script>
 <script src="../js/auth.js"></script>
@@ -109,12 +110,12 @@
 
 <script>
 const ANN_CFG2 = {
-  emergency:{emoji:'🚨',label:'Dharura',     requiresAck:true},
-  academic: {emoji:'📝',label:'Kitaaluma',   requiresAck:true},
-  general:  {emoji:'📢',label:'Jumla',       requiresAck:false},
-  info:     {emoji:'📰',label:'Habari',      requiresAck:false},
-  deadline: {emoji:'⏰',label:'Tarehe',      requiresAck:false},
-  poll:     {emoji:'🗳️',label:'Kura',        requiresAck:true},
+  emergency:{label:'Emergency',     requiresAck:true},
+  academic: {label:'Academic',      requiresAck:true},
+  general:  {label:'General',       requiresAck:false},
+  info:     {label:'Information',   requiresAck:false},
+  deadline: {label:'Deadline',      requiresAck:false},
+  poll:     {label:'Poll',          requiresAck:true},
 };
 const ROLE_CAN_SEND = {
   'super-admin':Object.keys(ANN_CFG2),
@@ -130,9 +131,9 @@ const ComposePage = {
     const user    = Auth.Session.load();
     const allowed = ROLE_CAN_SEND[user?.role||'lecturer']||[];
     const typeEl  = document.getElementById('cp-type');
-    if (typeEl) typeEl.innerHTML = allowed.map(t => `<option value="${t}">${ANN_CFG2[t].emoji} ${ANN_CFG2[t].label}</option>`).join('');
+    if (typeEl) typeEl.innerHTML = allowed.map(t => `<option value="${t}">${ANN_CFG2[t].label}</option>`).join('');
     if (!allowed.length) {
-      App.Toast.error('Huna ruhusa ya kutuma matangazo');
+      App.Toast.error('You do not have permission to send announcements');
       setTimeout(()=>window.location.replace('announcements.html'),1500);
     }
   },
@@ -140,19 +141,19 @@ const ComposePage = {
     const type  = document.getElementById('cp-type')?.value;
     const title = document.getElementById('cp-title')?.value.trim();
     const body  = document.getElementById('cp-body')?.value.trim();
-    if (!title) { App.Toast.error('Weka kichwa cha tangazo'); return; }
-    if (!body || body.length < 20) { App.Toast.error('Andika maandishi ya kutosha (herufi 20+)'); return; }
+    if (!title) { App.Toast.error('Enter an announcement subject'); return; }
+    if (!body || body.length < 20) { App.Toast.error('Write sufficient text (20+ characters)'); return; }
     const user  = Auth.Session.load();
     const cfg   = ANN_CFG2[type]||ANN_CFG2.info;
     const list  = DB.LS.get('femos_announcements') || [];
     list.unshift({
       id: Utils.ID.short(), type, title, body,
-      sender:{name:user?.name||'Admin',role:user?.role||'lecturer',emoji:user?.emoji||'👤'},
+      sender:{name:user?.name||'Admin',role:user?.role||'lecturer',emoji:user?.emoji||''},
       sentAt:Date.now(), requiresAck:cfg.requiresAck,
       readBy:[], ackedBy:[], enrolled:82,
     });
     DB.LS.set('femos_announcements', list);
-    App.Toast.success('Tangazo limetumwa: "'+title+'"');
+    App.Toast.success('Announcement sent: "'+title+'"');
     document.getElementById('cp-title').value='';
     document.getElementById('cp-body').value='';
     setTimeout(()=>window.location.replace('announcements.html'),800);
