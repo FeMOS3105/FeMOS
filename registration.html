@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>FeMOS — Institution & Course Registration</title>
+<style>
+  :root{
+    --water-light:#5fd4f0; --water-mid:#2ea8ee; --water-deep:#155fd1; --water-abyss:#0b2f9e;
+    --ink:#0d1b4b; --muted:#5c6b9a; --line:#dbe6fb; --danger:#e14b4b; --success:#1fae6e;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:100%;min-height:100%;}
+  body{
+    background:linear-gradient(180deg,#eef5ff 0%,#f7fbff 100%);
+    font-family:'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+    color:var(--ink); min-height:100vh; display:flex; align-items:center; justify-content:center;
+    padding:24px 16px; overflow-x:hidden;
+  }
+  .card{width:100%;max-width:460px;background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(13,27,75,0.12);padding:34px 26px;}
+  .logo-mini{width:56px;height:56px;margin:0 auto 12px;border-radius:50%;
+    background:linear-gradient(135deg,var(--water-light),var(--water-deep));
+    display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.2rem;
+    box-shadow:0 10px 24px rgba(21,95,209,0.28);}
+  h1.brand{text-align:center;font-size:1.3rem;font-weight:700;
+    background:linear-gradient(90deg,var(--water-mid),var(--water-deep));
+    -webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:6px;}
+  p.sub{text-align:center;font-size:0.85rem;color:var(--muted);margin-bottom:26px;}
+
+  .userpill{display:flex;align-items:center;gap:12px;background:#f5f9ff;border-radius:14px;padding:12px 14px;margin-bottom:24px;}
+  .userpill .av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--water-light),var(--water-deep));
+    display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.9rem;overflow:hidden;flex-shrink:0;}
+  .userpill .av img{width:100%;height:100%;object-fit:cover;}
+  .userpill .name{font-weight:700;font-size:0.92rem;}
+  .userpill .email{font-size:0.76rem;color:var(--muted);}
+
+  .field{margin-bottom:18px;}
+  .field label{display:block;font-size:0.8rem;font-weight:600;color:var(--muted);margin-bottom:6px;}
+  select{width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid var(--line);
+    font-size:0.95rem;color:var(--ink);background:#fbfdff;appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235c6b9a' stroke-width='2'><path d='m6 9 6 6 6-6'/></svg>");
+    background-repeat:no-repeat;background-position:right 14px center;background-size:18px;}
+  select:focus{outline:none;border-color:var(--water-mid);box-shadow:0 0 0 3px rgba(46,168,238,0.15);}
+  select:disabled{background-color:#f2f4f8;color:var(--muted);}
+
+  .btn{width:100%;padding:14px;border:none;border-radius:12px;font-weight:700;font-size:0.95rem;cursor:pointer;
+    background:linear-gradient(90deg,var(--water-mid),var(--water-deep));color:#fff;
+    transition:transform .15s, box-shadow .15s;}
+  .btn:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(21,95,209,0.3);}
+  .btn:disabled{opacity:0.55;cursor:not-allowed;transform:none;box-shadow:none;}
+
+  .note{font-size:0.76rem;color:var(--muted);margin-top:14px;line-height:1.5;text-align:center;}
+  .msg{margin-top:14px;padding:11px 14px;border-radius:10px;font-size:0.85rem;display:none;}
+  .msg.show{display:block;}
+  .msg.err{background:#fdecec;color:var(--danger);}
+  .msg.ok{background:#e9f9f1;color:var(--success);}
+
+  @media (max-width:380px){ .card{padding:24px 16px;} }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo-mini">Fe</div>
+  <h1 class="brand">Institution & Course Registration</h1>
+  <p class="sub">Final step before you enter the system</p>
+
+  <div class="userpill" id="userPill">
+    <div class="av" id="userAv">?</div>
+    <div>
+      <div class="name" id="userName">Loading...</div>
+      <div class="email" id="userEmail"></div>
+    </div>
+  </div>
+
+  <form id="regForm">
+    <div class="field">
+      <label for="institution">Institution</label>
+      <select id="institution" required>
+        <option value="" disabled selected>-- Select Institution --</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="course">Course</label>
+      <select id="course" required disabled>
+        <option value="" disabled selected>-- Select Institution First --</option>
+      </select>
+    </div>
+
+    <button type="submit" class="btn" id="btnSaveReg">Complete Registration</button>
+    <div class="msg" id="msgReg"></div>
+  </form>
+
+  <div class="note">
+    After you complete this step, your course's Class Representative (CR) will<br/>
+    confirm your registration on the official student roster.
+  </div>
+</div>
+
+<!-- ================= FIREBASE SDK (compat) ================= -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+  // ================= PUT YOUR FIREBASE CONFIG HERE =================
+  // Firebase Console -> Project settings -> General -> Your apps -> SDK setup and configuration
+  const firebaseConfig = {
+    apiKey: "PUT_YOUR_API_KEY_HERE",
+    authDomain: "PUT_YOUR_AUTH_DOMAIN_HERE",
+    projectId: "PUT_YOUR_PROJECT_ID_HERE",
+    storageBucket: "PUT_YOUR_STORAGE_BUCKET_HERE",
+    messagingSenderId: "PUT_YOUR_SENDER_ID_HERE",
+    appId: "PUT_YOUR_APP_ID_HERE"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  // ================= COURSES PER INSTITUTION (replace with your real data) =================
+  // Better long-term approach: store this list in a Firestore collection called
+  // "institutions" so it can be updated without touching the code. For now this
+  // static object is used to keep the demo simple to wire up.
+  const INSTITUTIONS = {
+    "MUST": {
+      name: "Mbeya University of Science and Technology",
+      courses: ["Computer Science", "Electrical Engineering", "Mechanical Engineering", "Information Technology"]
+    },
+    "UDSM": {
+      name: "University of Dar es Salaam",
+      courses: ["Law", "Business Administration", "Medicine", "Education", "Civil Engineering"]
+    },
+    "UDOM": {
+      name: "University of Dodoma",
+      courses: ["Science Education", "Social Sciences", "Agriculture", "Computer Science"]
+    }
+  };
+
+  const institutionSelect = document.getElementById('institution');
+  const courseSelect = document.getElementById('course');
+
+  Object.keys(INSTITUTIONS).forEach(function(code){
+    const opt = document.createElement('option');
+    opt.value = code;
+    opt.textContent = INSTITUTIONS[code].name;
+    institutionSelect.appendChild(opt);
+  });
+
+  institutionSelect.addEventListener('change', function(){
+    const code = this.value;
+    courseSelect.innerHTML = '<option value="" disabled selected>-- Select Course --</option>';
+    if(INSTITUTIONS[code]){
+      INSTITUTIONS[code].courses.forEach(function(c){
+        const opt = document.createElement('option');
+        opt.value = c; opt.textContent = c;
+        courseSelect.appendChild(opt);
+      });
+      courseSelect.disabled = false;
+    } else {
+      courseSelect.disabled = true;
+    }
+  });
+
+  function showMsg(text, type){
+    const el = document.getElementById('msgReg');
+    el.textContent = text; el.className = 'msg show ' + type;
+  }
+
+  let currentUser = null;
+
+  auth.onAuthStateChanged(async function(user){
+    if(!user){
+      window.location.href = 'login.html';
+      return;
+    }
+    currentUser = user;
+    document.getElementById('userName').textContent = user.displayName || user.email;
+    document.getElementById('userEmail').textContent = user.email;
+    if(user.photoURL){
+      document.getElementById('userAv').innerHTML = '<img src="' + user.photoURL + '" alt="Profile"/>';
+    } else {
+      const initials = (user.displayName || user.email || '?').trim().split(/\s+/).map(function(p){return p[0];}).slice(0,2).join('').toUpperCase();
+      document.getElementById('userAv').textContent = initials;
+    }
+  });
+
+  document.getElementById('regForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    if(!currentUser){ showMsg('You are not logged in. Please log in again.', 'err'); return; }
+    const instCode = institutionSelect.value;
+    const course = courseSelect.value;
+    if(!instCode || !course){ showMsg('Select both an institution and a course before continuing.', 'err'); return; }
+
+    const btn = document.getElementById('btnSaveReg');
+    btn.disabled = true; btn.textContent = 'Saving...';
+    try{
+      const institutionName = INSTITUTIONS[instCode].name;
+
+      // 1) Update the user's profile with the chosen institution/course
+      await db.collection('users').doc(currentUser.uid).set({
+        institution: instCode,
+        institutionName: institutionName,
+        course: course,
+        confirmedByCR: false
+      }, { merge: true });
+
+      // 2) Add a record to that course's roster - the Class Representative will confirm it
+      const courseDocId = instCode + '_' + course.replace(/\s+/g, '_');
+      await db.collection('courseRosters').doc(courseDocId).collection('pendingStudents').doc(currentUser.uid).set({
+        fullName: currentUser.displayName || '',
+        email: currentUser.email,
+        institution: instCode,
+        course: course,
+        requestedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      showMsg('Registration complete! Waiting for your Class Representative to confirm you.', 'ok');
+      setTimeout(function(){ window.location.href = 'dashboard.html'; }, 1200);
+    }catch(err){
+      showMsg('Error: ' + (err.message || 'Could not save your registration'), 'err');
+    }finally{
+      btn.disabled = false; btn.textContent = 'Complete Registration';
+    }
+  });
+</script>
+</body>
+</html>

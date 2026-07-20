@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>FeMOS — Log In</title>
+<style>
+  :root{
+    --water-light:#5fd4f0; --water-mid:#2ea8ee; --water-deep:#155fd1; --water-abyss:#0b2f9e;
+    --ink:#0d1b4b; --muted:#5c6b9a; --line:#dbe6fb; --danger:#e14b4b; --success:#1fae6e;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:100%;min-height:100%;}
+  body{
+    background:linear-gradient(180deg,#eef5ff 0%,#f7fbff 100%);
+    font-family:'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+    color:var(--ink); min-height:100vh; display:flex; align-items:center; justify-content:center;
+    padding:24px 16px; overflow-x:hidden;
+  }
+  .card{width:100%;max-width:420px;background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(13,27,75,0.12);padding:36px 28px;}
+  .logo-mini{width:60px;height:60px;margin:0 auto 16px;display:block;border-radius:50%;
+    background:linear-gradient(135deg,var(--water-light),var(--water-deep));
+    display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.3rem;
+    box-shadow:0 10px 24px rgba(21,95,209,0.28);}
+  h1.brand{text-align:center;font-size:1.5rem;font-weight:700;
+    background:linear-gradient(90deg,var(--water-mid),var(--water-deep));
+    -webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:4px;}
+  p.tag{text-align:center;font-size:0.74rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:30px;}
+  h2.title{font-size:1.15rem;font-weight:700;margin-bottom:22px;text-align:center;color:var(--ink);}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:0.8rem;font-weight:600;color:var(--muted);margin-bottom:6px;}
+  .input-wrap{position:relative;}
+  .input-wrap svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;
+    stroke:var(--muted);fill:none;stroke-width:1.8;pointer-events:none;}
+  .input-wrap input{width:100%;padding:13px 14px 13px 42px;border-radius:12px;border:1.5px solid var(--line);
+    font-size:0.95rem;color:var(--ink);background:#fbfdff;}
+  .input-wrap input:focus{outline:none;border-color:var(--water-mid);box-shadow:0 0 0 3px rgba(46,168,238,0.15);}
+  .btn{width:100%;padding:14px;border:none;border-radius:12px;font-weight:700;font-size:0.95rem;cursor:pointer;
+    background:linear-gradient(90deg,var(--water-mid),var(--water-deep));color:#fff;
+    transition:transform .15s, box-shadow .15s;}
+  .btn:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(21,95,209,0.3);}
+  .btn:disabled{opacity:0.55;cursor:not-allowed;transform:none;box-shadow:none;}
+  .linkline{text-align:center;margin-top:20px;font-size:0.88rem;color:var(--muted);}
+  .linkline a{color:var(--water-deep);font-weight:600;text-decoration:none;}
+  .linkline a:hover{text-decoration:underline;}
+  .msg{margin-top:14px;padding:11px 14px;border-radius:10px;font-size:0.85rem;display:none;}
+  .msg.show{display:block;}
+  .msg.err{background:#fdecec;color:var(--danger);}
+  .msg.ok{background:#e9f9f1;color:var(--success);}
+  @media (max-width:380px){ .card{padding:26px 18px;} }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo-mini">Fe</div>
+  <h1 class="brand">FeMOS</h1>
+  <p class="tag">FastLine Campus OS</p>
+  <h2 class="title">Log In With Your Password</h2>
+
+  <form id="loginForm">
+    <div class="field">
+      <label for="email">Email Address</label>
+      <div class="input-wrap">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg>
+        <input type="email" id="email" placeholder="name@femos.ac.tz" required autocomplete="email"/>
+      </div>
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <div class="input-wrap">
+        <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password"/>
+      </div>
+    </div>
+    <button type="submit" class="btn" id="btnLogin">Log In</button>
+    <div class="msg" id="msgBox"></div>
+  </form>
+
+  <div class="linkline">
+    Are you new in FeMOS? <a href="signup.html">Sign Up Here</a>
+  </div>
+</div>
+
+<!-- ================= FIREBASE SDK (compat) ================= -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+  // ================= PUT YOUR FIREBASE CONFIG HERE =================
+  // Go to: Firebase Console -> (select your project) -> Project settings (gear icon)
+  // -> General tab -> scroll to "Your apps" -> Web app -> "SDK setup and configuration"
+  // -> select "Config" -> copy the whole object and paste it below, replacing the
+  // placeholder values that start with "PUT_".
+  const firebaseConfig = {
+    apiKey: "PUT_YOUR_API_KEY_HERE",
+    authDomain: "PUT_YOUR_AUTH_DOMAIN_HERE",
+    projectId: "PUT_YOUR_PROJECT_ID_HERE",
+    storageBucket: "PUT_YOUR_STORAGE_BUCKET_HERE",
+    messagingSenderId: "PUT_YOUR_SENDER_ID_HERE",
+    appId: "PUT_YOUR_APP_ID_HERE"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  const form = document.getElementById('loginForm');
+  const msgBox = document.getElementById('msgBox');
+  const btnLogin = document.getElementById('btnLogin');
+
+  function showMsg(text, type){
+    msgBox.textContent = text;
+    msgBox.className = 'msg show ' + type;
+  }
+
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    btnLogin.disabled = true;
+    btnLogin.textContent = 'Logging in...';
+    try{
+      const cred = await auth.signInWithEmailAndPassword(email, password);
+      const uid = cred.user.uid;
+      // Check whether the user has already completed institution/course registration
+      const doc = await db.collection('users').doc(uid).get();
+      const data = doc.exists ? doc.data() : null;
+      if(data && data.institution && data.course){
+        window.location.href = 'dashboard.html'; // dashboard page - to be built next
+      } else {
+        window.location.href = 'registration.html';
+      }
+    }catch(err){
+      showMsg('Login failed: ' + (err.message || 'Check your email and password'), 'err');
+    }finally{
+      btnLogin.disabled = false;
+      btnLogin.textContent = 'Log In';
+    }
+  });
+</script>
+</body>
+</html>
