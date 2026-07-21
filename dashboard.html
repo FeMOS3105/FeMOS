@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FeMOS — Dashboard</title>
+    <style>
+      :root {
+        --water-light: #5fd4f0;
+        --water-mid: #2ea8ee;
+        --water-deep: #155fd1;
+        --water-abyss: #0b2f9e;
+        --ink: #0d1b4b;
+        --muted: #5c6b9a;
+        --line: #dbe6fb;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Segoe UI", system-ui, sans-serif;
+        background: linear-gradient(180deg, #eef5ff 0%, #f7fbff 100%);
+        color: var(--ink);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+      .card {
+        width: 100%;
+        max-width: 720px;
+        background: rgba(255, 255, 255, 0.97);
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(13, 27, 75, 0.12);
+        padding: 32px;
+        border: 1px solid rgba(255, 255, 255, 0.75);
+      }
+      .logo {
+        width: 82px;
+        height: 82px;
+        border-radius: 50%;
+        overflow: hidden;
+        display: block;
+        margin: 0 auto 14px;
+        box-shadow:
+          0 0 0 4px rgba(255, 255, 255, 0.9),
+          0 16px 40px rgba(21, 95, 209, 0.24);
+      }
+      .logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        padding: 4px;
+      }
+      h1 {
+        text-align: center;
+        font-size: 1.4rem;
+        margin-bottom: 8px;
+        background: linear-gradient(90deg, var(--water-mid), var(--water-deep));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      p {
+        color: var(--muted);
+        text-align: center;
+        margin-bottom: 24px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+      }
+      .box {
+        padding: 18px;
+        border-radius: 16px;
+        background: #f5f9ff;
+        border: 1px solid var(--line);
+      }
+      .box h3 {
+        font-size: 1rem;
+        margin-bottom: 6px;
+      }
+      .box p {
+        margin: 0;
+        text-align: left;
+        font-size: 0.9rem;
+      }
+      .btn {
+        display: inline-block;
+        margin-top: 12px;
+        padding: 10px 14px;
+        border-radius: 10px;
+        background: linear-gradient(90deg, var(--water-mid), var(--water-deep));
+        color: #fff;
+        text-decoration: none;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="logo">
+        <img
+          src="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png"
+          alt="FeMOS logo"
+        />
+      </div>
+      <h1>Welcome to FeMOS</h1>
+      <p>
+        Your account is ready. This dashboard will be expanded with your
+        modules, notices, and actions soon.
+      </p>
+      <div class="grid">
+        <div class="box">
+          <h3>Account Status</h3>
+          <p>Your registration and authentication flow are now working.</p>
+          <a class="btn" href="login.html">Go Back to Login</a>
+        </div>
+        <div class="box">
+          <h3>Next Step</h3>
+          <p>
+            Connect this page to your real FeMOS dashboard modules once the
+            backend is ready.
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

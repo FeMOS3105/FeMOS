@@ -1,359 +1,808 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>FeMOS — Sign Up</title>
-<style>
-  :root{
-    --water-light:#5fd4f0; --water-mid:#2ea8ee; --water-deep:#155fd1; --water-abyss:#0b2f9e;
-    --ink:#0d1b4b; --muted:#5c6b9a; --line:#dbe6fb; --danger:#e14b4b; --success:#1fae6e;
-  }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  html,body{width:100%;min-height:100%;}
-  body{
-    background:linear-gradient(180deg,#eef5ff 0%,#f7fbff 100%);
-    font-family:'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
-    color:var(--ink); min-height:100vh; display:flex; align-items:center; justify-content:center;
-    padding:24px 16px; overflow-x:hidden;
-  }
-  .card{width:100%;max-width:440px;background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(13,27,75,0.12);padding:34px 26px;}
-  .logo-mini{width:56px;height:56px;margin:0 auto 12px;border-radius:50%;
-    background:linear-gradient(135deg,var(--water-light),var(--water-deep));
-    display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.2rem;
-    box-shadow:0 10px 24px rgba(21,95,209,0.28);}
-  h1.brand{text-align:center;font-size:1.35rem;font-weight:700;
-    background:linear-gradient(90deg,var(--water-mid),var(--water-deep));
-    -webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:20px;}
-
-  .steps{display:flex;justify-content:center;gap:8px;margin-bottom:26px;}
-  .steps .dot{width:8px;height:8px;border-radius:50%;background:var(--line);transition:background .2s;}
-  .steps .dot.active{background:var(--water-deep);}
-
-  .stepPane{display:none;}
-  .stepPane.active{display:block;}
-
-  h2.title{font-size:1.1rem;font-weight:700;margin-bottom:6px;text-align:center;color:var(--ink);}
-  p.sub{text-align:center;font-size:0.85rem;color:var(--muted);margin-bottom:22px;}
-
-  .avatar-wrap{display:flex;flex-direction:column;align-items:center;margin-bottom:20px;}
-  .avatar-circle{
-    width:92px;height:92px;border-radius:50%;background:#f0f5ff;border:2px dashed var(--line);
-    display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;position:relative;
-  }
-  .avatar-circle img{width:100%;height:100%;object-fit:cover;}
-  .avatar-circle svg{width:30px;height:30px;stroke:var(--muted);fill:none;stroke-width:1.6;}
-  .avatar-hint{font-size:0.76rem;color:var(--muted);margin-top:8px;}
-
-  .field{margin-bottom:16px;}
-  .field label{display:block;font-size:0.8rem;font-weight:600;color:var(--muted);margin-bottom:6px;}
-  .input-wrap{position:relative;}
-  .input-wrap svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;
-    stroke:var(--muted);fill:none;stroke-width:1.8;pointer-events:none;}
-  .input-wrap input{width:100%;padding:13px 14px 13px 42px;border-radius:12px;border:1.5px solid var(--line);
-    font-size:0.95rem;color:var(--ink);background:#fbfdff;}
-  .input-wrap input.no-icon{padding-left:14px;text-align:center;letter-spacing:6px;font-weight:700;}
-  .input-wrap input:focus{outline:none;border-color:var(--water-mid);box-shadow:0 0 0 3px rgba(46,168,238,0.15);}
-
-  .btn{width:100%;padding:14px;border:none;border-radius:12px;font-weight:700;font-size:0.95rem;cursor:pointer;
-    background:linear-gradient(90deg,var(--water-mid),var(--water-deep));color:#fff;
-    transition:transform .15s, box-shadow .15s;}
-  .btn:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(21,95,209,0.3);}
-  .btn:disabled{opacity:0.55;cursor:not-allowed;transform:none;box-shadow:none;}
-  .btn-outline{background:transparent;border:1.5px solid var(--line);color:var(--ink);margin-top:10px;}
-
-  .linkline{text-align:center;margin-top:20px;font-size:0.88rem;color:var(--muted);}
-  .linkline a{color:var(--water-deep);font-weight:600;text-decoration:none;}
-
-  .msg{margin-top:14px;padding:11px 14px;border-radius:10px;font-size:0.85rem;display:none;}
-  .msg.show{display:block;}
-  .msg.err{background:#fdecec;color:var(--danger);}
-  .msg.ok{background:#e9f9f1;color:var(--success);}
-
-  @media (max-width:380px){ .card{padding:24px 16px;} }
-</style>
-</head>
-<body>
-
-<div class="card">
-  <div class="logo-mini">Fe</div>
-  <h1 class="brand">Sign Up for FeMOS</h1>
-
-  <div class="steps">
-    <span class="dot active" data-dot="1"></span>
-    <span class="dot" data-dot="2"></span>
-    <span class="dot" data-dot="3"></span>
-  </div>
-
-  <!-- ============ STEP 1: FULL NAME + PROFILE PICTURE ============ -->
-  <div class="stepPane active" data-step="1">
-    <h2 class="title">Enter Your Full Name</h2>
-    <p class="sub">This name will be publicly visible to admins, lecturers, and on your dashboard</p>
-
-    <div class="avatar-wrap">
-      <div class="avatar-circle" id="avatarCircle">
-        <svg viewBox="0 0 24 24"><path d="M4 7h4l2-3h4l2 3h4v13H4z"/><circle cx="12" cy="13" r="4"/></svg>
-      </div>
-      <div class="avatar-hint">Tap to add a profile picture (optional)</div>
-      <input type="file" id="photoInput" accept="image/*" style="display:none;"/>
-    </div>
-
-    <div class="field">
-      <label for="fullName">Full Names</label>
-      <div class="input-wrap">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
-        <input type="text" id="fullName" placeholder="e.g. Amina Hassan Juma" required/>
-      </div>
-    </div>
-    <button class="btn" id="btnStep1Next">Next</button>
-    <div class="msg" id="msgStep1"></div>
-  </div>
-
-  <!-- ============ STEP 2: EMAIL + PASSWORD ============ -->
-  <div class="stepPane" data-step="2">
-    <h2 class="title">Enter Your Email</h2>
-    <p class="sub">We will send a verification code (OTP) to this email address</p>
-
-    <div class="field">
-      <label for="signupEmail">Email Address</label>
-      <div class="input-wrap">
-        <svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg>
-        <input type="email" id="signupEmail" placeholder="name@femos.ac.tz" required/>
-      </div>
-    </div>
-    <div class="field">
-      <label for="signupPassword">Set a Password (you will use this to log in)</label>
-      <div class="input-wrap">
-        <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-        <input type="password" id="signupPassword" placeholder="at least 6 characters" minlength="6" required/>
-      </div>
-    </div>
-    <button class="btn" id="btnGetVerified">Get Verified</button>
-    <div class="msg" id="msgStep2"></div>
-  </div>
-
-  <!-- ============ STEP 3: OTP ============ -->
-  <div class="stepPane" data-step="3">
-    <h2 class="title">Enter OTP</h2>
-    <p class="sub">Enter OTP Sent to <strong id="otpEmailLabel">your email</strong></p>
-
-    <div class="field">
-      <div class="input-wrap">
-        <input type="text" id="otpInput" class="no-icon" maxlength="6" placeholder="- - - - - -" required/>
-      </div>
-    </div>
-    <button class="btn" id="btnVerifyOtp">Verify OTP</button>
-    <button class="btn btn-outline" id="btnResendOtp" type="button">Resend OTP</button>
-    <div class="msg" id="msgStep3"></div>
-  </div>
-
-  <div class="linkline">
-    Already have a FeMOS account? <a href="login.html">Log In Here</a>
-  </div>
-</div>
-
-<!-- ================= FIREBASE SDK (compat) ================= -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
-<!-- ================= EMAILJS SDK ================= -->
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-
-<script>
-  // ================= PUT YOUR FIREBASE CONFIG HERE =================
-  // Firebase Console -> Project settings -> General -> Your apps -> SDK setup and configuration
-  const firebaseConfig = {
-    apiKey: "PUT_YOUR_API_KEY_HERE",
-    authDomain: "PUT_YOUR_AUTH_DOMAIN_HERE",
-    projectId: "PUT_YOUR_PROJECT_ID_HERE",
-    storageBucket: "PUT_YOUR_STORAGE_BUCKET_HERE",
-    messagingSenderId: "PUT_YOUR_SENDER_ID_HERE",
-    appId: "PUT_YOUR_APP_ID_HERE"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-
-  // ================= PUT YOUR EMAILJS CONFIG HERE =================
-  // Go to https://dashboard.emailjs.com/admin
-  //  - "Email Services" tab      -> click your connected service -> copy its "Service ID"
-  //  - "Email Templates" tab     -> open/create your OTP template -> copy its "Template ID"
-  //  - "Account" -> "General"    -> copy your "Public Key"
-  // Your email template should include two variables: {{to_email}} and {{otp_code}}
-  // (and optionally {{to_name}}) so EmailJS knows where to send the code and what to put in it.
-  const EMAILJS_PUBLIC_KEY  = "PUT_YOUR_EMAILJS_PUBLIC_KEY_HERE";
-  const EMAILJS_SERVICE_ID  = "PUT_YOUR_EMAILJS_SERVICE_ID_HERE";
-  const EMAILJS_TEMPLATE_ID = "PUT_YOUR_EMAILJS_TEMPLATE_ID_HERE";
-  emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
-
-  // ================= PUT YOUR CLOUDINARY CONFIG HERE =================
-  // Cloudinary Console -> Dashboard -> "Cloud name" (top of page)
-  // Cloudinary Console -> Settings -> Upload -> Upload presets -> create an UNSIGNED preset -> copy its name
-  const CLOUDINARY_CLOUD_NAME = "PUT_YOUR_CLOUD_NAME_HERE";
-  const CLOUDINARY_UPLOAD_PRESET = "PUT_YOUR_UPLOAD_PRESET_HERE"; // must be an unsigned preset
-
-  // ---------- Form state (kept when moving between steps) ----------
-  const state = {
-    fullName: '',
-    photoFile: null,
-    photoPreviewUrl: '',
-    email: '',
-    password: '',
-    otpSent: '',
-    otpSentAt: 0
-  };
-
-  function goToStep(n){
-    document.querySelectorAll('.stepPane').forEach(function(p){
-      p.classList.toggle('active', p.getAttribute('data-step') === String(n));
-    });
-    document.querySelectorAll('.steps .dot').forEach(function(d){
-      d.classList.toggle('active', parseInt(d.getAttribute('data-dot'),10) <= n);
-    });
-  }
-  function showMsg(id, text, type){
-    const el = document.getElementById(id);
-    el.textContent = text;
-    el.className = 'msg show ' + type;
-  }
-
-  // ---------- STEP 1: Name + Photo ----------
-  const avatarCircle = document.getElementById('avatarCircle');
-  const photoInput = document.getElementById('photoInput');
-  avatarCircle.addEventListener('click', function(){ photoInput.click(); });
-  photoInput.addEventListener('change', function(e){
-    const file = e.target.files[0];
-    if(!file) return;
-    state.photoFile = file;
-    const reader = new FileReader();
-    reader.onload = function(ev){
-      avatarCircle.innerHTML = '<img src="' + ev.target.result + '" alt="Profile Picture"/>';
-    };
-    reader.readAsDataURL(file);
-  });
-
-  document.getElementById('btnStep1Next').addEventListener('click', function(){
-    const name = document.getElementById('fullName').value.trim();
-    if(!name){ showMsg('msgStep1','Please enter your full name first.','err'); return; }
-    state.fullName = name;
-    goToStep(2);
-  });
-
-  // ---------- STEP 2: Email + Password -> Send OTP ----------
-  function generateOtp(){
-    return String(Math.floor(100000 + Math.random()*900000));
-  }
-
-  document.getElementById('btnGetVerified').addEventListener('click', async function(){
-    const email = document.getElementById('signupEmail').value.trim();
-    const password = document.getElementById('signupPassword').value;
-    if(!email || !password || password.length < 6){
-      showMsg('msgStep2','Enter a valid email and a password of at least 6 characters.','err');
-      return;
-    }
-    state.email = email;
-    state.password = password;
-    const btn = this;
-    btn.disabled = true; btn.textContent = 'Sending OTP...';
-    try{
-      const otp = generateOtp();
-      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-        to_email: email,
-        otp_code: otp,
-        to_name: state.fullName
-      });
-      state.otpSent = otp;
-      state.otpSentAt = Date.now();
-      document.getElementById('otpEmailLabel').textContent = email;
-      goToStep(3);
-    }catch(err){
-      showMsg('msgStep2', 'Failed to send OTP: ' + (err.text || err.message || 'Please try again'), 'err');
-    }finally{
-      btn.disabled = false; btn.textContent = 'Get Verified';
-    }
-  });
-
-  document.getElementById('btnResendOtp').addEventListener('click', async function(){
-    const btn = this;
-    btn.disabled = true; btn.textContent = 'Sending...';
-    try{
-      const otp = generateOtp();
-      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-        to_email: state.email, otp_code: otp, to_name: state.fullName
-      });
-      state.otpSent = otp;
-      state.otpSentAt = Date.now();
-      showMsg('msgStep3','A new OTP has been sent.','ok');
-    }catch(err){
-      showMsg('msgStep3','Failed to resend OTP.','err');
-    }finally{
-      btn.disabled = false; btn.textContent = 'Resend OTP';
-    }
-  });
-
-  // ---------- STEP 3: Verify OTP -> Firebase + Cloudinary ----------
-  async function uploadPhotoToCloudinary(file){
-    const url = 'https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD_NAME + '/image/upload';
-    const form = new FormData();
-    form.append('file', file);
-    form.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    const res = await fetch(url, { method:'POST', body: form });
-    if(!res.ok) throw new Error('Failed to upload photo to Cloudinary');
-    const data = await res.json();
-    return data.secure_url;
-  }
-
-  document.getElementById('btnVerifyOtp').addEventListener('click', async function(){
-    const entered = document.getElementById('otpInput').value.trim();
-    if(!entered){ showMsg('msgStep3','Enter the OTP you received by email.','err'); return; }
-
-    const OTP_VALID_MS = 10 * 60 * 1000; // OTP is valid for 10 minutes
-    if(Date.now() - state.otpSentAt > OTP_VALID_MS){
-      showMsg('msgStep3','This OTP has expired. Tap "Resend OTP".','err');
-      return;
-    }
-    if(entered !== state.otpSent){
-      showMsg('msgStep3','Incorrect OTP. Please check your email again.','err');
-      return;
-    }
-
-    const btn = this;
-    btn.disabled = true; btn.textContent = 'Verifying...';
-    try{
-      // 1) Create the Firebase account
-      const cred = await auth.createUserWithEmailAndPassword(state.email, state.password);
-      const user = cred.user;
-
-      // 2) Upload the profile picture to Cloudinary (if provided)
-      let photoURL = '';
-      if(state.photoFile){
-        photoURL = await uploadPhotoToCloudinary(state.photoFile);
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>FeMOS — Sign Up</title>
+    <style>
+      :root {
+        --water-light: #5fd4f0;
+        --water-mid: #2ea8ee;
+        --water-deep: #155fd1;
+        --water-abyss: #0b2f9e;
+        --ink: #0d1b4b;
+        --muted: #5c6b9a;
+        --line: #dbe6fb;
+        --danger: #e14b4b;
+        --success: #1fae6e;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        width: 100%;
+        min-height: 100%;
+      }
+      body {
+        background: linear-gradient(180deg, #eef5ff 0%, #f7fbff 100%);
+        font-family:
+          "Segoe UI",
+          system-ui,
+          -apple-system,
+          Roboto,
+          sans-serif;
+        color: var(--ink);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px 16px;
+        overflow-x: hidden;
+      }
+      .card {
+        width: 100%;
+        max-width: 440px;
+        background: rgba(255, 255, 255, 0.97);
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(13, 27, 75, 0.12);
+        padding: 34px 26px;
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.75);
+        animation: riseIn 0.7s ease both;
+      }
+      body::before,
+      body::after {
+        content: "";
+        position: fixed;
+        inset: auto;
+        width: 260px;
+        height: 260px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(46, 168, 238, 0.22),
+          transparent 70%
+        );
+        filter: blur(24px);
+        z-index: -1;
+        animation: floatOrb 6s ease-in-out infinite;
+      }
+      body::before {
+        top: -70px;
+        left: -40px;
+      }
+      body::after {
+        bottom: -80px;
+        right: -40px;
+        animation-delay: 1.8s;
       }
 
-      // 3) Update the Firebase Auth profile
-      await user.updateProfile({ displayName: state.fullName, photoURL: photoURL || null });
+      .logo-mini {
+        width: 78px;
+        height: 78px;
+        margin: 0 auto 12px;
+        border-radius: 50%;
+        overflow: hidden;
+        background: linear-gradient(135deg, #eef8ff 0%, #dcefff 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow:
+          0 0 0 4px rgba(255, 255, 255, 0.9),
+          0 16px 40px rgba(21, 95, 209, 0.24);
+        border: 3px solid rgba(255, 255, 255, 0.95);
+        animation: floatLogo 3.8s ease-in-out infinite;
+        position: relative;
+      }
+      .logo-mini::before {
+        content: "";
+        position: absolute;
+        inset: -2px;
+        border-radius: inherit;
+        background: linear-gradient(
+          135deg,
+          rgba(46, 168, 238, 0.65),
+          rgba(21, 95, 209, 0.9)
+        );
+        z-index: -1;
+        filter: blur(8px);
+        opacity: 0.35;
+      }
+      .logo-mini img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        padding: 4px;
+      }
+      h1.brand {
+        text-align: center;
+        font-size: 1.35rem;
+        font-weight: 700;
+        background: linear-gradient(90deg, var(--water-mid), var(--water-deep));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        margin-bottom: 20px;
+      }
 
-      // 4) Save full profile details to Firestore
-      await db.collection('users').doc(user.uid).set({
-        fullName: state.fullName,
-        email: state.email,
-        photoURL: photoURL || null,
-        verified: true,
-        institution: null,
-        course: null,
-        confirmedByCR: false,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      .steps {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 26px;
+      }
+      .steps .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--line);
+        transition: background 0.2s;
+      }
+      .steps .dot.active {
+        background: var(--water-deep);
+      }
+
+      .stepPane {
+        display: none;
+      }
+      .stepPane.active {
+        display: block;
+      }
+
+      h2.title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 6px;
+        text-align: center;
+        color: var(--ink);
+      }
+      p.sub {
+        text-align: center;
+        font-size: 0.85rem;
+        color: var(--muted);
+        margin-bottom: 22px;
+      }
+
+      .avatar-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .avatar-circle {
+        width: 92px;
+        height: 92px;
+        border-radius: 50%;
+        background: #f0f5ff;
+        border: 2px dashed var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        cursor: pointer;
+        position: relative;
+      }
+      .avatar-circle img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .avatar-circle svg {
+        width: 30px;
+        height: 30px;
+        stroke: var(--muted);
+        fill: none;
+        stroke-width: 1.6;
+      }
+      .avatar-hint {
+        font-size: 0.76rem;
+        color: var(--muted);
+        margin-top: 8px;
+      }
+
+      .field {
+        margin-bottom: 16px;
+      }
+      .field label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+      .input-wrap {
+        position: relative;
+      }
+      .input-wrap svg {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 18px;
+        height: 18px;
+        stroke: var(--muted);
+        fill: none;
+        stroke-width: 1.8;
+        pointer-events: none;
+      }
+      .input-wrap input {
+        width: 100%;
+        padding: 13px 14px 13px 42px;
+        border-radius: 12px;
+        border: 1.5px solid var(--line);
+        font-size: 0.95rem;
+        color: var(--ink);
+        background: #fbfdff;
+      }
+      .input-wrap input.no-icon {
+        padding-left: 14px;
+        text-align: center;
+        letter-spacing: 6px;
+        font-weight: 700;
+      }
+      .input-wrap input:focus {
+        outline: none;
+        border-color: var(--water-mid);
+        box-shadow: 0 0 0 3px rgba(46, 168, 238, 0.15);
+      }
+
+      .btn {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        background: linear-gradient(90deg, var(--water-mid), var(--water-deep));
+        color: #fff;
+        transition:
+          transform 0.15s,
+          box-shadow 0.15s;
+      }
+      .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 24px rgba(21, 95, 209, 0.3);
+      }
+      .btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+      .btn-outline {
+        background: transparent;
+        border: 1.5px solid var(--line);
+        color: var(--ink);
+        margin-top: 10px;
+      }
+
+      .linkline {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 0.88rem;
+        color: var(--muted);
+      }
+      .linkline a {
+        color: var(--water-deep);
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      .msg {
+        margin-top: 14px;
+        padding: 11px 14px;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        display: none;
+      }
+      .msg.show {
+        display: block;
+      }
+      .msg.err {
+        background: #fdecec;
+        color: var(--danger);
+      }
+      .msg.ok {
+        background: #e9f9f1;
+        color: var(--success);
+      }
+
+      @keyframes floatLogo {
+        0%,
+        100% {
+          transform: translateY(0px) scale(1);
+        }
+        50% {
+          transform: translateY(-4px) scale(1.02);
+        }
+      }
+      @keyframes floatOrb {
+        0%,
+        100% {
+          transform: translate3d(0, 0, 0);
+        }
+        50% {
+          transform: translate3d(12px, -18px, 0);
+        }
+      }
+      @keyframes riseIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 380px) {
+        .card {
+          padding: 24px 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="logo-mini">
+        <img
+          src="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png"
+          alt="FeMOS logo"
+        />
+      </div>
+      <h1 class="brand">Sign Up for FeMOS</h1>
+
+      <div class="steps">
+        <span class="dot active" data-dot="1"></span>
+        <span class="dot" data-dot="2"></span>
+        <span class="dot" data-dot="3"></span>
+      </div>
+
+      <!-- ============ STEP 1: FULL NAME + PROFILE PICTURE ============ -->
+      <div class="stepPane active" data-step="1">
+        <h2 class="title">Enter Your Full Name</h2>
+        <p class="sub">
+          This name will be publicly visible to admins, lecturers, and on your
+          dashboard
+        </p>
+
+        <div class="avatar-wrap">
+          <div class="avatar-circle" id="avatarCircle">
+            <svg viewBox="0 0 24 24">
+              <path d="M4 7h4l2-3h4l2 3h4v13H4z" />
+              <circle cx="12" cy="13" r="4" />
+            </svg>
+          </div>
+          <div class="avatar-hint">Tap to add a profile picture (optional)</div>
+          <input
+            type="file"
+            id="photoInput"
+            accept="image/*"
+            style="display: none"
+          />
+        </div>
+
+        <div class="field">
+          <label for="fullName">Full Names</label>
+          <div class="input-wrap">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
+            </svg>
+            <input
+              type="text"
+              id="fullName"
+              placeholder="e.g. Jonathan John Athanas"
+              required
+            />
+          </div>
+        </div>
+        <button class="btn" id="btnStep1Next">Next</button>
+        <div class="msg" id="msgStep1"></div>
+      </div>
+
+      <!-- ============ STEP 2: EMAIL + PASSWORD ============ -->
+      <div class="stepPane" data-step="2">
+        <h2 class="title">Enter Your Email</h2>
+        <p class="sub">
+          We will send a verification code (OTP) to this email address
+        </p>
+
+        <div class="field">
+          <label for="signupEmail">Email Address</label>
+          <div class="input-wrap">
+            <svg viewBox="0 0 24 24">
+              <path d="M4 6h16v12H4z" />
+              <path d="m4 7 8 6 8-6" />
+            </svg>
+            <input
+              type="email"
+              id="signupEmail"
+              placeholder="jaybros@gmail.com"
+              required
+            />
+          </div>
+        </div>
+        <div class="field">
+          <label for="signupPassword"
+            >Set a Password (you will use this to log in)</label
+          >
+          <div class="input-wrap">
+            <svg viewBox="0 0 24 24">
+              <rect x="5" y="11" width="14" height="9" rx="2" />
+              <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+            </svg>
+            <input
+              type="password"
+              id="signupPassword"
+              placeholder="at least 6 characters"
+              minlength="6"
+              required
+            />
+          </div>
+        </div>
+        <button class="btn" id="btnGetVerified">Get Verified</button>
+        <div class="msg" id="msgStep2"></div>
+      </div>
+
+      <!-- ============ STEP 3: OTP ============ -->
+      <div class="stepPane" data-step="3">
+        <h2 class="title">Enter OTP</h2>
+        <p class="sub">
+          Enter OTP Sent to <strong id="otpEmailLabel">your email</strong>
+        </p>
+
+        <div class="field">
+          <div class="input-wrap">
+            <input
+              type="text"
+              id="otpInput"
+              class="no-icon"
+              maxlength="6"
+              placeholder="- - - - - -"
+              required
+            />
+          </div>
+        </div>
+        <button class="btn" id="btnVerifyOtp">Verify OTP</button>
+        <button class="btn btn-outline" id="btnResendOtp" type="button">
+          Resend OTP
+        </button>
+        <div class="msg" id="msgStep3"></div>
+      </div>
+
+      <div class="linkline">
+        Already have a FeMOS account? <a href="login.html">Log In Here</a>
+      </div>
+    </div>
+
+    <!-- ================= FIREBASE SDK (compat) ================= -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+    <!-- ================= EMAILJS SDK ================= -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+    <script>
+      // ================= FIREBASE CONFIG =================
+      const firebaseConfig = {
+        apiKey: "AIzaSyCb-Y69glDSkNDwgzoCXyUVAz6D86Ccdfo",
+        authDomain: "femos-fe742.firebaseapp.com",
+        projectId: "femos-fe742",
+        storageBucket: "femos-fe742.firebasestorage.app",
+        messagingSenderId: "1022203442714",
+        appId: "1:1022203442714:web:4fa06d28d788c024bf83a3",
+        measurementId: "G-M4DEBFVJCV",
+      };
+
+      // ================= EMAILJS CONFIG =================
+      const EMAILJS_PUBLIC_KEY = "n1q50LOlnNH_wWusx";
+      const EMAILJS_SERVICE_ID = "service_lx1zlxc";
+      const EMAILJS_TEMPLATE_ID = "template_qpd2pyq";
+
+      // ================= CLOUDINARY CONFIG =================
+      const CLOUDINARY_CLOUD_NAME = "j8zmetxr";
+      const CLOUDINARY_UPLOAD_PRESET = "FastLine_FeMOS";
+
+      const app = firebase.apps.length
+        ? firebase.app()
+        : firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth(app);
+      const db = firebase.firestore(app);
+
+      function validateRequiredConfig() {
+        const missing = [];
+        if (!firebaseConfig.apiKey || firebaseConfig.apiKey.includes("PUT_"))
+          missing.push("Firebase API key");
+        if (
+          !firebaseConfig.authDomain ||
+          firebaseConfig.authDomain.includes("PUT_")
+        )
+          missing.push("Firebase auth domain");
+        if (
+          !firebaseConfig.projectId ||
+          firebaseConfig.projectId.includes("PUT_")
+        )
+          missing.push("Firebase project ID");
+        if (
+          !firebaseConfig.storageBucket ||
+          firebaseConfig.storageBucket.includes("PUT_")
+        )
+          missing.push("Firebase storage bucket");
+        if (
+          !firebaseConfig.messagingSenderId ||
+          firebaseConfig.messagingSenderId.includes("PUT_")
+        )
+          missing.push("Firebase messaging sender ID");
+        if (!firebaseConfig.appId || firebaseConfig.appId.includes("PUT_"))
+          missing.push("Firebase app ID");
+        if (!EMAILJS_PUBLIC_KEY || EMAILJS_PUBLIC_KEY.includes("PUT_"))
+          missing.push("EmailJS public key");
+        if (!EMAILJS_SERVICE_ID || EMAILJS_SERVICE_ID.includes("PUT_"))
+          missing.push("EmailJS service ID");
+        if (!EMAILJS_TEMPLATE_ID || EMAILJS_TEMPLATE_ID.includes("PUT_"))
+          missing.push("EmailJS template ID");
+        if (!CLOUDINARY_CLOUD_NAME || CLOUDINARY_CLOUD_NAME.includes("PUT_"))
+          missing.push("Cloudinary cloud name");
+        if (
+          !CLOUDINARY_UPLOAD_PRESET ||
+          CLOUDINARY_UPLOAD_PRESET.includes("PUT_")
+        )
+          missing.push("Cloudinary upload preset");
+        if (missing.length) {
+          throw new Error(
+            "Missing required config values: " + missing.join(", "),
+          );
+        }
+      }
+
+      validateRequiredConfig();
+      if (typeof emailjs !== "undefined") {
+        emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+      }
+
+      // ---------- Form state (kept when moving between steps) ----------
+      const state = {
+        fullName: "",
+        photoFile: null,
+        photoPreviewUrl: "",
+        email: "",
+        password: "",
+        otpSent: "",
+        otpSentAt: 0,
+      };
+
+      function goToStep(n) {
+        document.querySelectorAll(".stepPane").forEach(function (p) {
+          p.classList.toggle(
+            "active",
+            p.getAttribute("data-step") === String(n),
+          );
+        });
+        document.querySelectorAll(".steps .dot").forEach(function (d) {
+          d.classList.toggle(
+            "active",
+            parseInt(d.getAttribute("data-dot"), 10) <= n,
+          );
+        });
+      }
+      function showMsg(id, text, type) {
+        const el = document.getElementById(id);
+        el.textContent = text;
+        el.className = "msg show " + type;
+      }
+
+      // ---------- STEP 1: Name + Photo ----------
+      const avatarCircle = document.getElementById("avatarCircle");
+      const photoInput = document.getElementById("photoInput");
+      avatarCircle.addEventListener("click", function () {
+        photoInput.click();
+      });
+      photoInput.addEventListener("change", function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        state.photoFile = file;
+        const reader = new FileReader();
+        reader.onload = function (ev) {
+          avatarCircle.innerHTML =
+            '<img src="' + ev.target.result + '" alt="Profile Picture"/>';
+        };
+        reader.readAsDataURL(file);
       });
 
-      showMsg('msgStep3','Verified! Taking you to institution and course registration...','ok');
-      setTimeout(function(){ window.location.href = 'registration.html'; }, 900);
-    }catch(err){
-      showMsg('msgStep3','Error: ' + (err.message || 'Could not complete registration'), 'err');
-    }finally{
-      btn.disabled = false; btn.textContent = 'Verify OTP';
-    }
-  });
-</script>
-</body>
+      document
+        .getElementById("btnStep1Next")
+        .addEventListener("click", function () {
+          const name = document.getElementById("fullName").value.trim();
+          if (!name) {
+            showMsg("msgStep1", "Please enter your full name first.", "err");
+            return;
+          }
+          state.fullName = name;
+          goToStep(2);
+        });
+
+      // ---------- STEP 2: Email + Password -> Send OTP ----------
+      function generateOtp() {
+        return String(Math.floor(100000 + Math.random() * 900000));
+      }
+
+      document
+        .getElementById("btnGetVerified")
+        .addEventListener("click", async function () {
+          const email = document.getElementById("signupEmail").value.trim();
+          const password = document.getElementById("signupPassword").value;
+          if (!email || !password || password.length < 6) {
+            showMsg(
+              "msgStep2",
+              "Enter a valid email and a password of at least 6 characters.",
+              "err",
+            );
+            return;
+          }
+          state.email = email;
+          state.password = password;
+          const btn = this;
+          btn.disabled = true;
+          btn.textContent = "Sending OTP...";
+          try {
+            const otp = generateOtp();
+            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+              to_email: email,
+              otp_code: otp,
+              to_name: state.fullName,
+            });
+            state.otpSent = otp;
+            state.otpSentAt = Date.now();
+            document.getElementById("otpEmailLabel").textContent = email;
+            goToStep(3);
+          } catch (err) {
+            showMsg(
+              "msgStep2",
+              "Failed to send OTP: " +
+                (err.text || err.message || "Please try again"),
+              "err",
+            );
+          } finally {
+            btn.disabled = false;
+            btn.textContent = "Get Verified";
+          }
+        });
+
+      document
+        .getElementById("btnResendOtp")
+        .addEventListener("click", async function () {
+          const btn = this;
+          btn.disabled = true;
+          btn.textContent = "Sending...";
+          try {
+            const otp = generateOtp();
+            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+              to_email: state.email,
+              otp_code: otp,
+              to_name: state.fullName,
+            });
+            state.otpSent = otp;
+            state.otpSentAt = Date.now();
+            showMsg("msgStep3", "A new OTP has been sent.", "ok");
+          } catch (err) {
+            showMsg("msgStep3", "Failed to resend OTP.", "err");
+          } finally {
+            btn.disabled = false;
+            btn.textContent = "Resend OTP";
+          }
+        });
+
+      // ---------- STEP 3: Verify OTP -> Firebase + Cloudinary ----------
+      async function uploadPhotoToCloudinary(file) {
+        const url =
+          "https://api.cloudinary.com/v1_1/" +
+          CLOUDINARY_CLOUD_NAME +
+          "/image/upload";
+        const form = new FormData();
+        form.append("file", file);
+        form.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+        const res = await fetch(url, { method: "POST", body: form });
+        if (!res.ok) throw new Error("Failed to upload photo to Cloudinary");
+        const data = await res.json();
+        return data.secure_url;
+      }
+
+      document
+        .getElementById("btnVerifyOtp")
+        .addEventListener("click", async function () {
+          const entered = document.getElementById("otpInput").value.trim();
+          if (!entered) {
+            showMsg("msgStep3", "Enter the OTP you received by email.", "err");
+            return;
+          }
+
+          const OTP_VALID_MS = 10 * 60 * 1000; // OTP is valid for 10 minutes
+          if (Date.now() - state.otpSentAt > OTP_VALID_MS) {
+            showMsg(
+              "msgStep3",
+              'This OTP has expired. Tap "Resend OTP".',
+              "err",
+            );
+            return;
+          }
+          if (entered !== state.otpSent) {
+            showMsg(
+              "msgStep3",
+              "Incorrect OTP. Please check your email again.",
+              "err",
+            );
+            return;
+          }
+
+          const btn = this;
+          btn.disabled = true;
+          btn.textContent = "Verifying...";
+          try {
+            // 1) Create the Firebase account
+            const cred = await auth.createUserWithEmailAndPassword(
+              state.email,
+              state.password,
+            );
+            const user = cred.user;
+
+            // 2) Upload the profile picture to Cloudinary (if provided)
+            let photoURL = "";
+            if (state.photoFile) {
+              photoURL = await uploadPhotoToCloudinary(state.photoFile);
+            }
+
+            // 3) Update the Firebase Auth profile
+            await user.updateProfile({
+              displayName: state.fullName,
+              photoURL: photoURL || null,
+            });
+
+            // 4) Save full profile details to Firestore
+            await db
+              .collection("users")
+              .doc(user.uid)
+              .set({
+                fullName: state.fullName,
+                email: state.email,
+                photoURL: photoURL || null,
+                verified: true,
+                institution: null,
+                course: null,
+                confirmedByCR: false,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+              });
+
+            showMsg(
+              "msgStep3",
+              "Verified! Taking you to institution and course registration...",
+              "ok",
+            );
+            setTimeout(function () {
+              window.location.href = "registration.html";
+            }, 900);
+          } catch (err) {
+            const message =
+              err && err.code === "auth/configuration-not-found"
+                ? "Firebase Authentication is not configured for this project. Please enable Email/Password sign-in in Firebase Console > Authentication > Sign-in method."
+                : "Error: " +
+                  (err.message || "Could not complete registration");
+            showMsg("msgStep3", message, "err");
+          } finally {
+            btn.disabled = false;
+            btn.textContent = "Verify OTP";
+          }
+        });
+    </script>
+  </body>
 </html>
