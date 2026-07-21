@@ -7,6 +7,7 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
     <title>FeMOS — Sign Up</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
     <style>
       :root {
         --water-light: #5fd4f0;
@@ -17,26 +18,14 @@
         --muted: #5c6b9a;
         --line: #dbe6fb;
         --danger: #e14b4b;
+        --warn: #e0a020;
         --success: #1fae6e;
       }
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      html,
-      body {
-        width: 100%;
-        min-height: 100%;
-      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { width: 100%; min-height: 100%; }
       body {
         background: linear-gradient(180deg, #eef5ff 0%, #f7fbff 100%);
-        font-family:
-          "Segoe UI",
-          system-ui,
-          -apple-system,
-          Roboto,
-          sans-serif;
+        font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
         color: var(--ink);
         min-height: 100vh;
         display: flex;
@@ -45,6 +34,24 @@
         padding: 24px 16px;
         overflow-x: hidden;
       }
+      body::before, body::after {
+        content: "";
+        position: fixed;
+        inset: auto;
+        width: 260px;
+        height: 260px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(46, 168, 238, 0.22), transparent 70%);
+        filter: blur(24px);
+        z-index: -1;
+        animation: floatOrb 6s ease-in-out infinite;
+      }
+      body::before { top: -70px; left: -40px; }
+      body::after { bottom: -80px; right: -40px; animation-delay: 1.8s; }
+      @keyframes floatOrb {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-16px); }
+      }
       .card {
         width: 100%;
         max-width: 440px;
@@ -52,303 +59,115 @@
         border-radius: 24px;
         box-shadow: 0 20px 60px rgba(13, 27, 75, 0.12);
         padding: 34px 26px;
-        backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.75);
-        animation: riseIn 0.7s ease both;
       }
-      body::before,
-      body::after {
-        content: "";
-        position: fixed;
-        inset: auto;
-        width: 260px;
-        height: 260px;
-        border-radius: 50%;
-        background: radial-gradient(
-          circle,
-          rgba(46, 168, 238, 0.22),
-          transparent 70%
-        );
-        filter: blur(24px);
-        z-index: -1;
-        animation: floatOrb 6s ease-in-out infinite;
-      }
-      body::before {
-        top: -70px;
-        left: -40px;
-      }
-      body::after {
-        bottom: -80px;
-        right: -40px;
-        animation-delay: 1.8s;
-      }
-
       .logo-mini {
-        width: 78px;
-        height: 78px;
-        margin: 0 auto 12px;
-        border-radius: 50%;
-        overflow: hidden;
-        background: linear-gradient(135deg, #eef8ff 0%, #dcefff 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow:
-          0 0 0 4px rgba(255, 255, 255, 0.9),
-          0 16px 40px rgba(21, 95, 209, 0.24);
-        border: 3px solid rgba(255, 255, 255, 0.95);
-        animation: floatLogo 3.8s ease-in-out infinite;
-        position: relative;
+        width: 78px; height: 78px; margin: 0 auto 12px; border-radius: 50%;
+        overflow: hidden; background: linear-gradient(135deg, #eef8ff 0%, #dcefff 100%);
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 0 0 4px rgba(255,255,255,0.9), 0 16px 40px rgba(21,95,209,0.24);
+        border: 3px solid rgba(255,255,255,0.95); position: relative;
       }
-      .logo-mini::before {
-        content: "";
-        position: absolute;
-        inset: -2px;
-        border-radius: inherit;
-        background: linear-gradient(
-          135deg,
-          rgba(46, 168, 238, 0.65),
-          rgba(21, 95, 209, 0.9)
-        );
-        z-index: -1;
-        filter: blur(8px);
-        opacity: 0.35;
-      }
-      .logo-mini img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-        padding: 4px;
-      }
+      .logo-mini img { width: 100%; height: 100%; object-fit: cover; display: block; padding: 4px; }
       h1.brand {
-        text-align: center;
-        font-size: 1.35rem;
-        font-weight: 700;
+        text-align: center; font-size: 1.35rem; font-weight: 700;
         background: linear-gradient(90deg, var(--water-mid), var(--water-deep));
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-        margin-bottom: 20px;
+        -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 20px;
       }
-
-      .steps {
-        display: flex;
-        justify-content: center;
-        gap: 8px;
-        margin-bottom: 26px;
-      }
-      .steps .dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--line);
-        transition: background 0.2s;
-      }
-      .steps .dot.active {
-        background: var(--water-deep);
-      }
-
-      .stepPane {
-        display: none;
-      }
-      .stepPane.active {
-        display: block;
-      }
-
-      h2.title {
-        font-size: 1.1rem;
-        font-weight: 700;
-        margin-bottom: 6px;
-        text-align: center;
-        color: var(--ink);
-      }
-      p.sub {
-        text-align: center;
-        font-size: 0.85rem;
-        color: var(--muted);
-        margin-bottom: 22px;
-      }
-
-      .avatar-wrap {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin-bottom: 20px;
-      }
+      .steps { display: flex; justify-content: center; gap: 8px; margin-bottom: 26px; }
+      .steps .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line); transition: background .2s; }
+      .steps .dot.active { background: var(--water-deep); }
+      .stepPane { display: none; }
+      .stepPane.active { display: block; }
+      h2.title { font-size: 1.1rem; font-weight: 700; margin-bottom: 6px; text-align: center; color: var(--ink); }
+      p.sub { text-align: center; font-size: 0.85rem; color: var(--muted); margin-bottom: 22px; }
+      .avatar-wrap { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; }
       .avatar-circle {
-        width: 92px;
-        height: 92px;
-        border-radius: 50%;
-        background: #f0f5ff;
-        border: 2px dashed var(--line);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-        cursor: pointer;
-        position: relative;
+        width: 92px; height: 92px; border-radius: 50%; background: #f0f5ff; border: 2px dashed var(--line);
+        display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; position: relative;
       }
-      .avatar-circle img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-      .avatar-circle svg {
-        width: 30px;
-        height: 30px;
-        stroke: var(--muted);
-        fill: none;
-        stroke-width: 1.6;
-      }
-      .avatar-hint {
-        font-size: 0.76rem;
-        color: var(--muted);
-        margin-top: 8px;
-      }
-
-      .field {
-        margin-bottom: 16px;
-      }
-      .field label {
-        display: block;
-        font-size: 0.8rem;
-        font-weight: 600;
-        color: var(--muted);
-        margin-bottom: 6px;
-      }
-      .input-wrap {
-        position: relative;
-      }
-      .input-wrap svg {
-        position: absolute;
-        left: 14px;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 18px;
-        height: 18px;
-        stroke: var(--muted);
-        fill: none;
-        stroke-width: 1.8;
-        pointer-events: none;
+      .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+      .avatar-circle svg { width: 30px; height: 30px; stroke: var(--muted); fill: none; stroke-width: 1.6; }
+      .avatar-hint { font-size: 0.76rem; color: var(--muted); margin-top: 8px; }
+      .field { margin-bottom: 16px; }
+      .field label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+      .input-wrap { position: relative; }
+      .input-wrap svg.left-icon {
+        position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px;
+        stroke: var(--muted); fill: none; stroke-width: 1.8; pointer-events: none;
       }
       .input-wrap input {
-        width: 100%;
-        padding: 13px 14px 13px 42px;
-        border-radius: 12px;
-        border: 1.5px solid var(--line);
-        font-size: 0.95rem;
-        color: var(--ink);
-        background: #fbfdff;
+        width: 100%; padding: 13px 14px 13px 42px; border-radius: 12px; border: 1.5px solid var(--line);
+        font-size: 0.95rem; color: var(--ink); background: #fbfdff;
       }
-      .input-wrap input.no-icon {
-        padding-left: 14px;
-        text-align: center;
-        letter-spacing: 6px;
-        font-weight: 700;
+      .input-wrap input.has-eye { padding-right: 42px; }
+      .input-wrap input.no-icon { padding-left: 14px; text-align: center; letter-spacing: 6px; font-weight: 700; }
+      .input-wrap input:focus { outline: none; border-color: var(--water-mid); box-shadow: 0 0 0 3px rgba(46,168,238,0.15); }
+      .eye-btn {
+        position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+        width: 30px; height: 30px; border: none; background: transparent; cursor: pointer;
+        display: flex; align-items: center; justify-content: center; border-radius: 8px;
       }
-      .input-wrap input:focus {
-        outline: none;
-        border-color: var(--water-mid);
-        box-shadow: 0 0 0 3px rgba(46, 168, 238, 0.15);
+      .eye-btn:hover { background: #eef5ff; }
+      .eye-btn svg { width: 18px; height: 18px; stroke: var(--muted); fill: none; stroke-width: 1.8; }
+
+      .suggest-box {
+        background: #eaf6ff; border: 1.5px dashed var(--water-mid); border-radius: 12px;
+        padding: 12px 14px; margin-bottom: 16px;
       }
+      .suggest-label { font-size: 0.72rem; letter-spacing: 1px; text-transform: uppercase; color: var(--water-deep); margin-bottom: 6px; }
+      .suggest-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+      .suggest-row code {
+        font-family: 'Consolas', monospace; font-size: 0.95rem; font-weight: 700; color: var(--ink);
+        letter-spacing: 1px; word-break: break-all;
+      }
+      .icon-btn {
+        width: 30px; height: 30px; border-radius: 8px; border: 1.5px solid var(--line); background: #fff;
+        cursor: pointer; flex-shrink: 0; font-size: 1rem; color: var(--water-deep);
+      }
+      .icon-btn:hover { background: #f5f9ff; }
+      .btn-small { width: 100%; padding: 9px; font-size: 0.82rem; }
+
+      .strength-meter { margin-bottom: 16px; }
+      .strength-bar { height: 6px; border-radius: 4px; background: var(--line); overflow: hidden; margin-bottom: 6px; }
+      .strength-fill { height: 100%; width: 0%; background: var(--danger); transition: width .25s, background .25s; }
+      .strength-label { font-size: 0.78rem; color: var(--muted); margin-bottom: 8px; }
+      .strength-checklist { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; }
+      .strength-checklist li { font-size: 0.74rem; color: var(--muted); position: relative; padding-left: 16px; }
+      .strength-checklist li::before {
+        content: "○"; position: absolute; left: 0; color: var(--muted);
+      }
+      .strength-checklist li.met { color: var(--success); }
+      .strength-checklist li.met::before { content: "✓"; color: var(--success); }
 
       .btn {
-        width: 100%;
-        padding: 14px;
-        border: none;
-        border-radius: 12px;
-        font-weight: 700;
-        font-size: 0.95rem;
-        cursor: pointer;
-        background: linear-gradient(90deg, var(--water-mid), var(--water-deep));
-        color: #fff;
-        transition:
-          transform 0.15s,
-          box-shadow 0.15s;
+        width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 700; font-size: 0.95rem;
+        cursor: pointer; background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); color: #fff;
+        transition: transform .15s, box-shadow .15s;
       }
-      .btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 10px 24px rgba(21, 95, 209, 0.3);
-      }
-      .btn:disabled {
-        opacity: 0.55;
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
-      }
-      .btn-outline {
-        background: transparent;
-        border: 1.5px solid var(--line);
-        color: var(--ink);
-        margin-top: 10px;
-      }
+      .btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(21,95,209,0.3); }
+      .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+      .btn-outline { background: transparent; border: 1.5px solid var(--line); color: var(--ink); margin-top: 10px; }
+      .linkline { text-align: center; margin-top: 20px; font-size: 0.88rem; color: var(--muted); }
+      .linkline a { color: var(--water-deep); font-weight: 600; text-decoration: none; }
+      .msg { margin-top: 14px; padding: 11px 14px; border-radius: 10px; font-size: 0.85rem; display: none; }
+      .msg.show { display: block; }
+      .msg.err { background: #fdecec; color: var(--danger); }
+      .msg.ok { background: #e9f9f1; color: var(--success); }
+      @media (max-width: 380px) { .card { padding: 24px 16px; } }
 
-      .linkline {
-        text-align: center;
-        margin-top: 20px;
-        font-size: 0.88rem;
-        color: var(--muted);
+      /* ---------- Crop modal ---------- */
+      .modalOverlay {
+        position: fixed; inset: 0; background: rgba(13,27,75,0.6); display: none;
+        align-items: center; justify-content: center; z-index: 60; padding: 18px;
       }
-      .linkline a {
-        color: var(--water-deep);
-        font-weight: 600;
-        text-decoration: none;
-      }
-
-      .msg {
-        margin-top: 14px;
-        padding: 11px 14px;
-        border-radius: 10px;
-        font-size: 0.85rem;
-        display: none;
-      }
-      .msg.show {
-        display: block;
-      }
-      .msg.err {
-        background: #fdecec;
-        color: var(--danger);
-      }
-      .msg.ok {
-        background: #e9f9f1;
-        color: var(--success);
-      }
-
-      @keyframes floatLogo {
-        0%,
-        100% {
-          transform: translateY(0px) scale(1);
-        }
-        50% {
-          transform: translateY(-4px) scale(1.02);
-        }
-      }
-      @keyframes floatOrb {
-        0%,
-        100% {
-          transform: translate3d(0, 0, 0);
-        }
-        50% {
-          transform: translate3d(12px, -18px, 0);
-        }
-      }
-      @keyframes riseIn {
-        from {
-          opacity: 0;
-          transform: translateY(10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      @media (max-width: 380px) {
-        .card {
-          padding: 24px 16px;
-        }
-      }
+      .modalOverlay.show { display: flex; }
+      .modalBox { background: #fff; border-radius: 18px; padding: 20px; max-width: 380px; width: 100%; }
+      .modalBox h3 { font-size: 1rem; margin-bottom: 12px; text-align: center; color: var(--ink); }
+      .cropper-shell { width: 100%; height: 300px; background: #0d1b4b; border-radius: 12px; overflow: hidden; }
+      .cropper-shell img { display: block; max-width: 100%; }
+      .modalActions { display: flex; gap: 10px; margin-top: 14px; }
+      .modalActions .btn { margin-top: 0; }
     </style>
   </head>
   <body>
@@ -370,40 +189,21 @@
       <!-- ============ STEP 1: FULL NAME + PROFILE PICTURE ============ -->
       <div class="stepPane active" data-step="1">
         <h2 class="title">Enter Your Full Name</h2>
-        <p class="sub">
-          This name will be publicly visible to admins, lecturers, and on your
-          dashboard
-        </p>
+        <p class="sub">This name will be publicly visible to admins, lecturers, and on your dashboard</p>
 
         <div class="avatar-wrap">
           <div class="avatar-circle" id="avatarCircle">
-            <svg viewBox="0 0 24 24">
-              <path d="M4 7h4l2-3h4l2 3h4v13H4z" />
-              <circle cx="12" cy="13" r="4" />
-            </svg>
+            <svg viewBox="0 0 24 24"><path d="M4 7h4l2-3h4l2 3h4v13H4z"/><circle cx="12" cy="13" r="4"/></svg>
           </div>
-          <div class="avatar-hint">Tap to add a profile picture (optional)</div>
-          <input
-            type="file"
-            id="photoInput"
-            accept="image/*"
-            style="display: none"
-          />
+          <div class="avatar-hint">Tap to add a profile picture (optional) — you'll be able to crop it</div>
+          <input type="file" id="photoInput" accept="image/*" style="display: none;"/>
         </div>
 
         <div class="field">
           <label for="fullName">Full Names</label>
           <div class="input-wrap">
-            <svg viewBox="0 0 24 24">
-              <circle cx="12" cy="8" r="4" />
-              <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
-            </svg>
-            <input
-              type="text"
-              id="fullName"
-              placeholder="e.g. Jonathan John Athanas"
-              required
-            />
+            <svg class="left-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+            <input type="text" id="fullName" placeholder="e.g. Jonathan John Athanas" required/>
           </div>
         </div>
         <button class="btn" id="btnStep1Next">Next</button>
@@ -413,43 +213,59 @@
       <!-- ============ STEP 2: EMAIL + PASSWORD ============ -->
       <div class="stepPane" data-step="2">
         <h2 class="title">Enter Your Email</h2>
-        <p class="sub">
-          We will send a verification code (OTP) to this email address
-        </p>
+        <p class="sub">We will send a verification code (OTP) to this email address</p>
 
         <div class="field">
           <label for="signupEmail">Email Address</label>
           <div class="input-wrap">
-            <svg viewBox="0 0 24 24">
-              <path d="M4 6h16v12H4z" />
-              <path d="m4 7 8 6 8-6" />
-            </svg>
-            <input
-              type="email"
-              id="signupEmail"
-              placeholder="jaybros@gmail.com"
-              required
-            />
+            <svg class="left-icon" viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg>
+            <input type="email" id="signupEmail" placeholder="jaybros@gmail.com" required/>
           </div>
         </div>
+
+        <div class="suggest-box">
+          <div class="suggest-label">Suggested Strong Password</div>
+          <div class="suggest-row">
+            <code id="suggestValue">Xk9!mQar</code>
+            <button type="button" class="icon-btn" id="btnRegenSuggest" title="Generate another">⟳</button>
+          </div>
+          <button type="button" class="btn btn-outline btn-small" id="btnUseSuggest">Use This Password</button>
+        </div>
+
         <div class="field">
-          <label for="signupPassword"
-            >Set a Password (you will use this to log in)</label
-          >
+          <label for="signupPassword">Set Password</label>
           <div class="input-wrap">
-            <svg viewBox="0 0 24 24">
-              <rect x="5" y="11" width="14" height="9" rx="2" />
-              <path d="M8 11V7a4 4 0 0 1 8 0v4" />
-            </svg>
-            <input
-              type="password"
-              id="signupPassword"
-              placeholder="at least 6 characters"
-              minlength="6"
-              required
-            />
+            <svg class="left-icon" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            <input type="password" id="signupPassword" class="has-eye" placeholder="at least 8 characters" required/>
+            <button type="button" class="eye-btn" id="toggleP1" title="Show/Hide password">
+              <svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
           </div>
         </div>
+
+        <div class="strength-meter">
+          <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+          <div class="strength-label" id="strengthLabel">Enter a password</div>
+          <ul class="strength-checklist" id="strengthChecklist">
+            <li data-rule="len">At least 8 characters</li>
+            <li data-rule="upper">One uppercase letter</li>
+            <li data-rule="lower">One lowercase letter</li>
+            <li data-rule="number">One number</li>
+            <li data-rule="symbol">One symbol (!@#$...)</li>
+          </ul>
+        </div>
+
+        <div class="field">
+          <label for="signupPasswordConfirm">Confirm Password</label>
+          <div class="input-wrap">
+            <svg class="left-icon" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            <input type="password" id="signupPasswordConfirm" class="has-eye" placeholder="repeat your password" required/>
+            <button type="button" class="eye-btn" id="toggleP2" title="Show/Hide password">
+              <svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+
         <button class="btn" id="btnGetVerified">Get Verified</button>
         <div class="msg" id="msgStep2"></div>
       </div>
@@ -457,31 +273,32 @@
       <!-- ============ STEP 3: OTP ============ -->
       <div class="stepPane" data-step="3">
         <h2 class="title">Enter OTP</h2>
-        <p class="sub">
-          Enter OTP Sent to <strong id="otpEmailLabel">your email</strong>
-        </p>
+        <p class="sub">Enter OTP Sent to <strong id="otpEmailLabel">your email</strong></p>
 
         <div class="field">
           <div class="input-wrap">
-            <input
-              type="text"
-              id="otpInput"
-              class="no-icon"
-              maxlength="6"
-              placeholder="- - - - - -"
-              required
-            />
+            <input type="text" id="otpInput" class="no-icon" maxlength="6" placeholder="- - - - - -" required/>
           </div>
         </div>
         <button class="btn" id="btnVerifyOtp">Verify OTP</button>
-        <button class="btn btn-outline" id="btnResendOtp" type="button">
-          Resend OTP
-        </button>
+        <button class="btn btn-outline" id="btnResendOtp" type="button">Resend OTP</button>
         <div class="msg" id="msgStep3"></div>
       </div>
 
       <div class="linkline">
         Already have a FeMOS account? <a href="login.html">Log In Here</a>
+      </div>
+    </div>
+
+    <!-- ============ CROP MODAL ============ -->
+    <div class="modalOverlay" id="cropModalOverlay">
+      <div class="modalBox">
+        <h3>Adjust Your Photo</h3>
+        <div class="cropper-shell"><img id="cropperImage" src="" alt=""/></div>
+        <div class="modalActions">
+          <button type="button" class="btn btn-outline" id="btnCropCancel">Cancel</button>
+          <button type="button" class="btn" id="btnCropConfirm">Use Photo</button>
+        </div>
       </div>
     </div>
 
@@ -492,6 +309,9 @@
 
     <!-- ================= EMAILJS SDK ================= -->
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+    <!-- ================= CROPPER.JS (for photo cropping) ================= -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 
     <script>
       // ================= FIREBASE CONFIG =================
@@ -514,87 +334,61 @@
       const CLOUDINARY_CLOUD_NAME = "j8zmetxr";
       const CLOUDINARY_UPLOAD_PRESET = "FastLine_FeMOS";
 
-      const app = firebase.apps.length
-        ? firebase.app()
-        : firebase.initializeApp(firebaseConfig);
+      const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
       const auth = firebase.auth(app);
       const db = firebase.firestore(app);
+      if (typeof emailjs !== "undefined") { emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY }); }
 
-      function validateRequiredConfig() {
-        const missing = [];
-        if (!firebaseConfig.apiKey || firebaseConfig.apiKey.includes("PUT_"))
-          missing.push("Firebase API key");
-        if (
-          !firebaseConfig.authDomain ||
-          firebaseConfig.authDomain.includes("PUT_")
-        )
-          missing.push("Firebase auth domain");
-        if (
-          !firebaseConfig.projectId ||
-          firebaseConfig.projectId.includes("PUT_")
-        )
-          missing.push("Firebase project ID");
-        if (
-          !firebaseConfig.storageBucket ||
-          firebaseConfig.storageBucket.includes("PUT_")
-        )
-          missing.push("Firebase storage bucket");
-        if (
-          !firebaseConfig.messagingSenderId ||
-          firebaseConfig.messagingSenderId.includes("PUT_")
-        )
-          missing.push("Firebase messaging sender ID");
-        if (!firebaseConfig.appId || firebaseConfig.appId.includes("PUT_"))
-          missing.push("Firebase app ID");
-        if (!EMAILJS_PUBLIC_KEY || EMAILJS_PUBLIC_KEY.includes("PUT_"))
-          missing.push("EmailJS public key");
-        if (!EMAILJS_SERVICE_ID || EMAILJS_SERVICE_ID.includes("PUT_"))
-          missing.push("EmailJS service ID");
-        if (!EMAILJS_TEMPLATE_ID || EMAILJS_TEMPLATE_ID.includes("PUT_"))
-          missing.push("EmailJS template ID");
-        if (!CLOUDINARY_CLOUD_NAME || CLOUDINARY_CLOUD_NAME.includes("PUT_"))
-          missing.push("Cloudinary cloud name");
-        if (
-          !CLOUDINARY_UPLOAD_PRESET ||
-          CLOUDINARY_UPLOAD_PRESET.includes("PUT_")
-        )
-          missing.push("Cloudinary upload preset");
-        if (missing.length) {
-          throw new Error(
-            "Missing required config values: " + missing.join(", "),
+      // ---------- Helper: never let an async step hang the UI forever ----------
+      function withTimeout(promise, ms, message) {
+        return new Promise(function (resolve, reject) {
+          const timer = setTimeout(function () { reject(new Error(message)); }, ms);
+          promise.then(
+            function (v) { clearTimeout(timer); resolve(v); },
+            function (e) { clearTimeout(timer); reject(e); }
           );
-        }
+        });
       }
+      const TROUBLESHOOT_TIP =
+        " (If this keeps happening: confirm Email/Password sign-in is enabled in Firebase Console > Authentication > Sign-in method, " +
+        "that this site's domain is listed under Authentication > Settings > Authorized domains, and that you are opening this page " +
+        "through a real http/https address rather than double-clicking the file.)";
 
-      validateRequiredConfig();
-      if (typeof emailjs !== "undefined") {
-        emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
-      }
-
-      // ---------- Form state (kept when moving between steps) ----------
+      // ---------- Form state, persisted to sessionStorage so it survives a reload ----------
+      const STORAGE_KEY = "femos_signup_state_v1";
       const state = {
-        fullName: "",
-        photoFile: null,
-        photoPreviewUrl: "",
-        email: "",
-        password: "",
-        otpSent: "",
-        otpSentAt: 0,
+        fullName: "", photoFile: null, photoPreviewUrl: "",
+        email: "", password: "", otpSent: "", otpSentAt: 0,
       };
+      let currentStep = 1;
+
+      function saveSessionState() {
+        try {
+          sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
+            step: currentStep, fullName: state.fullName, photoPreviewUrl: state.photoPreviewUrl,
+            email: state.email, password: state.password, otpSent: state.otpSent, otpSentAt: state.otpSentAt,
+          }));
+        } catch (e) { /* sessionStorage may be unavailable in some private-browsing modes */ }
+      }
+      function loadSessionState() {
+        try {
+          const raw = sessionStorage.getItem(STORAGE_KEY);
+          return raw ? JSON.parse(raw) : null;
+        } catch (e) { return null; }
+      }
+      function clearSessionState() {
+        try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) {}
+      }
 
       function goToStep(n) {
+        currentStep = n;
         document.querySelectorAll(".stepPane").forEach(function (p) {
-          p.classList.toggle(
-            "active",
-            p.getAttribute("data-step") === String(n),
-          );
+          p.classList.toggle("active", p.getAttribute("data-step") === String(n));
         });
         document.querySelectorAll(".steps .dot").forEach(function (d) {
-          d.classList.toggle(
-            "active",
-            parseInt(d.getAttribute("data-dot"), 10) <= n,
-          );
+          d.classList.toggle("active", parseInt(d.getAttribute("data-dot"), 10) <= n);
         });
+        saveSessionState();
       }
       function showMsg(id, text, type) {
         const el = document.getElementById(id);
@@ -602,207 +396,317 @@
         el.className = "msg show " + type;
       }
 
-      // ---------- STEP 1: Name + Photo ----------
       const avatarCircle = document.getElementById("avatarCircle");
       const photoInput = document.getElementById("photoInput");
-      avatarCircle.addEventListener("click", function () {
-        photoInput.click();
-      });
+
+      // ---------- STEP 1: Name + Photo (with crop modal) ----------
+      avatarCircle.addEventListener("click", function () { photoInput.click(); });
+
+      let cropper = null;
+      const cropOverlay = document.getElementById("cropModalOverlay");
+      const cropperImageEl = document.getElementById("cropperImage");
+
       photoInput.addEventListener("change", function (e) {
         const file = e.target.files[0];
         if (!file) return;
-        state.photoFile = file;
         const reader = new FileReader();
         reader.onload = function (ev) {
-          avatarCircle.innerHTML =
-            '<img src="' + ev.target.result + '" alt="Profile Picture"/>';
+          cropperImageEl.src = ev.target.result;
+          cropOverlay.classList.add("show");
+          if (cropper) cropper.destroy();
+          cropper = new Cropper(cropperImageEl, {
+            aspectRatio: 1, viewMode: 1, autoCropArea: 0.9, background: false, dragMode: "move",
+          });
         };
         reader.readAsDataURL(file);
       });
 
-      document
-        .getElementById("btnStep1Next")
-        .addEventListener("click", function () {
-          const name = document.getElementById("fullName").value.trim();
-          if (!name) {
-            showMsg("msgStep1", "Please enter your full name first.", "err");
-            return;
-          }
-          state.fullName = name;
-          goToStep(2);
+      document.getElementById("btnCropCancel").addEventListener("click", function () {
+        cropOverlay.classList.remove("show");
+        photoInput.value = "";
+        if (cropper) { cropper.destroy(); cropper = null; }
+      });
+
+      document.getElementById("btnCropConfirm").addEventListener("click", function () {
+        if (!cropper) return;
+        cropper.getCroppedCanvas({ width: 480, height: 480 }).toBlob(function (blob) {
+          if (!blob) return;
+          const file = new File([blob], "profile.jpg", { type: "image/jpeg" });
+          state.photoFile = file;
+          const objectUrl = URL.createObjectURL(blob);
+          avatarCircle.innerHTML = '<img src="' + objectUrl + '" alt="Profile Picture"/>';
+          const reader2 = new FileReader();
+          reader2.onload = function (ev2) {
+            state.photoPreviewUrl = ev2.target.result;
+            saveSessionState();
+          };
+          reader2.readAsDataURL(blob);
+          cropOverlay.classList.remove("show");
+          cropper.destroy();
+          cropper = null;
+        }, "image/jpeg", 0.9);
+      });
+
+      document.getElementById("fullName").addEventListener("input", function (e) {
+        state.fullName = e.target.value;
+      });
+
+      document.getElementById("btnStep1Next").addEventListener("click", function () {
+        const name = document.getElementById("fullName").value.trim();
+        if (!name) { showMsg("msgStep1", "Please enter your full name first.", "err"); return; }
+        state.fullName = name;
+        goToStep(2);
+      });
+
+      // ---------- Password: show/hide, strength meter, suggestion ----------
+      function wireEyeToggle(btnId, inputId) {
+        document.getElementById(btnId).addEventListener("click", function () {
+          const inp = document.getElementById(inputId);
+          inp.type = inp.type === "password" ? "text" : "password";
         });
+      }
+      wireEyeToggle("toggleP1", "signupPassword");
+      wireEyeToggle("toggleP2", "signupPasswordConfirm");
+
+      function generateStrongPassword(length) {
+        length = length || 12;
+        const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+        const lower = "abcdefghijkmnopqrstuvwxyz";
+        const numbers = "23456789";
+        const symbols = "!@#$%^&*?";
+        const all = upper + lower + numbers + symbols;
+        const pw = [
+          upper[Math.floor(Math.random() * upper.length)],
+          lower[Math.floor(Math.random() * lower.length)],
+          numbers[Math.floor(Math.random() * numbers.length)],
+          symbols[Math.floor(Math.random() * symbols.length)],
+        ];
+        for (let i = pw.length; i < length; i++) { pw.push(all[Math.floor(Math.random() * all.length)]); }
+        for (let i = pw.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          const tmp = pw[i]; pw[i] = pw[j]; pw[j] = tmp;
+        }
+        return pw.join("");
+      }
+      function refreshSuggestion() {
+        const val = generateStrongPassword(12);
+        document.getElementById("suggestValue").textContent = val;
+        return val;
+      }
+      document.getElementById("btnRegenSuggest").addEventListener("click", refreshSuggestion);
+      document.getElementById("btnUseSuggest").addEventListener("click", function () {
+        const val = document.getElementById("suggestValue").textContent;
+        document.getElementById("signupPassword").value = val;
+        document.getElementById("signupPasswordConfirm").value = val;
+        renderStrength(val);
+        state.password = val;
+        saveSessionState();
+      });
+      refreshSuggestion();
+
+      function evaluatePassword(pw) {
+        const rules = {
+          len: pw.length >= 8,
+          upper: /[A-Z]/.test(pw),
+          lower: /[a-z]/.test(pw),
+          number: /[0-9]/.test(pw),
+          symbol: /[^A-Za-z0-9]/.test(pw),
+        };
+        const metCount = Object.keys(rules).filter(function (k) { return rules[k]; }).length;
+        let level = "weak", pct = pw ? 15 : 0, color = "var(--danger)";
+        if (metCount >= 5) { level = "strong"; pct = 100; color = "var(--success)"; }
+        else if (metCount >= 3) { level = "fair"; pct = 60; color = "var(--warn)"; }
+        return { rules: rules, level: level, pct: pct, color: color, metCount: metCount };
+      }
+      function renderStrength(pw) {
+        const evalResult = evaluatePassword(pw);
+        document.getElementById("strengthFill").style.width = evalResult.pct + "%";
+        document.getElementById("strengthFill").style.background = evalResult.color;
+        document.getElementById("strengthLabel").textContent = pw
+          ? "Password strength: " + evalResult.level.charAt(0).toUpperCase() + evalResult.level.slice(1)
+          : "Enter a password";
+        document.querySelectorAll("#strengthChecklist li").forEach(function (li) {
+          li.classList.toggle("met", !!evalResult.rules[li.getAttribute("data-rule")]);
+        });
+        return evalResult;
+      }
+      document.getElementById("signupPassword").addEventListener("input", function (e) {
+        renderStrength(e.target.value);
+      });
 
       // ---------- STEP 2: Email + Password -> Send OTP ----------
-      function generateOtp() {
-        return String(Math.floor(100000 + Math.random() * 900000));
-      }
+      function generateOtp() { return String(Math.floor(100000 + Math.random() * 900000)); }
 
-      document
-        .getElementById("btnGetVerified")
-        .addEventListener("click", async function () {
-          const email = document.getElementById("signupEmail").value.trim();
-          const password = document.getElementById("signupPassword").value;
-          if (!email || !password || password.length < 6) {
-            showMsg(
-              "msgStep2",
-              "Enter a valid email and a password of at least 6 characters.",
-              "err",
-            );
-            return;
-          }
-          state.email = email;
-          state.password = password;
-          const btn = this;
-          btn.disabled = true;
-          btn.textContent = "Sending OTP...";
-          try {
-            const otp = generateOtp();
-            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-              to_email: email,
-              otp_code: otp,
-              to_name: state.fullName,
-            });
-            state.otpSent = otp;
-            state.otpSentAt = Date.now();
-            document.getElementById("otpEmailLabel").textContent = email;
-            goToStep(3);
-          } catch (err) {
-            showMsg(
-              "msgStep2",
-              "Failed to send OTP: " +
-                (err.text || err.message || "Please try again"),
-              "err",
-            );
-          } finally {
-            btn.disabled = false;
-            btn.textContent = "Get Verified";
-          }
-        });
+      document.getElementById("btnGetVerified").addEventListener("click", async function () {
+        const email = document.getElementById("signupEmail").value.trim();
+        const password = document.getElementById("signupPassword").value;
+        const confirmPw = document.getElementById("signupPasswordConfirm").value;
 
-      document
-        .getElementById("btnResendOtp")
-        .addEventListener("click", async function () {
-          const btn = this;
-          btn.disabled = true;
-          btn.textContent = "Sending...";
-          try {
-            const otp = generateOtp();
-            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-              to_email: state.email,
-              otp_code: otp,
-              to_name: state.fullName,
-            });
-            state.otpSent = otp;
-            state.otpSentAt = Date.now();
-            showMsg("msgStep3", "A new OTP has been sent.", "ok");
-          } catch (err) {
-            showMsg("msgStep3", "Failed to resend OTP.", "err");
-          } finally {
-            btn.disabled = false;
-            btn.textContent = "Resend OTP";
-          }
-        });
+        if (!email) { showMsg("msgStep2", "Enter a valid email address.", "err"); return; }
+        if (!password || !confirmPw) { showMsg("msgStep2", "Set and confirm your password.", "err"); return; }
+        if (password !== confirmPw) { showMsg("msgStep2", "Passwords do not match.", "err"); return; }
+        const evalResult = evaluatePassword(password);
+        if (evalResult.metCount < 4) {
+          showMsg("msgStep2", "Please choose a stronger password (mix uppercase, lowercase, numbers, and symbols), or use the suggestion above.", "err");
+          return;
+        }
+
+        state.email = email;
+        state.password = password;
+        saveSessionState();
+
+        const btn = this;
+        btn.disabled = true; btn.textContent = "Sending OTP...";
+        try {
+          const otp = generateOtp();
+          await withTimeout(
+            emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { to_email: email, otp_code: otp, to_name: state.fullName }),
+            15000, "Sending the OTP is taking too long. Check your EmailJS Service ID / Template ID / Public Key."
+          );
+          state.otpSent = otp;
+          state.otpSentAt = Date.now();
+          document.getElementById("otpEmailLabel").textContent = email;
+          goToStep(3);
+        } catch (err) {
+          showMsg("msgStep2", "Failed to send OTP: " + (err.text || err.message || "Please try again"), "err");
+        } finally {
+          btn.disabled = false; btn.textContent = "Get Verified";
+        }
+      });
+
+      document.getElementById("btnResendOtp").addEventListener("click", async function () {
+        const btn = this;
+        btn.disabled = true; btn.textContent = "Sending...";
+        try {
+          const otp = generateOtp();
+          await withTimeout(
+            emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { to_email: state.email, otp_code: otp, to_name: state.fullName }),
+            15000, "Sending the OTP is taking too long. Please try again."
+          );
+          state.otpSent = otp;
+          state.otpSentAt = Date.now();
+          saveSessionState();
+          showMsg("msgStep3", "A new OTP has been sent.", "ok");
+        } catch (err) {
+          showMsg("msgStep3", "Failed to resend OTP: " + (err.text || err.message || ""), "err");
+        } finally {
+          btn.disabled = false; btn.textContent = "Resend OTP";
+        }
+      });
 
       // ---------- STEP 3: Verify OTP -> Firebase + Cloudinary ----------
       async function uploadPhotoToCloudinary(file) {
-        const url =
-          "https://api.cloudinary.com/v1_1/" +
-          CLOUDINARY_CLOUD_NAME +
-          "/image/upload";
+        const url = "https://api.cloudinary.com/v1_1/" + CLOUDINARY_CLOUD_NAME + "/image/upload";
         const form = new FormData();
         form.append("file", file);
         form.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
         const res = await fetch(url, { method: "POST", body: form });
-        if (!res.ok) throw new Error("Failed to upload photo to Cloudinary");
+        if (!res.ok) throw new Error("Failed to upload photo to Cloudinary (check cloud name / upload preset)");
         const data = await res.json();
         return data.secure_url;
       }
+      async function getPhotoFileForUpload() {
+        if (state.photoFile) return state.photoFile;
+        if (state.photoPreviewUrl) {
+          const res = await fetch(state.photoPreviewUrl);
+          const blob = await res.blob();
+          return new File([blob], "profile.jpg", { type: blob.type || "image/jpeg" });
+        }
+        return null;
+      }
 
-      document
-        .getElementById("btnVerifyOtp")
-        .addEventListener("click", async function () {
-          const entered = document.getElementById("otpInput").value.trim();
-          if (!entered) {
-            showMsg("msgStep3", "Enter the OTP you received by email.", "err");
-            return;
+      document.getElementById("btnVerifyOtp").addEventListener("click", async function () {
+        const entered = document.getElementById("otpInput").value.trim();
+        if (!entered) { showMsg("msgStep3", "Enter the OTP you received by email.", "err"); return; }
+
+        const OTP_VALID_MS = 10 * 60 * 1000;
+        if (Date.now() - state.otpSentAt > OTP_VALID_MS) {
+          showMsg("msgStep3", 'This OTP has expired. Tap "Resend OTP".', "err");
+          return;
+        }
+        if (entered !== state.otpSent) {
+          showMsg("msgStep3", "Incorrect OTP. Please check your email again.", "err");
+          return;
+        }
+
+        const btn = this;
+        btn.disabled = true; btn.textContent = "Verifying...";
+        try {
+          const cred = await withTimeout(
+            auth.createUserWithEmailAndPassword(state.email, state.password),
+            15000, "Creating your account is taking too long." + TROUBLESHOOT_TIP
+          );
+          const user = cred.user;
+
+          const photoFileToUpload = await getPhotoFileForUpload();
+          let photoURL = "";
+          if (photoFileToUpload) {
+            photoURL = await withTimeout(
+              uploadPhotoToCloudinary(photoFileToUpload),
+              15000, "Uploading your photo is taking too long. Check your Cloudinary cloud name and upload preset."
+            );
           }
 
-          const OTP_VALID_MS = 10 * 60 * 1000; // OTP is valid for 10 minutes
-          if (Date.now() - state.otpSentAt > OTP_VALID_MS) {
-            showMsg(
-              "msgStep3",
-              'This OTP has expired. Tap "Resend OTP".',
-              "err",
-            );
-            return;
+          await withTimeout(
+            user.updateProfile({ displayName: state.fullName, photoURL: photoURL || null }),
+            10000, "Updating your profile is taking too long."
+          );
+
+          await withTimeout(
+            db.collection("users").doc(user.uid).set({
+              fullName: state.fullName, email: state.email, photoURL: photoURL || null,
+              verified: true, institution: null, course: null, confirmedByCR: false,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            }),
+            10000, "Saving your profile is taking too long. Check that your Firestore security rules allow this write."
+          );
+
+          clearSessionState();
+          showMsg("msgStep3", "Verified! Taking you to institution and course registration...", "ok");
+          setTimeout(function () { window.location.href = "registration.html"; }, 900);
+        } catch (err) {
+          let message = "Error: " + (err.message || "Could not complete registration");
+          if (err && err.code === "auth/email-already-in-use") {
+            message = "This email is already registered. Try logging in instead.";
+          } else if (err && err.code === "auth/operation-not-allowed") {
+            message = "Email/Password sign-in is not enabled for this project yet. Enable it in Firebase Console > Authentication > Sign-in method.";
+          } else if (err && err.code === "auth/network-request-failed") {
+            message = "Network error while creating your account. Check your internet connection and try again.";
+          } else if (err && err.code === "auth/configuration-not-found") {
+            message = "Firebase Authentication is not configured for this project. Enable Email/Password sign-in in Firebase Console > Authentication > Sign-in method.";
           }
-          if (entered !== state.otpSent) {
-            showMsg(
-              "msgStep3",
-              "Incorrect OTP. Please check your email again.",
-              "err",
-            );
-            return;
-          }
+          showMsg("msgStep3", message, "err");
+        } finally {
+          btn.disabled = false; btn.textContent = "Verify OTP";
+        }
+      });
 
-          const btn = this;
-          btn.disabled = true;
-          btn.textContent = "Verifying...";
-          try {
-            // 1) Create the Firebase account
-            const cred = await auth.createUserWithEmailAndPassword(
-              state.email,
-              state.password,
-            );
-            const user = cred.user;
+      // ---------- Restore state after a reload (e.g. switching apps to check email) ----------
+      (function restoreSession() {
+        const saved = loadSessionState();
+        if (!saved) return;
+        state.fullName = saved.fullName || "";
+        state.photoPreviewUrl = saved.photoPreviewUrl || "";
+        state.email = saved.email || "";
+        state.password = saved.password || "";
+        state.otpSent = saved.otpSent || "";
+        state.otpSentAt = saved.otpSentAt || 0;
 
-            // 2) Upload the profile picture to Cloudinary (if provided)
-            let photoURL = "";
-            if (state.photoFile) {
-              photoURL = await uploadPhotoToCloudinary(state.photoFile);
-            }
-
-            // 3) Update the Firebase Auth profile
-            await user.updateProfile({
-              displayName: state.fullName,
-              photoURL: photoURL || null,
-            });
-
-            // 4) Save full profile details to Firestore
-            await db
-              .collection("users")
-              .doc(user.uid)
-              .set({
-                fullName: state.fullName,
-                email: state.email,
-                photoURL: photoURL || null,
-                verified: true,
-                institution: null,
-                course: null,
-                confirmedByCR: false,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-              });
-
-            showMsg(
-              "msgStep3",
-              "Verified! Taking you to institution and course registration...",
-              "ok",
-            );
-            setTimeout(function () {
-              window.location.href = "registration.html";
-            }, 900);
-          } catch (err) {
-            const message =
-              err && err.code === "auth/configuration-not-found"
-                ? "Firebase Authentication is not configured for this project. Please enable Email/Password sign-in in Firebase Console > Authentication > Sign-in method."
-                : "Error: " +
-                  (err.message || "Could not complete registration");
-            showMsg("msgStep3", message, "err");
-          } finally {
-            btn.disabled = false;
-            btn.textContent = "Verify OTP";
-          }
-        });
+        if (state.fullName) document.getElementById("fullName").value = state.fullName;
+        if (state.photoPreviewUrl) {
+          avatarCircle.innerHTML = '<img src="' + state.photoPreviewUrl + '" alt="Profile Picture"/>';
+        }
+        if (state.email) document.getElementById("signupEmail").value = state.email;
+        if (state.password) {
+          document.getElementById("signupPassword").value = state.password;
+          document.getElementById("signupPasswordConfirm").value = state.password;
+          renderStrength(state.password);
+        }
+        if (saved.step && saved.step >= 1 && saved.step <= 3) {
+          if (state.email) document.getElementById("otpEmailLabel").textContent = state.email;
+          goToStep(saved.step);
+        }
+      })();
     </script>
   </body>
 </html>

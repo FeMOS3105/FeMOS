@@ -380,7 +380,7 @@
           const doc = await db.collection("users").doc(uid).get();
           const data = doc.exists ? doc.data() : null;
           if (data && data.institution && data.course) {
-            window.location.href = "dashboard.html"; // dashboard page - to be built next
+            window.location.href = "proof.html"; // temporary proof-of-concept page - real dashboard comes later
           } else {
             window.location.href = "registration.html";
           }
