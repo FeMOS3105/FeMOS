@@ -2,303 +2,138 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>FeMOS — Log In</title>
     <style>
       :root {
-        --water-light: #5fd4f0;
-        --water-mid: #2ea8ee;
-        --water-deep: #155fd1;
-        --water-abyss: #0b2f9e;
-        --ink: #0d1b4b;
-        --muted: #5c6b9a;
-        --line: #dbe6fb;
-        --danger: #e14b4b;
-        --success: #1fae6e;
+        --water-light: #5fd4f0; --water-mid: #2ea8ee; --water-deep: #155fd1; --water-abyss: #0b2f9e;
+        --ink: #0d1b4b; --muted: #5c6b9a; --line: #dbe6fb; --danger: #e14b4b; --success: #1fae6e;
       }
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      html,
-      body {
-        width: 100%;
-        min-height: 100%;
-      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { width: 100%; min-height: 100%; }
       body {
         background: linear-gradient(180deg, #eef5ff 0%, #f7fbff 100%);
-        font-family:
-          "Segoe UI",
-          system-ui,
-          -apple-system,
-          Roboto,
-          sans-serif;
-        color: var(--ink);
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 24px 16px;
-        overflow-x: hidden;
+        font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+        color: var(--ink); min-height: 100vh; display: flex; align-items: center; justify-content: center;
+        padding: 24px 16px; overflow-x: hidden;
       }
-      body::before,
-      body::after {
-        content: "";
-        position: fixed;
-        inset: auto;
-        width: 260px;
-        height: 260px;
-        border-radius: 50%;
-        background: radial-gradient(
-          circle,
-          rgba(46, 168, 238, 0.22),
-          transparent 70%
-        );
-        filter: blur(24px);
-        z-index: -1;
-        animation: floatOrb 6s ease-in-out infinite;
+      body::before, body::after {
+        content: ""; position: fixed; inset: auto; width: 260px; height: 260px; border-radius: 50%;
+        background: radial-gradient(circle, rgba(46,168,238,0.22), transparent 70%); filter: blur(24px);
+        z-index: -1; animation: floatOrb 6s ease-in-out infinite;
       }
-      body::before {
-        top: -70px;
-        left: -40px;
-      }
-      body::after {
-        bottom: -80px;
-        right: -40px;
-        animation-delay: 1.8s;
-      }
+      body::before { top: -70px; left: -40px; }
+      body::after { bottom: -80px; right: -40px; animation-delay: 1.8s; }
+      @keyframes floatOrb { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-16px);} }
       .card {
-        width: 100%;
-        max-width: 420px;
-        background: rgba(255, 255, 255, 0.97);
-        border-radius: 24px;
-        box-shadow: 0 20px 60px rgba(13, 27, 75, 0.12);
-        padding: 36px 28px;
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.75);
-        animation: riseIn 0.7s ease both;
+        width: 100%; max-width: 420px; background: rgba(255,255,255,0.97); border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(13,27,75,0.12); padding: 36px 28px;
+        backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.75);
       }
       .logo-mini {
-        width: 82px;
-        height: 82px;
-        margin: 0 auto 16px;
-        display: block;
-        border-radius: 50%;
-        overflow: hidden;
-        background: linear-gradient(135deg, #eef8ff 0%, #dcefff 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow:
-          0 0 0 4px rgba(255, 255, 255, 0.9),
-          0 16px 40px rgba(21, 95, 209, 0.24);
-        border: 3px solid rgba(255, 255, 255, 0.95);
-        animation: floatLogo 3.8s ease-in-out infinite;
-        position: relative;
+        width: 82px; height: 82px; margin: 0 auto 16px; border-radius: 50%; overflow: hidden;
+        background: linear-gradient(135deg, #eef8ff 0%, #dcefff 100%); display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 0 0 4px rgba(255,255,255,0.9), 0 16px 40px rgba(21,95,209,0.24);
+        border: 3px solid rgba(255,255,255,0.95); position: relative;
       }
-      .logo-mini::before {
-        content: "";
-        position: absolute;
-        inset: -2px;
-        border-radius: inherit;
-        background: linear-gradient(
-          135deg,
-          rgba(46, 168, 238, 0.65),
-          rgba(21, 95, 209, 0.9)
-        );
-        z-index: -1;
-        filter: blur(8px);
-        opacity: 0.35;
-      }
-      .logo-mini img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-        padding: 4px;
-      }
+      .logo-mini img { width: 100%; height: 100%; object-fit: cover; display: block; padding: 4px; }
       h1.brand {
-        text-align: center;
-        font-size: 1.5rem;
-        font-weight: 700;
+        text-align: center; font-size: 1.5rem; font-weight: 700;
         background: linear-gradient(90deg, var(--water-mid), var(--water-deep));
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-        margin-bottom: 4px;
+        -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 4px;
       }
-      p.tag {
-        text-align: center;
-        font-size: 0.74rem;
-        color: var(--muted);
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        margin-bottom: 30px;
+      p.tag { text-align: center; font-size: 0.74rem; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 26px; }
+      h2.title { font-size: 1.15rem; font-weight: 700; margin-bottom: 18px; text-align: center; color: var(--ink); }
+
+      /* ---------- Google button ---------- */
+      .btn-google {
+        width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
+        padding: 13px; border-radius: 12px; border: 1.5px solid var(--line); background: #fff;
+        font-weight: 600; font-size: 0.94rem; color: var(--ink); cursor: pointer;
+        transition: box-shadow .15s, transform .15s;
       }
-      h2.title {
-        font-size: 1.15rem;
-        font-weight: 700;
-        margin-bottom: 22px;
-        text-align: center;
-        color: var(--ink);
+      .btn-google:hover { box-shadow: 0 8px 20px rgba(13,27,75,0.12); transform: translateY(-1px); }
+      .btn-google:disabled { opacity: 0.55; cursor: not-allowed; }
+
+      .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; color: var(--muted); font-size: 0.8rem; }
+      .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+      .linkline { text-align: center; font-size: 0.88rem; color: var(--muted); margin-bottom: 14px; }
+      .linkline a { color: var(--water-deep); font-weight: 600; text-decoration: none; }
+      .linkline a:hover { text-decoration: underline; }
+
+      .pill-btn {
+        display: block; width: 100%; text-align: center; padding: 12px 18px; border-radius: 999px; border: none;
+        background: linear-gradient(90deg, var(--water-light), var(--water-mid) 60%, var(--water-deep));
+        color: #fff; font-weight: 700; font-size: 0.88rem; cursor: pointer;
+        box-shadow: 0 8px 22px rgba(46,168,238,0.35);
+        transition: transform .15s, box-shadow .15s;
       }
-      .field {
-        margin-bottom: 16px;
-      }
-      .field label {
-        display: block;
-        font-size: 0.8rem;
-        font-weight: 600;
-        color: var(--muted);
-        margin-bottom: 6px;
-      }
-      .input-wrap {
-        position: relative;
-      }
-      .input-wrap svg {
-        position: absolute;
-        left: 14px;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 18px;
-        height: 18px;
-        stroke: var(--muted);
-        fill: none;
-        stroke-width: 1.8;
-        pointer-events: none;
-      }
-      .input-wrap input {
-        width: 100%;
-        padding: 13px 14px 13px 42px;
-        border-radius: 12px;
-        border: 1.5px solid var(--line);
-        font-size: 0.95rem;
-        color: var(--ink);
-        background: #fbfdff;
-      }
-      .input-wrap input:focus {
-        outline: none;
-        border-color: var(--water-mid);
-        box-shadow: 0 0 0 3px rgba(46, 168, 238, 0.15);
-      }
-      .btn {
-        width: 100%;
-        padding: 14px;
-        border: none;
-        border-radius: 12px;
-        font-weight: 700;
-        font-size: 0.95rem;
-        cursor: pointer;
-        background: linear-gradient(90deg, var(--water-mid), var(--water-deep));
-        color: #fff;
-        transition:
-          transform 0.15s,
-          box-shadow 0.15s;
-      }
-      .btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 10px 24px rgba(21, 95, 209, 0.3);
-      }
-      .btn:disabled {
-        opacity: 0.55;
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
-      }
-      .linkline {
-        text-align: center;
-        margin-top: 20px;
-        font-size: 0.88rem;
-        color: var(--muted);
-      }
-      .linkline a {
-        color: var(--water-deep);
-        font-weight: 600;
-        text-decoration: none;
-      }
-      .linkline a:hover {
-        text-decoration: underline;
-      }
-      .msg {
-        margin-top: 14px;
-        padding: 11px 14px;
-        border-radius: 10px;
-        font-size: 0.85rem;
-        display: none;
-      }
-      .msg.show {
-        display: block;
-      }
-      .msg.err {
-        background: #fdecec;
-        color: var(--danger);
-      }
-      .msg.ok {
-        background: #e9f9f1;
-        color: var(--success);
-      }
-      @media (max-width: 380px) {
-        .card {
-          padding: 26px 18px;
-        }
-      }
+      .pill-btn:hover { transform: translateY(-1px); box-shadow: 0 12px 28px rgba(46,168,238,0.45); }
+
+      .collapse-panel { max-height: 0; overflow: hidden; transition: max-height .35s ease; }
+      .collapse-panel.open { max-height: 700px; margin-top: 22px; }
+
+      .field { margin-bottom: 16px; }
+      .field label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+      .input-wrap { position: relative; }
+      .input-wrap svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; stroke: var(--muted); fill: none; stroke-width: 1.8; pointer-events: none; }
+      .input-wrap input { width: 100%; padding: 13px 14px 13px 42px; border-radius: 12px; border: 1.5px solid var(--line); font-size: 0.95rem; color: var(--ink); background: #fbfdff; }
+      .input-wrap input:focus { outline: none; border-color: var(--water-mid); box-shadow: 0 0 0 3px rgba(46,168,238,0.15); }
+      .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 700; font-size: 0.95rem; cursor: pointer;
+        background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); color: #fff; transition: transform .15s, box-shadow .15s; }
+      .btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(21,95,209,0.3); }
+      .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+      .msg { margin-top: 14px; padding: 11px 14px; border-radius: 10px; font-size: 0.85rem; display: none; }
+      .msg.show { display: block; }
+      .msg.err { background: #fdecec; color: var(--danger); }
+      .msg.ok { background: #e9f9f1; color: var(--success); }
+      @media (max-width: 380px) { .card { padding: 26px 18px; } }
     </style>
   </head>
   <body>
     <div class="card">
       <div class="logo-mini">
-        <img
-          src="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png"
-          alt="FeMOS logo"
-        />
+        <img src="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png" alt="FeMOS logo"/>
       </div>
       <h1 class="brand">FeMOS</h1>
       <p class="tag">FastLine Campus OS</p>
-      <h2 class="title">Log In With Your Password</h2>
+      <h2 class="title">Welcome Back</h2>
 
-      <form id="loginForm">
-        <div class="field">
-          <label for="email">Email Address</label>
-          <div class="input-wrap">
-            <svg viewBox="0 0 24 24">
-              <path d="M4 6h16v12H4z" />
-              <path d="m4 7 8 6 8-6" />
-            </svg>
-            <input
-              type="email"
-              id="email"
-              placeholder="jaybros@gmail.com"
-              required
-              autocomplete="email"
-            />
+      <button type="button" class="btn-google" id="btnGoogle">
+        <svg viewBox="0 0 48 48" width="20" height="20">
+          <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.5 29.5 4.5 24 4.5 13.2 4.5 4.5 13.2 4.5 24S13.2 43.5 24 43.5c10.5 0 19.5-8.5 19.5-19.5 0-1.3-.1-2.7-.4-4z"/>
+          <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.7 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.5 29.5 4.5 24 4.5 16 4.5 9 9 6.3 14.7z"/>
+          <path fill="#4CAF50" d="M24 43.5c5.4 0 10.2-1.8 13.9-5l-6.4-5.4C29.6 34.7 26.9 35.5 24 35.5c-5.3 0-9.7-3.4-11.3-8.1l-6.6 5.1C9 39 16 43.5 24 43.5z"/>
+          <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-1 3-3.1 5.5-5.8 7.1l6.4 5.4C39.5 37.5 43.5 31.5 43.5 24c0-1.3-.1-2.7-.4-3.5z"/>
+        </svg>
+        Continue with Google
+      </button>
+
+      <div class="divider">or</div>
+
+      <div class="linkline">Are you new in FeMOS? <a href="signup.html">Sign Up Here</a></div>
+      <button type="button" class="pill-btn" id="btnToggleManual">Sign In with Other Email</button>
+
+      <div class="collapse-panel" id="manualPanel">
+        <form id="loginForm" autocomplete="on">
+          <div class="field">
+            <label for="email">Email Address</label>
+            <div class="input-wrap">
+              <svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg>
+              <input type="email" id="email" name="username" placeholder="jaybros@gmail.com" required autocomplete="username"/>
+            </div>
           </div>
-        </div>
-        <div class="field">
-          <label for="password">Password</label>
-          <div class="input-wrap">
-            <svg viewBox="0 0 24 24">
-              <rect x="5" y="11" width="14" height="9" rx="2" />
-              <path d="M8 11V7a4 4 0 0 1 8 0v4" />
-            </svg>
-            <input
-              type="password"
-              id="password"
-              placeholder="••••••••"
-              required
-              autocomplete="current-password"
-            />
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="input-wrap">
+              <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+              <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password"/>
+            </div>
           </div>
-        </div>
-        <button type="submit" class="btn" id="btnLogin">Log In</button>
+          <button type="submit" class="btn" id="btnLogin">Log In</button>
+        </form>
         <div class="msg" id="msgBox"></div>
-      </form>
-
-      <div class="linkline">
-        Are you new in FeMOS? <a href="signup.html">Sign Up Here</a>
       </div>
     </div>
 
@@ -317,79 +152,96 @@
         appId: "1:1022203442714:web:4fa06d28d788c024bf83a3",
         measurementId: "G-M4DEBFVJCV",
       };
-
-      function validateFirebaseConfig() {
-        const missing = [];
-        if (!firebaseConfig.apiKey || firebaseConfig.apiKey.includes("PUT_"))
-          missing.push("Firebase API key");
-        if (
-          !firebaseConfig.authDomain ||
-          firebaseConfig.authDomain.includes("PUT_")
-        )
-          missing.push("Firebase auth domain");
-        if (
-          !firebaseConfig.projectId ||
-          firebaseConfig.projectId.includes("PUT_")
-        )
-          missing.push("Firebase project ID");
-        if (
-          !firebaseConfig.storageBucket ||
-          firebaseConfig.storageBucket.includes("PUT_")
-        )
-          missing.push("Firebase storage bucket");
-        if (
-          !firebaseConfig.messagingSenderId ||
-          firebaseConfig.messagingSenderId.includes("PUT_")
-        )
-          missing.push("Firebase messaging sender ID");
-        if (!firebaseConfig.appId || firebaseConfig.appId.includes("PUT_"))
-          missing.push("Firebase app ID");
-        if (missing.length) {
-          throw new Error(
-            "Missing required Firebase config values: " + missing.join(", "),
-          );
-        }
-      }
-
-      validateFirebaseConfig();
-      const app = firebase.apps.length
-        ? firebase.app()
-        : firebase.initializeApp(firebaseConfig);
+      const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
       const auth = firebase.auth(app);
       const db = firebase.firestore(app);
 
-      const form = document.getElementById("loginForm");
       const msgBox = document.getElementById("msgBox");
-      const btnLogin = document.getElementById("btnLogin");
+      function showMsg(text, type) { msgBox.textContent = text; msgBox.className = "msg show " + type; }
 
-      function showMsg(text, type) {
-        msgBox.textContent = text;
-        msgBox.className = "msg show " + type;
+      // ---------- Best-effort: offer to autofill from the browser's password manager ----------
+      // Note: navigator.credentials (Credential Management API) is only supported in some
+      // Chromium browsers and is being phased out industry-wide, so this is a bonus, not
+      // a guarantee. The reliable part is the <form>/autocomplete markup above, which every
+      // major browser's native password manager understands on its own.
+      async function trySilentAutofill() {
+        if (!("credentials" in navigator) || typeof PasswordCredential === "undefined") return;
+        try {
+          const cred = await navigator.credentials.get({ password: true, mediation: "optional" });
+          if (cred && cred.type === "password") {
+            document.getElementById("email").value = cred.id;
+            document.getElementById("password").value = cred.password;
+          }
+        } catch (e) { /* ignore - not supported / not permitted */ }
       }
 
-      form.addEventListener("submit", async function (e) {
+      async function routeAfterAuth(user) {
+        const doc = await db.collection("users").doc(user.uid).get();
+        const data = doc.exists ? doc.data() : null;
+        if (data && data.institution && data.course) {
+          window.location.href = "proof.html";
+        } else {
+          if (!doc.exists) {
+            await db.collection("users").doc(user.uid).set({
+              fullName: user.displayName || "", email: user.email, photoURL: user.photoURL || null,
+              verified: true, institution: null, course: null, confirmedByCR: false,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            });
+          }
+          window.location.href = "registration.html";
+        }
+      }
+
+      // ---------- Google Sign-In ----------
+      document.getElementById("btnGoogle").addEventListener("click", async function () {
+        const btn = this;
+        btn.disabled = true;
+        try {
+          const provider = new firebase.auth.GoogleAuthProvider();
+          const result = await auth.signInWithPopup(provider);
+          await routeAfterAuth(result.user);
+        } catch (err) {
+          showMsg("Google sign-in failed: " + (err.message || "Please try again"), "err");
+        } finally {
+          btn.disabled = false;
+        }
+      });
+
+      // ---------- Toggle manual email/password panel ----------
+      const manualPanel = document.getElementById("manualPanel");
+      const toggleBtn = document.getElementById("btnToggleManual");
+      toggleBtn.addEventListener("click", function () {
+        const opening = !manualPanel.classList.contains("open");
+        manualPanel.classList.toggle("open");
+        toggleBtn.textContent = opening ? "Hide Email Sign In" : "Sign In with Other Email";
+        if (opening) {
+          trySilentAutofill();
+          setTimeout(function () { document.getElementById("email").focus(); }, 120);
+        }
+      });
+
+      // ---------- Manual email/password login ----------
+      document.getElementById("loginForm").addEventListener("submit", async function (e) {
         e.preventDefault();
         const email = document.getElementById("email").value.trim();
         const password = document.getElementById("password").value;
+        const btnLogin = document.getElementById("btnLogin");
         btnLogin.disabled = true;
         btnLogin.textContent = "Logging in...";
         try {
           const cred = await auth.signInWithEmailAndPassword(email, password);
-          const uid = cred.user.uid;
-          // Check whether the user has already completed institution/course registration
-          const doc = await db.collection("users").doc(uid).get();
-          const data = doc.exists ? doc.data() : null;
-          if (data && data.institution && data.course) {
-            window.location.href = "proof.html"; // temporary proof-of-concept page - real dashboard comes later
-          } else {
-            window.location.href = "registration.html";
+          // Best-effort: tell supporting browsers to remember this credential
+          if ("credentials" in navigator && typeof PasswordCredential !== "undefined") {
+            try {
+              await navigator.credentials.store(new PasswordCredential({ id: email, password: password, name: cred.user.displayName || email }));
+            } catch (e2) { /* ignore */ }
           }
+          await routeAfterAuth(cred.user);
         } catch (err) {
           const message =
             err && err.code === "auth/configuration-not-found"
               ? "Firebase Authentication is not configured for this project. Please enable Email/Password sign-in in Firebase Console > Authentication > Sign-in method."
-              : "Login failed: " +
-                (err.message || "Check your email and password");
+              : "Login failed: " + (err.message || "Check your email and password");
           showMsg(message, "err");
         } finally {
           btnLogin.disabled = false;

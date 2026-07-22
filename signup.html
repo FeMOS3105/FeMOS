@@ -2,85 +2,75 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>FeMOS — Sign Up</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
     <style>
       :root {
-        --water-light: #5fd4f0;
-        --water-mid: #2ea8ee;
-        --water-deep: #155fd1;
-        --water-abyss: #0b2f9e;
-        --ink: #0d1b4b;
-        --muted: #5c6b9a;
-        --line: #dbe6fb;
-        --danger: #e14b4b;
-        --warn: #e0a020;
-        --success: #1fae6e;
+        --water-light: #5fd4f0; --water-mid: #2ea8ee; --water-deep: #155fd1; --water-abyss: #0b2f9e;
+        --ink: #0d1b4b; --muted: #5c6b9a; --line: #dbe6fb; --danger: #e14b4b; --warn: #e0a020; --success: #1fae6e;
       }
       * { box-sizing: border-box; margin: 0; padding: 0; }
       html, body { width: 100%; min-height: 100%; }
       body {
         background: linear-gradient(180deg, #eef5ff 0%, #f7fbff 100%);
         font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
-        color: var(--ink);
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 24px 16px;
-        overflow-x: hidden;
+        color: var(--ink); min-height: 100vh; display: flex; align-items: center; justify-content: center;
+        padding: 24px 16px; overflow-x: hidden;
       }
       body::before, body::after {
-        content: "";
-        position: fixed;
-        inset: auto;
-        width: 260px;
-        height: 260px;
-        border-radius: 50%;
-        background: radial-gradient(circle, rgba(46, 168, 238, 0.22), transparent 70%);
-        filter: blur(24px);
-        z-index: -1;
-        animation: floatOrb 6s ease-in-out infinite;
+        content: ""; position: fixed; inset: auto; width: 260px; height: 260px; border-radius: 50%;
+        background: radial-gradient(circle, rgba(46,168,238,0.22), transparent 70%); filter: blur(24px);
+        z-index: -1; animation: floatOrb 6s ease-in-out infinite;
       }
       body::before { top: -70px; left: -40px; }
       body::after { bottom: -80px; right: -40px; animation-delay: 1.8s; }
-      @keyframes floatOrb {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-16px); }
-      }
+      @keyframes floatOrb { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-16px);} }
       .card {
-        width: 100%;
-        max-width: 440px;
-        background: rgba(255, 255, 255, 0.97);
-        border-radius: 24px;
-        box-shadow: 0 20px 60px rgba(13, 27, 75, 0.12);
-        padding: 34px 26px;
-        border: 1px solid rgba(255, 255, 255, 0.75);
+        width: 100%; max-width: 440px; background: rgba(255,255,255,0.97); border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(13,27,75,0.12); padding: 34px 26px; border: 1px solid rgba(255,255,255,0.75);
       }
       .logo-mini {
-        width: 78px; height: 78px; margin: 0 auto 12px; border-radius: 50%;
-        overflow: hidden; background: linear-gradient(135deg, #eef8ff 0%, #dcefff 100%);
-        display: flex; align-items: center; justify-content: center;
-        box-shadow: 0 0 0 4px rgba(255,255,255,0.9), 0 16px 40px rgba(21,95,209,0.24);
-        border: 3px solid rgba(255,255,255,0.95); position: relative;
+        width: 78px; height: 78px; margin: 0 auto 12px; border-radius: 50%; overflow: hidden;
+        background: linear-gradient(135deg, #eef8ff 0%, #dcefff 100%); display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 0 0 4px rgba(255,255,255,0.9), 0 16px 40px rgba(21,95,209,0.24); border: 3px solid rgba(255,255,255,0.95);
       }
       .logo-mini img { width: 100%; height: 100%; object-fit: cover; display: block; padding: 4px; }
       h1.brand {
         text-align: center; font-size: 1.35rem; font-weight: 700;
         background: linear-gradient(90deg, var(--water-mid), var(--water-deep));
-        -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 20px;
+        -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 18px;
       }
-      .steps { display: flex; justify-content: center; gap: 8px; margin-bottom: 26px; }
+
+      .btn-google {
+        width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
+        padding: 13px; border-radius: 12px; border: 1.5px solid var(--line); background: #fff;
+        font-weight: 600; font-size: 0.94rem; color: var(--ink); cursor: pointer;
+        transition: box-shadow .15s, transform .15s;
+      }
+      .btn-google:hover { box-shadow: 0 8px 20px rgba(13,27,75,0.12); transform: translateY(-1px); }
+      .btn-google:disabled { opacity: 0.55; cursor: not-allowed; }
+      .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; color: var(--muted); font-size: 0.8rem; }
+      .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+      .linkline { text-align: center; font-size: 0.88rem; color: var(--muted); margin-bottom: 14px; }
+      .linkline a { color: var(--water-deep); font-weight: 600; text-decoration: none; }
+      .pill-btn {
+        display: block; width: 100%; text-align: center; padding: 12px 18px; border-radius: 999px; border: none;
+        background: linear-gradient(90deg, var(--water-light), var(--water-mid) 60%, var(--water-deep));
+        color: #fff; font-weight: 700; font-size: 0.88rem; cursor: pointer;
+        box-shadow: 0 8px 22px rgba(46,168,238,0.35); transition: transform .15s, box-shadow .15s;
+      }
+      .pill-btn:hover { transform: translateY(-1px); box-shadow: 0 12px 28px rgba(46,168,238,0.45); }
+      .collapse-panel { max-height: 0; overflow: hidden; transition: max-height .4s ease; }
+      .collapse-panel.open { max-height: 1400px; margin-top: 24px; }
+
+      .steps { display: flex; justify-content: center; gap: 8px; margin-bottom: 22px; }
       .steps .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line); transition: background .2s; }
       .steps .dot.active { background: var(--water-deep); }
       .stepPane { display: none; }
       .stepPane.active { display: block; }
       h2.title { font-size: 1.1rem; font-weight: 700; margin-bottom: 6px; text-align: center; color: var(--ink); }
-      p.sub { text-align: center; font-size: 0.85rem; color: var(--muted); margin-bottom: 22px; }
+      p.sub { text-align: center; font-size: 0.85rem; color: var(--muted); margin-bottom: 20px; }
       .avatar-wrap { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; }
       .avatar-circle {
         width: 92px; height: 92px; border-radius: 50%; background: #f0f5ff; border: 2px dashed var(--line);
@@ -92,41 +82,30 @@
       .field { margin-bottom: 16px; }
       .field label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
       .input-wrap { position: relative; }
-      .input-wrap svg.left-icon {
-        position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px;
-        stroke: var(--muted); fill: none; stroke-width: 1.8; pointer-events: none;
-      }
-      .input-wrap input {
-        width: 100%; padding: 13px 14px 13px 42px; border-radius: 12px; border: 1.5px solid var(--line);
-        font-size: 0.95rem; color: var(--ink); background: #fbfdff;
-      }
+      .input-wrap svg.left-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; stroke: var(--muted); fill: none; stroke-width: 1.8; pointer-events: none; }
+      .input-wrap input { width: 100%; padding: 13px 14px 13px 42px; border-radius: 12px; border: 1.5px solid var(--line); font-size: 0.95rem; color: var(--ink); background: #fbfdff; }
       .input-wrap input.has-eye { padding-right: 42px; }
       .input-wrap input.no-icon { padding-left: 14px; text-align: center; letter-spacing: 6px; font-weight: 700; }
       .input-wrap input:focus { outline: none; border-color: var(--water-mid); box-shadow: 0 0 0 3px rgba(46,168,238,0.15); }
-      .eye-btn {
-        position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-        width: 30px; height: 30px; border: none; background: transparent; cursor: pointer;
-        display: flex; align-items: center; justify-content: center; border-radius: 8px;
-      }
+      .eye-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 8px; }
       .eye-btn:hover { background: #eef5ff; }
       .eye-btn svg { width: 18px; height: 18px; stroke: var(--muted); fill: none; stroke-width: 1.8; }
 
-      .suggest-box {
-        background: #eaf6ff; border: 1.5px dashed var(--water-mid); border-radius: 12px;
-        padding: 12px 14px; margin-bottom: 16px;
+      /* ---------- Password choice panel ---------- */
+      .choice-panel { border: 1.5px dashed var(--water-mid); background: #eaf6ff; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+      .choice-panel p { font-size: 0.86rem; color: var(--ink); margin-bottom: 12px; text-align: center; font-weight: 600; }
+      .choice-row { display: flex; flex-direction: column; gap: 8px; }
+      .choice-btn {
+        width: 100%; padding: 11px; border-radius: 10px; border: 1.5px solid var(--water-mid); background: #fff;
+        font-weight: 600; font-size: 0.85rem; color: var(--water-deep); cursor: pointer; transition: background .15s;
       }
-      .suggest-label { font-size: 0.72rem; letter-spacing: 1px; text-transform: uppercase; color: var(--water-deep); margin-bottom: 6px; }
-      .suggest-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
-      .suggest-row code {
-        font-family: 'Consolas', monospace; font-size: 0.95rem; font-weight: 700; color: var(--ink);
-        letter-spacing: 1px; word-break: break-all;
+      .choice-btn:hover { background: #f0f9ff; }
+      .choice-btn.primary { background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); color: #fff; border: none; }
+      .suggested-note {
+        display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 0.78rem;
+        color: var(--success); background: #e9f9f1; border-radius: 8px; padding: 8px 12px; margin-bottom: 14px;
       }
-      .icon-btn {
-        width: 30px; height: 30px; border-radius: 8px; border: 1.5px solid var(--line); background: #fff;
-        cursor: pointer; flex-shrink: 0; font-size: 1rem; color: var(--water-deep);
-      }
-      .icon-btn:hover { background: #f5f9ff; }
-      .btn-small { width: 100%; padding: 9px; font-size: 0.82rem; }
+      .suggested-note button { background: none; border: none; color: var(--water-deep); font-weight: 600; font-size: 0.76rem; cursor: pointer; text-decoration: underline; }
 
       .strength-meter { margin-bottom: 16px; }
       .strength-bar { height: 6px; border-radius: 4px; background: var(--line); overflow: hidden; margin-bottom: 6px; }
@@ -134,33 +113,22 @@
       .strength-label { font-size: 0.78rem; color: var(--muted); margin-bottom: 8px; }
       .strength-checklist { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; }
       .strength-checklist li { font-size: 0.74rem; color: var(--muted); position: relative; padding-left: 16px; }
-      .strength-checklist li::before {
-        content: "○"; position: absolute; left: 0; color: var(--muted);
-      }
+      .strength-checklist li::before { content: "○"; position: absolute; left: 0; color: var(--muted); }
       .strength-checklist li.met { color: var(--success); }
       .strength-checklist li.met::before { content: "✓"; color: var(--success); }
 
-      .btn {
-        width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 700; font-size: 0.95rem;
-        cursor: pointer; background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); color: #fff;
-        transition: transform .15s, box-shadow .15s;
-      }
+      .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 700; font-size: 0.95rem; cursor: pointer;
+        background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); color: #fff; transition: transform .15s, box-shadow .15s; }
       .btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(21,95,209,0.3); }
       .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
       .btn-outline { background: transparent; border: 1.5px solid var(--line); color: var(--ink); margin-top: 10px; }
-      .linkline { text-align: center; margin-top: 20px; font-size: 0.88rem; color: var(--muted); }
-      .linkline a { color: var(--water-deep); font-weight: 600; text-decoration: none; }
       .msg { margin-top: 14px; padding: 11px 14px; border-radius: 10px; font-size: 0.85rem; display: none; }
       .msg.show { display: block; }
       .msg.err { background: #fdecec; color: var(--danger); }
       .msg.ok { background: #e9f9f1; color: var(--success); }
       @media (max-width: 380px) { .card { padding: 24px 16px; } }
 
-      /* ---------- Crop modal ---------- */
-      .modalOverlay {
-        position: fixed; inset: 0; background: rgba(13,27,75,0.6); display: none;
-        align-items: center; justify-content: center; z-index: 60; padding: 18px;
-      }
+      .modalOverlay { position: fixed; inset: 0; background: rgba(13,27,75,0.6); display: none; align-items: center; justify-content: center; z-index: 60; padding: 18px; }
       .modalOverlay.show { display: flex; }
       .modalBox { background: #fff; border-radius: 18px; padding: 20px; max-width: 380px; width: 100%; }
       .modalBox h3 { font-size: 1rem; margin-bottom: 12px; text-align: center; color: var(--ink); }
@@ -173,120 +141,135 @@
   <body>
     <div class="card">
       <div class="logo-mini">
-        <img
-          src="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png"
-          alt="FeMOS logo"
-        />
+        <img src="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png" alt="FeMOS logo"/>
       </div>
       <h1 class="brand">Sign Up for FeMOS</h1>
 
-      <div class="steps">
-        <span class="dot active" data-dot="1"></span>
-        <span class="dot" data-dot="2"></span>
-        <span class="dot" data-dot="3"></span>
-      </div>
+      <button type="button" class="btn-google" id="btnGoogleSignup">
+        <svg viewBox="0 0 48 48" width="20" height="20">
+          <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.5 29.5 4.5 24 4.5 13.2 4.5 4.5 13.2 4.5 24S13.2 43.5 24 43.5c10.5 0 19.5-8.5 19.5-19.5 0-1.3-.1-2.7-.4-4z"/>
+          <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.7 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.5 29.5 4.5 24 4.5 16 4.5 9 9 6.3 14.7z"/>
+          <path fill="#4CAF50" d="M24 43.5c5.4 0 10.2-1.8 13.9-5l-6.4-5.4C29.6 34.7 26.9 35.5 24 35.5c-5.3 0-9.7-3.4-11.3-8.1l-6.6 5.1C9 39 16 43.5 24 43.5z"/>
+          <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-1 3-3.1 5.5-5.8 7.1l6.4 5.4C39.5 37.5 43.5 31.5 43.5 24c0-1.3-.1-2.7-.4-3.5z"/>
+        </svg>
+        Continue with Google
+      </button>
+      <p style="text-align:center;font-size:0.74rem;color:var(--muted);margin-top:8px;">Fastest way in — no OTP needed, your email is already verified by Google.</p>
 
-      <!-- ============ STEP 1: FULL NAME + PROFILE PICTURE ============ -->
-      <div class="stepPane active" data-step="1">
-        <h2 class="title">Enter Your Full Name</h2>
-        <p class="sub">This name will be publicly visible to admins, lecturers, and on your dashboard</p>
+      <div class="divider">or</div>
 
-        <div class="avatar-wrap">
-          <div class="avatar-circle" id="avatarCircle">
-            <svg viewBox="0 0 24 24"><path d="M4 7h4l2-3h4l2 3h4v13H4z"/><circle cx="12" cy="13" r="4"/></svg>
+      <div class="linkline">Already have a FeMOS account? <a href="login.html">Log In Here</a></div>
+      <button type="button" class="pill-btn" id="btnToggleManual">Sign In with Other Email</button>
+
+      <div class="collapse-panel" id="manualPanel">
+        <div class="steps">
+          <span class="dot active" data-dot="1"></span>
+          <span class="dot" data-dot="2"></span>
+          <span class="dot" data-dot="3"></span>
+        </div>
+
+        <!-- ============ STEP 1: FULL NAME + PROFILE PICTURE ============ -->
+        <div class="stepPane active" data-step="1">
+          <h2 class="title">Enter Your Full Name</h2>
+          <p class="sub">This name will be publicly visible to admins, lecturers, and on your dashboard</p>
+          <div class="avatar-wrap">
+            <div class="avatar-circle" id="avatarCircle">
+              <svg viewBox="0 0 24 24"><path d="M4 7h4l2-3h4l2 3h4v13H4z"/><circle cx="12" cy="13" r="4"/></svg>
+            </div>
+            <div class="avatar-hint">Tap to add a profile picture (optional) — you'll be able to crop it</div>
+            <input type="file" id="photoInput" accept="image/*" style="display: none;"/>
           </div>
-          <div class="avatar-hint">Tap to add a profile picture (optional) — you'll be able to crop it</div>
-          <input type="file" id="photoInput" accept="image/*" style="display: none;"/>
-        </div>
-
-        <div class="field">
-          <label for="fullName">Full Names</label>
-          <div class="input-wrap">
-            <svg class="left-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
-            <input type="text" id="fullName" placeholder="e.g. Jonathan John Athanas" required/>
+          <div class="field">
+            <label for="fullName">Full Names</label>
+            <div class="input-wrap">
+              <svg class="left-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+              <input type="text" id="fullName" placeholder="e.g. Jonathan John Athanas" required/>
+            </div>
           </div>
+          <button type="button" class="btn" id="btnStep1Next">Next</button>
+          <div class="msg" id="msgStep1"></div>
         </div>
-        <button class="btn" id="btnStep1Next">Next</button>
-        <div class="msg" id="msgStep1"></div>
-      </div>
 
-      <!-- ============ STEP 2: EMAIL + PASSWORD ============ -->
-      <div class="stepPane" data-step="2">
-        <h2 class="title">Enter Your Email</h2>
-        <p class="sub">We will send a verification code (OTP) to this email address</p>
+        <!-- ============ STEP 2: EMAIL + PASSWORD ============ -->
+        <div class="stepPane" data-step="2">
+          <h2 class="title">Enter Your Email</h2>
+          <p class="sub">We will send a verification code (OTP) to this email address</p>
 
-        <div class="field">
-          <label for="signupEmail">Email Address</label>
-          <div class="input-wrap">
-            <svg class="left-icon" viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg>
-            <input type="email" id="signupEmail" placeholder="jaybros@gmail.com" required/>
+          <form id="signupCredsForm" autocomplete="on">
+            <div class="field">
+              <label for="signupEmail">Email Address</label>
+              <div class="input-wrap">
+                <svg class="left-icon" viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg>
+                <input type="email" id="signupEmail" name="username" placeholder="jaybros@gmail.com" required autocomplete="username"/>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="signupPassword">Set Password</label>
+
+              <div class="choice-panel" id="choicePanel">
+                <p>How would you like to set your password?</p>
+                <div class="choice-row">
+                  <button type="button" class="choice-btn primary" id="btnChooseSuggested">Use Suggested Strong Password</button>
+                  <button type="button" class="choice-btn" id="btnChooseOwn">Enter My Own</button>
+                </div>
+              </div>
+
+              <div class="suggested-note" id="suggestedNote" style="display:none;">
+                <span>Strong password generated ✓</span>
+                <button type="button" id="btnSwitchToOwn">Enter my own instead</button>
+              </div>
+
+              <div class="input-wrap" id="passwordInputWrap" style="display:none;">
+                <svg class="left-icon" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+                <input type="password" id="signupPassword" name="new-password" class="has-eye" placeholder="at least 8 characters" autocomplete="new-password"/>
+                <button type="button" class="eye-btn" id="toggleP1" title="Show/Hide password">
+                  <svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="strength-meter" id="strengthMeter" style="display:none;">
+              <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+              <div class="strength-label" id="strengthLabel">Enter a password</div>
+              <ul class="strength-checklist" id="strengthChecklist">
+                <li data-rule="len">At least 8 characters</li>
+                <li data-rule="upper">One uppercase letter</li>
+                <li data-rule="lower">One lowercase letter</li>
+                <li data-rule="number">One number</li>
+                <li data-rule="symbol">One symbol (!@#$...)</li>
+              </ul>
+            </div>
+
+            <div class="field" id="confirmField" style="display:none;">
+              <label for="signupPasswordConfirm">Confirm Password</label>
+              <div class="input-wrap">
+                <svg class="left-icon" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+                <input type="password" id="signupPasswordConfirm" name="new-password-confirm" class="has-eye" placeholder="repeat your password" autocomplete="new-password"/>
+                <button type="button" class="eye-btn" id="toggleP2" title="Show/Hide password">
+                  <svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <button type="button" class="btn" id="btnGetVerified">Get Verified</button>
+            <div class="msg" id="msgStep2"></div>
+          </form>
+        </div>
+
+        <!-- ============ STEP 3: OTP ============ -->
+        <div class="stepPane" data-step="3">
+          <h2 class="title">Enter OTP</h2>
+          <p class="sub">Enter OTP Sent to <strong id="otpEmailLabel">your email</strong></p>
+          <div class="field">
+            <div class="input-wrap">
+              <input type="text" id="otpInput" class="no-icon" maxlength="6" placeholder="- - - - - -" required/>
+            </div>
           </div>
+          <button type="button" class="btn" id="btnVerifyOtp">Verify OTP</button>
+          <button type="button" class="btn btn-outline" id="btnResendOtp">Resend OTP</button>
+          <div class="msg" id="msgStep3"></div>
         </div>
-
-        <div class="suggest-box">
-          <div class="suggest-label">Suggested Strong Password</div>
-          <div class="suggest-row">
-            <code id="suggestValue">Xk9!mQar</code>
-            <button type="button" class="icon-btn" id="btnRegenSuggest" title="Generate another">⟳</button>
-          </div>
-          <button type="button" class="btn btn-outline btn-small" id="btnUseSuggest">Use This Password</button>
-        </div>
-
-        <div class="field">
-          <label for="signupPassword">Set Password</label>
-          <div class="input-wrap">
-            <svg class="left-icon" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-            <input type="password" id="signupPassword" class="has-eye" placeholder="at least 8 characters" required/>
-            <button type="button" class="eye-btn" id="toggleP1" title="Show/Hide password">
-              <svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-          </div>
-        </div>
-
-        <div class="strength-meter">
-          <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
-          <div class="strength-label" id="strengthLabel">Enter a password</div>
-          <ul class="strength-checklist" id="strengthChecklist">
-            <li data-rule="len">At least 8 characters</li>
-            <li data-rule="upper">One uppercase letter</li>
-            <li data-rule="lower">One lowercase letter</li>
-            <li data-rule="number">One number</li>
-            <li data-rule="symbol">One symbol (!@#$...)</li>
-          </ul>
-        </div>
-
-        <div class="field">
-          <label for="signupPasswordConfirm">Confirm Password</label>
-          <div class="input-wrap">
-            <svg class="left-icon" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-            <input type="password" id="signupPasswordConfirm" class="has-eye" placeholder="repeat your password" required/>
-            <button type="button" class="eye-btn" id="toggleP2" title="Show/Hide password">
-              <svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-          </div>
-        </div>
-
-        <button class="btn" id="btnGetVerified">Get Verified</button>
-        <div class="msg" id="msgStep2"></div>
-      </div>
-
-      <!-- ============ STEP 3: OTP ============ -->
-      <div class="stepPane" data-step="3">
-        <h2 class="title">Enter OTP</h2>
-        <p class="sub">Enter OTP Sent to <strong id="otpEmailLabel">your email</strong></p>
-
-        <div class="field">
-          <div class="input-wrap">
-            <input type="text" id="otpInput" class="no-icon" maxlength="6" placeholder="- - - - - -" required/>
-          </div>
-        </div>
-        <button class="btn" id="btnVerifyOtp">Verify OTP</button>
-        <button class="btn btn-outline" id="btnResendOtp" type="button">Resend OTP</button>
-        <div class="msg" id="msgStep3"></div>
-      </div>
-
-      <div class="linkline">
-        Already have a FeMOS account? <a href="login.html">Log In Here</a>
       </div>
     </div>
 
@@ -314,7 +297,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 
     <script>
-      // ================= FIREBASE CONFIG =================
       const firebaseConfig = {
         apiKey: "AIzaSyCb-Y69glDSkNDwgzoCXyUVAz6D86Ccdfo",
         authDomain: "femos-fe742.firebaseapp.com",
@@ -324,13 +306,9 @@
         appId: "1:1022203442714:web:4fa06d28d788c024bf83a3",
         measurementId: "G-M4DEBFVJCV",
       };
-
-      // ================= EMAILJS CONFIG =================
       const EMAILJS_PUBLIC_KEY = "n1q50LOlnNH_wWusx";
       const EMAILJS_SERVICE_ID = "service_lx1zlxc";
       const EMAILJS_TEMPLATE_ID = "template_qpd2pyq";
-
-      // ================= CLOUDINARY CONFIG =================
       const CLOUDINARY_CLOUD_NAME = "j8zmetxr";
       const CLOUDINARY_UPLOAD_PRESET = "FastLine_FeMOS";
 
@@ -339,14 +317,10 @@
       const db = firebase.firestore(app);
       if (typeof emailjs !== "undefined") { emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY }); }
 
-      // ---------- Helper: never let an async step hang the UI forever ----------
       function withTimeout(promise, ms, message) {
         return new Promise(function (resolve, reject) {
           const timer = setTimeout(function () { reject(new Error(message)); }, ms);
-          promise.then(
-            function (v) { clearTimeout(timer); resolve(v); },
-            function (e) { clearTimeout(timer); reject(e); }
-          );
+          promise.then(function (v) { clearTimeout(timer); resolve(v); }, function (e) { clearTimeout(timer); reject(e); });
         });
       }
       const TROUBLESHOOT_TIP =
@@ -354,40 +328,72 @@
         "that this site's domain is listed under Authentication > Settings > Authorized domains, and that you are opening this page " +
         "through a real http/https address rather than double-clicking the file.)";
 
+      async function tryStoreCredential(email, password, displayName) {
+        if (!("credentials" in navigator) || typeof PasswordCredential === "undefined") return;
+        try {
+          await navigator.credentials.store(new PasswordCredential({ id: email, password: password, name: displayName || email }));
+        } catch (e) { /* best-effort only */ }
+      }
+
+      // ---------- Google Sign-Up (skips OTP entirely - Google already verified the email) ----------
+      document.getElementById("btnGoogleSignup").addEventListener("click", async function () {
+        const btn = this;
+        btn.disabled = true;
+        try {
+          const provider = new firebase.auth.GoogleAuthProvider();
+          const result = await auth.signInWithPopup(provider);
+          const user = result.user;
+          const docRef = db.collection("users").doc(user.uid);
+          const docSnap = await docRef.get();
+          if (!docSnap.exists) {
+            await docRef.set({
+              fullName: user.displayName || "", email: user.email, photoURL: user.photoURL || null,
+              verified: true, institution: null, course: null, confirmedByCR: false,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            });
+          }
+          const data = docSnap.exists ? docSnap.data() : null;
+          window.location.href = data && data.institution && data.course ? "proof.html" : "registration.html";
+        } catch (err) {
+          alert("Google sign-up failed: " + (err.message || "Please try again"));
+        } finally {
+          btn.disabled = false;
+        }
+      });
+
+      // ---------- Toggle manual signup wizard ----------
+      const manualPanel = document.getElementById("manualPanel");
+      const toggleBtn = document.getElementById("btnToggleManual");
+      toggleBtn.addEventListener("click", function () {
+        const opening = !manualPanel.classList.contains("open");
+        manualPanel.classList.toggle("open");
+        toggleBtn.textContent = opening ? "Hide Manual Sign Up" : "Sign In with Other Email";
+      });
+
       // ---------- Form state, persisted to sessionStorage so it survives a reload ----------
       const STORAGE_KEY = "femos_signup_state_v1";
-      const state = {
-        fullName: "", photoFile: null, photoPreviewUrl: "",
-        email: "", password: "", otpSent: "", otpSentAt: 0,
-      };
+      const state = { fullName: "", photoFile: null, photoPreviewUrl: "", email: "", password: "", otpSent: "", otpSentAt: 0 };
       let currentStep = 1;
+      let passwordChoice = null; // 'suggested' | 'own'
 
       function saveSessionState() {
         try {
           sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
-            step: currentStep, fullName: state.fullName, photoPreviewUrl: state.photoPreviewUrl,
+            step: currentStep, panelOpen: manualPanel.classList.contains("open"), passwordChoice: passwordChoice,
+            fullName: state.fullName, photoPreviewUrl: state.photoPreviewUrl,
             email: state.email, password: state.password, otpSent: state.otpSent, otpSentAt: state.otpSentAt,
           }));
-        } catch (e) { /* sessionStorage may be unavailable in some private-browsing modes */ }
+        } catch (e) {}
       }
       function loadSessionState() {
-        try {
-          const raw = sessionStorage.getItem(STORAGE_KEY);
-          return raw ? JSON.parse(raw) : null;
-        } catch (e) { return null; }
+        try { const raw = sessionStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null; } catch (e) { return null; }
       }
-      function clearSessionState() {
-        try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) {}
-      }
+      function clearSessionState() { try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) {} }
 
       function goToStep(n) {
         currentStep = n;
-        document.querySelectorAll(".stepPane").forEach(function (p) {
-          p.classList.toggle("active", p.getAttribute("data-step") === String(n));
-        });
-        document.querySelectorAll(".steps .dot").forEach(function (d) {
-          d.classList.toggle("active", parseInt(d.getAttribute("data-dot"), 10) <= n);
-        });
+        document.querySelectorAll(".stepPane").forEach(function (p) { p.classList.toggle("active", p.getAttribute("data-step") === String(n)); });
+        document.querySelectorAll(".steps .dot").forEach(function (d) { d.classList.toggle("active", parseInt(d.getAttribute("data-dot"), 10) <= n); });
         saveSessionState();
       }
       function showMsg(id, text, type) {
@@ -398,8 +404,6 @@
 
       const avatarCircle = document.getElementById("avatarCircle");
       const photoInput = document.getElementById("photoInput");
-
-      // ---------- STEP 1: Name + Photo (with crop modal) ----------
       avatarCircle.addEventListener("click", function () { photoInput.click(); });
 
       let cropper = null;
@@ -414,19 +418,15 @@
           cropperImageEl.src = ev.target.result;
           cropOverlay.classList.add("show");
           if (cropper) cropper.destroy();
-          cropper = new Cropper(cropperImageEl, {
-            aspectRatio: 1, viewMode: 1, autoCropArea: 0.9, background: false, dragMode: "move",
-          });
+          cropper = new Cropper(cropperImageEl, { aspectRatio: 1, viewMode: 1, autoCropArea: 0.9, background: false, dragMode: "move" });
         };
         reader.readAsDataURL(file);
       });
-
       document.getElementById("btnCropCancel").addEventListener("click", function () {
         cropOverlay.classList.remove("show");
         photoInput.value = "";
         if (cropper) { cropper.destroy(); cropper = null; }
       });
-
       document.getElementById("btnCropConfirm").addEventListener("click", function () {
         if (!cropper) return;
         cropper.getCroppedCanvas({ width: 480, height: 480 }).toBlob(function (blob) {
@@ -436,10 +436,7 @@
           const objectUrl = URL.createObjectURL(blob);
           avatarCircle.innerHTML = '<img src="' + objectUrl + '" alt="Profile Picture"/>';
           const reader2 = new FileReader();
-          reader2.onload = function (ev2) {
-            state.photoPreviewUrl = ev2.target.result;
-            saveSessionState();
-          };
+          reader2.onload = function (ev2) { state.photoPreviewUrl = ev2.target.result; saveSessionState(); };
           reader2.readAsDataURL(blob);
           cropOverlay.classList.remove("show");
           cropper.destroy();
@@ -447,10 +444,7 @@
         }, "image/jpeg", 0.9);
       });
 
-      document.getElementById("fullName").addEventListener("input", function (e) {
-        state.fullName = e.target.value;
-      });
-
+      document.getElementById("fullName").addEventListener("input", function (e) { state.fullName = e.target.value; });
       document.getElementById("btnStep1Next").addEventListener("click", function () {
         const name = document.getElementById("fullName").value.trim();
         if (!name) { showMsg("msgStep1", "Please enter your full name first.", "err"); return; }
@@ -458,7 +452,7 @@
         goToStep(2);
       });
 
-      // ---------- Password: show/hide, strength meter, suggestion ----------
+      // ---------- Password: choice panel, show/hide, strength meter, suggestion ----------
       function wireEyeToggle(btnId, inputId) {
         document.getElementById(btnId).addEventListener("click", function () {
           const inp = document.getElementById(inputId);
@@ -470,48 +464,18 @@
 
       function generateStrongPassword(length) {
         length = length || 12;
-        const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
-        const lower = "abcdefghijkmnopqrstuvwxyz";
-        const numbers = "23456789";
-        const symbols = "!@#$%^&*?";
+        const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ", lower = "abcdefghijkmnopqrstuvwxyz", numbers = "23456789", symbols = "!@#$%^&*?";
         const all = upper + lower + numbers + symbols;
         const pw = [
-          upper[Math.floor(Math.random() * upper.length)],
-          lower[Math.floor(Math.random() * lower.length)],
-          numbers[Math.floor(Math.random() * numbers.length)],
-          symbols[Math.floor(Math.random() * symbols.length)],
+          upper[Math.floor(Math.random() * upper.length)], lower[Math.floor(Math.random() * lower.length)],
+          numbers[Math.floor(Math.random() * numbers.length)], symbols[Math.floor(Math.random() * symbols.length)],
         ];
-        for (let i = pw.length; i < length; i++) { pw.push(all[Math.floor(Math.random() * all.length)]); }
-        for (let i = pw.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          const tmp = pw[i]; pw[i] = pw[j]; pw[j] = tmp;
-        }
+        for (let i = pw.length; i < length; i++) pw.push(all[Math.floor(Math.random() * all.length)]);
+        for (let i = pw.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = pw[i]; pw[i] = pw[j]; pw[j] = t; }
         return pw.join("");
       }
-      function refreshSuggestion() {
-        const val = generateStrongPassword(12);
-        document.getElementById("suggestValue").textContent = val;
-        return val;
-      }
-      document.getElementById("btnRegenSuggest").addEventListener("click", refreshSuggestion);
-      document.getElementById("btnUseSuggest").addEventListener("click", function () {
-        const val = document.getElementById("suggestValue").textContent;
-        document.getElementById("signupPassword").value = val;
-        document.getElementById("signupPasswordConfirm").value = val;
-        renderStrength(val);
-        state.password = val;
-        saveSessionState();
-      });
-      refreshSuggestion();
-
       function evaluatePassword(pw) {
-        const rules = {
-          len: pw.length >= 8,
-          upper: /[A-Z]/.test(pw),
-          lower: /[a-z]/.test(pw),
-          number: /[0-9]/.test(pw),
-          symbol: /[^A-Za-z0-9]/.test(pw),
-        };
+        const rules = { len: pw.length >= 8, upper: /[A-Z]/.test(pw), lower: /[a-z]/.test(pw), number: /[0-9]/.test(pw), symbol: /[^A-Za-z0-9]/.test(pw) };
         const metCount = Object.keys(rules).filter(function (k) { return rules[k]; }).length;
         let level = "weak", pct = pw ? 15 : 0, color = "var(--danger)";
         if (metCount >= 5) { level = "strong"; pct = 100; color = "var(--success)"; }
@@ -519,22 +483,56 @@
         return { rules: rules, level: level, pct: pct, color: color, metCount: metCount };
       }
       function renderStrength(pw) {
-        const evalResult = evaluatePassword(pw);
-        document.getElementById("strengthFill").style.width = evalResult.pct + "%";
-        document.getElementById("strengthFill").style.background = evalResult.color;
-        document.getElementById("strengthLabel").textContent = pw
-          ? "Password strength: " + evalResult.level.charAt(0).toUpperCase() + evalResult.level.slice(1)
-          : "Enter a password";
-        document.querySelectorAll("#strengthChecklist li").forEach(function (li) {
-          li.classList.toggle("met", !!evalResult.rules[li.getAttribute("data-rule")]);
-        });
-        return evalResult;
+        const r = evaluatePassword(pw);
+        document.getElementById("strengthFill").style.width = r.pct + "%";
+        document.getElementById("strengthFill").style.background = r.color;
+        document.getElementById("strengthLabel").textContent = pw ? "Password strength: " + r.level.charAt(0).toUpperCase() + r.level.slice(1) : "Enter a password";
+        document.querySelectorAll("#strengthChecklist li").forEach(function (li) { li.classList.toggle("met", !!r.rules[li.getAttribute("data-rule")]); });
+        return r;
       }
       document.getElementById("signupPassword").addEventListener("input", function (e) {
-        renderStrength(e.target.value);
+        state.password = e.target.value;
+        if (passwordChoice === "own") renderStrength(e.target.value);
+        saveSessionState();
+      });
+      document.getElementById("signupPasswordConfirm").addEventListener("input", saveSessionState);
+
+      function revealPasswordFields() {
+        document.getElementById("choicePanel").style.display = "none";
+        document.getElementById("passwordInputWrap").style.display = "block";
+        document.getElementById("confirmField").style.display = "block";
+      }
+
+      document.getElementById("btnChooseSuggested").addEventListener("click", function () {
+        const val = generateStrongPassword(12);
+        passwordChoice = "suggested";
+        revealPasswordFields();
+        document.getElementById("signupPassword").type = "text";
+        document.getElementById("signupPassword").value = val;
+        document.getElementById("signupPasswordConfirm").value = val;
+        document.getElementById("suggestedNote").style.display = "flex";
+        document.getElementById("strengthMeter").style.display = "none";
+        state.password = val;
+        saveSessionState();
+      });
+      document.getElementById("btnChooseOwn").addEventListener("click", function () {
+        passwordChoice = "own";
+        revealPasswordFields();
+        document.getElementById("signupPassword").type = "password";
+        document.getElementById("signupPassword").value = "";
+        document.getElementById("signupPasswordConfirm").value = "";
+        document.getElementById("suggestedNote").style.display = "none";
+        document.getElementById("strengthMeter").style.display = "block";
+        renderStrength("");
+        state.password = "";
+        saveSessionState();
+        document.getElementById("signupPassword").focus();
+      });
+      document.getElementById("btnSwitchToOwn").addEventListener("click", function () {
+        document.getElementById("btnChooseOwn").click();
       });
 
-      // ---------- STEP 2: Email + Password -> Send OTP ----------
+      // ---------- STEP 2: Send OTP ----------
       function generateOtp() { return String(Math.floor(100000 + Math.random() * 900000)); }
 
       document.getElementById("btnGetVerified").addEventListener("click", async function () {
@@ -543,12 +541,12 @@
         const confirmPw = document.getElementById("signupPasswordConfirm").value;
 
         if (!email) { showMsg("msgStep2", "Enter a valid email address.", "err"); return; }
+        if (!passwordChoice) { showMsg("msgStep2", "Tap the password field above to set your password first.", "err"); return; }
         if (!password || !confirmPw) { showMsg("msgStep2", "Set and confirm your password.", "err"); return; }
         if (password !== confirmPw) { showMsg("msgStep2", "Passwords do not match.", "err"); return; }
-        const evalResult = evaluatePassword(password);
-        if (evalResult.metCount < 4) {
-          showMsg("msgStep2", "Please choose a stronger password (mix uppercase, lowercase, numbers, and symbols), or use the suggestion above.", "err");
-          return;
+        if (passwordChoice === "own") {
+          const r = evaluatePassword(password);
+          if (r.metCount < 4) { showMsg("msgStep2", "Please choose a stronger password (mix uppercase, lowercase, numbers, symbols) or use the suggested one.", "err"); return; }
         }
 
         state.email = email;
@@ -618,16 +616,9 @@
       document.getElementById("btnVerifyOtp").addEventListener("click", async function () {
         const entered = document.getElementById("otpInput").value.trim();
         if (!entered) { showMsg("msgStep3", "Enter the OTP you received by email.", "err"); return; }
-
         const OTP_VALID_MS = 10 * 60 * 1000;
-        if (Date.now() - state.otpSentAt > OTP_VALID_MS) {
-          showMsg("msgStep3", 'This OTP has expired. Tap "Resend OTP".', "err");
-          return;
-        }
-        if (entered !== state.otpSent) {
-          showMsg("msgStep3", "Incorrect OTP. Please check your email again.", "err");
-          return;
-        }
+        if (Date.now() - state.otpSentAt > OTP_VALID_MS) { showMsg("msgStep3", 'This OTP has expired. Tap "Resend OTP".', "err"); return; }
+        if (entered !== state.otpSent) { showMsg("msgStep3", "Incorrect OTP. Please check your email again.", "err"); return; }
 
         const btn = this;
         btn.disabled = true; btn.textContent = "Verifying...";
@@ -641,40 +632,27 @@
           const photoFileToUpload = await getPhotoFileForUpload();
           let photoURL = "";
           if (photoFileToUpload) {
-            photoURL = await withTimeout(
-              uploadPhotoToCloudinary(photoFileToUpload),
-              15000, "Uploading your photo is taking too long. Check your Cloudinary cloud name and upload preset."
-            );
+            photoURL = await withTimeout(uploadPhotoToCloudinary(photoFileToUpload), 15000, "Uploading your photo is taking too long. Check your Cloudinary cloud name and upload preset.");
           }
-
-          await withTimeout(
-            user.updateProfile({ displayName: state.fullName, photoURL: photoURL || null }),
-            10000, "Updating your profile is taking too long."
-          );
-
+          await withTimeout(user.updateProfile({ displayName: state.fullName, photoURL: photoURL || null }), 10000, "Updating your profile is taking too long.");
           await withTimeout(
             db.collection("users").doc(user.uid).set({
-              fullName: state.fullName, email: state.email, photoURL: photoURL || null,
-              verified: true, institution: null, course: null, confirmedByCR: false,
-              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+              fullName: state.fullName, email: state.email, photoURL: photoURL || null, verified: true,
+              institution: null, course: null, confirmedByCR: false, createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             }),
             10000, "Saving your profile is taking too long. Check that your Firestore security rules allow this write."
           );
 
+          await tryStoreCredential(state.email, state.password, state.fullName);
           clearSessionState();
           showMsg("msgStep3", "Verified! Taking you to institution and course registration...", "ok");
           setTimeout(function () { window.location.href = "registration.html"; }, 900);
         } catch (err) {
           let message = "Error: " + (err.message || "Could not complete registration");
-          if (err && err.code === "auth/email-already-in-use") {
-            message = "This email is already registered. Try logging in instead.";
-          } else if (err && err.code === "auth/operation-not-allowed") {
-            message = "Email/Password sign-in is not enabled for this project yet. Enable it in Firebase Console > Authentication > Sign-in method.";
-          } else if (err && err.code === "auth/network-request-failed") {
-            message = "Network error while creating your account. Check your internet connection and try again.";
-          } else if (err && err.code === "auth/configuration-not-found") {
-            message = "Firebase Authentication is not configured for this project. Enable Email/Password sign-in in Firebase Console > Authentication > Sign-in method.";
-          }
+          if (err && err.code === "auth/email-already-in-use") message = "This email is already registered. Try logging in instead.";
+          else if (err && err.code === "auth/operation-not-allowed") message = "Email/Password sign-in is not enabled for this project yet. Enable it in Firebase Console > Authentication > Sign-in method.";
+          else if (err && err.code === "auth/network-request-failed") message = "Network error while creating your account. Check your internet connection and try again.";
+          else if (err && err.code === "auth/configuration-not-found") message = "Firebase Authentication is not configured for this project. Enable Email/Password sign-in in Firebase Console > Authentication > Sign-in method.";
           showMsg("msgStep3", message, "err");
         } finally {
           btn.disabled = false; btn.textContent = "Verify OTP";
@@ -691,16 +669,29 @@
         state.password = saved.password || "";
         state.otpSent = saved.otpSent || "";
         state.otpSentAt = saved.otpSentAt || 0;
+        passwordChoice = saved.passwordChoice || null;
 
-        if (state.fullName) document.getElementById("fullName").value = state.fullName;
-        if (state.photoPreviewUrl) {
-          avatarCircle.innerHTML = '<img src="' + state.photoPreviewUrl + '" alt="Profile Picture"/>';
+        if (saved.panelOpen) {
+          manualPanel.classList.add("open");
+          toggleBtn.textContent = "Hide Manual Sign Up";
         }
+        if (state.fullName) document.getElementById("fullName").value = state.fullName;
+        if (state.photoPreviewUrl) avatarCircle.innerHTML = '<img src="' + state.photoPreviewUrl + '" alt="Profile Picture"/>';
         if (state.email) document.getElementById("signupEmail").value = state.email;
+        if (passwordChoice) {
+          revealPasswordFields();
+          if (passwordChoice === "suggested") {
+            document.getElementById("signupPassword").type = "text";
+            document.getElementById("suggestedNote").style.display = "flex";
+            document.getElementById("strengthMeter").style.display = "none";
+          } else {
+            document.getElementById("strengthMeter").style.display = "block";
+          }
+        }
         if (state.password) {
           document.getElementById("signupPassword").value = state.password;
           document.getElementById("signupPasswordConfirm").value = state.password;
-          renderStrength(state.password);
+          if (passwordChoice === "own") renderStrength(state.password);
         }
         if (saved.step && saved.step >= 1 && saved.step <= 3) {
           if (state.email) document.getElementById("otpEmailLabel").textContent = state.email;
