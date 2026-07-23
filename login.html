@@ -88,6 +88,13 @@
       .btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(21,95,209,0.3); }
       .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
       .btn-outline { background: transparent; border: 1.5px solid var(--line); color: var(--ink); margin-top: 10px; }
+      .linkbtn {
+        display: block; width: 100%; text-align: center; background: none; border: none; cursor: pointer;
+        color: var(--water-deep); font-weight: 600; font-size: 0.85rem; margin-top: 12px; padding: 4px;
+      }
+      .linkbtn:hover { text-decoration: underline; }
+      .fineprint { font-size: 0.74rem; color: var(--muted); margin-top: 10px; line-height: 1.5; text-align: center; }
+      .or-divider { text-align: center; font-size: 0.78rem; color: var(--muted); margin: 18px 0 12px; }
       .msg { margin-top: 14px; padding: 11px 14px; border-radius: 10px; font-size: 0.85rem; display: none; }
       .msg.show { display: block; }
       .msg.err { background: #fdecec; color: var(--danger); }
@@ -147,8 +154,31 @@
             </div>
             <button type="submit" class="btn" id="btnLogin">Log In</button>
           </form>
+          <button type="button" class="linkbtn" id="btnForgotPassword">Forgot Password?</button>
           <button type="button" class="btn-outline" id="btnBackToEmail">Use a Different Email</button>
           <div class="msg" id="msgBox"></div>
+        </div>
+
+        <!-- ========== FORGOT PASSWORD PANEL ========== -->
+        <div class="loginStep" data-lstep="3">
+          <p class="sub">We'll email a reset link to <strong id="resetEmailLabel"></strong></p>
+          <button type="button" class="btn" id="btnSendReset">Send Password Reset Link</button>
+          <p class="fineprint">No reset link arriving? Check your spam folder, or if you never received the original signup OTP either, your email provider may be delaying FeMOS mail.</p>
+
+          <div class="or-divider">or, if you can't access that email</div>
+          <button type="button" class="btn-outline" id="btnUseRecoveryQuestion">Answer My Recovery Question Instead</button>
+          <div id="recoveryQuestionBlock" style="display:none;">
+            <p class="fineprint" style="margin-top:14px;">
+              Your recovery question is saved and ready to use, but safely verifying an answer and issuing a new
+              password without email access requires a small server-side helper (a Firebase Cloud Function) so that
+              one person's recovery answer can never be used to read or guess anyone else's account details. That
+              backend piece hasn't been built yet — ask your developer to add it next, or use the email reset link
+              above in the meantime.
+            </p>
+          </div>
+
+          <button type="button" class="btn-outline" id="btnBackToPasswordStep">Back to Password</button>
+          <div class="msg" id="msgReset"></div>
         </div>
 
       </div>
@@ -238,6 +268,39 @@
 
       document.getElementById("btnBackToEmail").addEventListener("click", function () {
         goToLoginStep(1);
+      });
+
+      // ---------- Forgot Password ----------
+      document.getElementById("btnForgotPassword").addEventListener("click", function () {
+        const email = document.getElementById("email").value.trim();
+        document.getElementById("resetEmailLabel").textContent = email || "your email";
+        document.getElementById("recoveryQuestionBlock").style.display = "none";
+        goToLoginStep(3);
+      });
+      document.getElementById("btnBackToPasswordStep").addEventListener("click", function () {
+        goToLoginStep(2);
+      });
+      document.getElementById("btnUseRecoveryQuestion").addEventListener("click", function () {
+        const block = document.getElementById("recoveryQuestionBlock");
+        block.style.display = block.style.display === "none" ? "block" : "none";
+      });
+      document.getElementById("btnSendReset").addEventListener("click", async function () {
+        const email = document.getElementById("email").value.trim();
+        if (!email) { showMsg("msgReset", "Enter your email on the previous step first.", "err"); return; }
+        const btn = this;
+        btn.disabled = true; btn.textContent = "Sending...";
+        try {
+          await auth.sendPasswordResetEmail(email);
+          showMsg("msgReset", "Reset link sent! Check " + email + " (including spam/junk folder).", "ok");
+        } catch (err) {
+          const message =
+            err && err.code === "auth/user-not-found"
+              ? "No FeMOS account uses that email address."
+              : "Could not send reset email: " + (err.message || "Please try again");
+          showMsg("msgReset", message, "err");
+        } finally {
+          btn.disabled = false; btn.textContent = "Send Password Reset Link";
+        }
       });
 
       document.getElementById("toggleLoginPw").addEventListener("click", function () {

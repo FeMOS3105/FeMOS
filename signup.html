@@ -231,6 +231,24 @@
             </div>
           </div>
 
+          <div class="field">
+            <label for="recoveryQuestion">Recovery Question (used if you ever forget your password)</label>
+            <select id="recoveryQuestion" style="width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid var(--line);font-size:0.9rem;color:var(--ink);background:#fbfdff;">
+              <option value="">-- Choose a question --</option>
+              <option value="What was the name of your first school?">What was the name of your first school?</option>
+              <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+              <option value="What was the name of your first pet?">What was the name of your first pet?</option>
+              <option value="What city were you born in?">What city were you born in?</option>
+              <option value="What was your favorite teacher's name?">What was your favorite teacher's name?</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="recoveryAnswer">Your Answer</label>
+            <div class="input-wrap">
+              <input type="text" id="recoveryAnswer" placeholder="Type your answer" style="padding-left:14px;"/>
+            </div>
+          </div>
+
           <button type="button" class="btn" id="btnGetVerified">Get Verified</button>
           <div class="msg" id="msgStep2"></div>
         </form>
@@ -312,6 +330,13 @@
         catch (e) {}
       }
 
+      // Hash the recovery answer before it ever reaches Firestore - never store it in plain text.
+      async function sha256Hex(text) {
+        const enc = new TextEncoder().encode(text.trim().toLowerCase());
+        const hashBuffer = await crypto.subtle.digest("SHA-256", enc);
+        return Array.from(new Uint8Array(hashBuffer)).map(function (b) { return b.toString(16).padStart(2, "0"); }).join("");
+      }
+
       const avatarCircle = document.getElementById("avatarCircle");
       const photoInput = document.getElementById("photoInput");
       let cropper = null;
@@ -362,7 +387,7 @@
 
       // ---------- Form state, persisted to sessionStorage so it survives a reload ----------
       const STORAGE_KEY = "femos_signup_state_v1";
-      const state = { fullName: "", photoFile: null, photoPreviewUrl: "", email: "", password: "", otpSent: "", otpSentAt: 0 };
+      const state = { fullName: "", photoFile: null, photoPreviewUrl: "", email: "", password: "", otpSent: "", otpSentAt: 0, recoveryQuestion: "", recoveryAnswer: "" };
       let currentStep = 1;
       let passwordChoice = null;
 
@@ -371,6 +396,7 @@
           sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
             step: currentStep, passwordChoice: passwordChoice, fullName: state.fullName, photoPreviewUrl: state.photoPreviewUrl,
             email: state.email, password: state.password, otpSent: state.otpSent, otpSentAt: state.otpSentAt,
+            recoveryQuestion: state.recoveryQuestion, recoveryAnswer: state.recoveryAnswer,
           }));
         } catch (e) {}
       }
@@ -472,6 +498,8 @@
         saveSessionState();
       });
       document.getElementById("signupPasswordConfirm").addEventListener("input", saveSessionState);
+      document.getElementById("recoveryQuestion").addEventListener("change", function (e) { state.recoveryQuestion = e.target.value; saveSessionState(); });
+      document.getElementById("recoveryAnswer").addEventListener("input", function (e) { state.recoveryAnswer = e.target.value; saveSessionState(); });
 
       function revealPasswordFields() {
         document.getElementById("choicePanel").style.display = "none";
@@ -512,10 +540,14 @@
         const password = document.getElementById("signupPassword").value;
         const confirmPw = document.getElementById("signupPasswordConfirm").value;
 
+        const recoveryQuestion = document.getElementById("recoveryQuestion").value;
+        const recoveryAnswer = document.getElementById("recoveryAnswer").value.trim();
+
         if (!email) { showMsg("msgStep2", "Enter a valid email address.", "err"); return; }
         if (!passwordChoice) { showMsg("msgStep2", "Tap the password field above to set your password first.", "err"); return; }
         if (!password || !confirmPw) { showMsg("msgStep2", "Set and confirm your password.", "err"); return; }
         if (password !== confirmPw) { showMsg("msgStep2", "Passwords do not match.", "err"); return; }
+        if (!recoveryQuestion || !recoveryAnswer) { showMsg("msgStep2", "Choose a recovery question and provide an answer, in case you forget your password later.", "err"); return; }
         if (passwordChoice === "own") {
           const r = evaluatePassword(password);
           if (r.metCount < 4) { showMsg("msgStep2", "Please choose a stronger password (mix uppercase, lowercase, numbers, symbols) or use the suggested one.", "err"); return; }
@@ -523,6 +555,8 @@
 
         state.email = email;
         state.password = password;
+        state.recoveryQuestion = recoveryQuestion;
+        state.recoveryAnswer = recoveryAnswer;
         saveSessionState();
 
         const btn = this;
@@ -606,10 +640,13 @@
             photoURL = await withTimeout(uploadPhotoToCloudinary(photoFileToUpload), 15000, "Uploading your photo is taking too long. Check your Cloudinary cloud name and upload preset.");
           }
           await withTimeout(user.updateProfile({ displayName: state.fullName, photoURL: photoURL || null }), 10000, "Updating your profile is taking too long.");
+          const recoveryAnswerHash = await sha256Hex(state.recoveryAnswer);
           await withTimeout(
             db.collection("users").doc(user.uid).set({
               fullName: state.fullName, email: state.email, photoURL: photoURL || null, verified: true,
-              institution: null, course: null, confirmedByCR: false, createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+              institution: null, course: null, confirmedByCR: false,
+              recoveryQuestion: state.recoveryQuestion, recoveryAnswerHash: recoveryAnswerHash,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             }),
             10000, "Saving your profile is taking too long. Check that your Firestore security rules allow this write."
           );
@@ -640,8 +677,12 @@
         state.otpSent = saved.otpSent || "";
         state.otpSentAt = saved.otpSentAt || 0;
         passwordChoice = saved.passwordChoice || null;
+        state.recoveryQuestion = saved.recoveryQuestion || "";
+        state.recoveryAnswer = saved.recoveryAnswer || "";
 
         if (state.fullName) document.getElementById("fullName").value = state.fullName;
+        if (state.recoveryQuestion) document.getElementById("recoveryQuestion").value = state.recoveryQuestion;
+        if (state.recoveryAnswer) document.getElementById("recoveryAnswer").value = state.recoveryAnswer;
         if (state.photoPreviewUrl) avatarCircle.innerHTML = '<img src="' + state.photoPreviewUrl + '" alt="Profile Picture"/>';
         if (state.email) document.getElementById("signupEmail").value = state.email;
         if (passwordChoice) {
