@@ -88,6 +88,7 @@
         <div class="tabbar">
           <button class="tabbtn active" data-tab="pending">Pending Registrations</button>
           <button class="tabbtn" data-tab="catalog">Catalog Management</button>
+          <button class="tabbtn" data-tab="instadmins">Institution Admins</button>
         </div>
 
         <!-- ============ PENDING REGISTRATIONS ============ -->
@@ -139,6 +140,24 @@
             <div id="catalogTree"></div>
           </div>
         </div>
+        <!-- ============ INSTITUTION ADMINS ============ -->
+        <div class="panel" id="panel-instadmins">
+          <div class="card">
+            <h2>Grant Institution Admin Access</h2>
+            <div class="hint">Enter the email of an already-registered FeMOS user, and pick which institution they'll manage.</div>
+            <div class="row2">
+              <div class="field"><label>Institution</label><select id="grantInstSelect"></select></div>
+              <div class="field"><label>User's Email</label><input id="grantEmail" placeholder="e.g. registrar@must.ac.tz"/></div>
+            </div>
+            <button class="btn" id="btnGrantInstAdmin">Grant Institution Admin</button>
+            <div class="msg" id="msgGrant"></div>
+          </div>
+
+          <div class="card">
+            <h2>Current Institution Admins</h2>
+            <div id="instAdminList"><div class="empty">Loading...</div></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -174,14 +193,14 @@
           return;
         }
         try {
-          const adminDoc = await db.collection("admins").doc(user.uid).get();
-          if (!adminDoc.exists) {
+          const roleDoc = await db.collection("userRoles").doc(user.uid).get();
+          if (!roleDoc.exists || roleDoc.data().role !== "superAdmin") {
             gate.innerHTML =
               "<h2>Access Denied</h2>" +
-              "<p style='color:var(--muted);font-size:0.85rem;margin-top:8px;'>Your account (" + user.email + ") is not an admin yet. " +
-              "To grant access, add a document in Firestore: collection <b>admins</b>, document ID:</p>" +
+              "<p style='color:var(--muted);font-size:0.85rem;margin-top:8px;'>Your account (" + user.email + ") is not a Super Admin. " +
+              "To grant access, add a document in Firestore: collection <b>userRoles</b>, document ID:</p>" +
               "<code>" + user.uid + "</code>" +
-              "<p style='color:var(--muted);font-size:0.8rem;'>Then reload this page.</p>" +
+              "<p style='color:var(--muted);font-size:0.8rem;'>...with a field <b>role</b> (string) set to <b>superAdmin</b>. Then reload this page.</p>" +
               '<button class="btn" style="margin-top:14px;" onclick="location.reload()">Reload</button>';
             return;
           }
@@ -221,6 +240,8 @@
         loadPending();
         loadInstitutionSelects();
         loadCatalogTree();
+        loadGrantInstSelect();
+        loadInstAdminList();
       }
 
       // ================= PENDING REGISTRATIONS =================
@@ -414,6 +435,65 @@
             loadInstitutionSelects();
           });
         });
+      }
+      // ================= INSTITUTION ADMINS =================
+      async function loadGrantInstSelect() {
+        const snap = await db.collection("institutions").orderBy("name").get();
+        document.getElementById("grantInstSelect").innerHTML =
+          snap.docs.map(function (d) { return '<option value="' + d.id + '">' + escapeHtml(d.data().name) + "</option>"; }).join("") ||
+          '<option value="">-- add an institution first --</option>';
+      }
+
+      document.getElementById("btnGrantInstAdmin").addEventListener("click", async function () {
+        const instId = document.getElementById("grantInstSelect").value;
+        const email = document.getElementById("grantEmail").value.trim();
+        if (!instId || !email) { showMsg("msgGrant", "Pick an institution and enter the user's email.", "err"); return; }
+        try {
+          const userSnap = await db.collection("users").where("email", "==", email).limit(1).get();
+          if (userSnap.empty) { showMsg("msgGrant", "No FeMOS user found with that email. They must sign up first.", "err"); return; }
+          const targetUid = userSnap.docs[0].id;
+          const instName = document.getElementById("grantInstSelect").selectedOptions[0].textContent;
+          await db.collection("userRoles").doc(targetUid).set({
+            role: "institutionAdmin", institutionId: instId, institutionName: instName,
+            assignedAt: firebase.firestore.FieldValue.serverTimestamp(), assignedBy: auth.currentUser.uid,
+          });
+          document.getElementById("grantEmail").value = "";
+          showMsg("msgGrant", "Granted! " + email + " is now Institution Admin for " + instName + ".", "ok");
+          loadInstAdminList();
+        } catch (err) {
+          showMsg("msgGrant", "Error: " + (err.message || ""), "err");
+        }
+      });
+
+      async function loadInstAdminList() {
+        const listEl = document.getElementById("instAdminList");
+        listEl.innerHTML = "Loading...";
+        try {
+          const snap = await db.collection("userRoles").where("role", "==", "institutionAdmin").get();
+          if (snap.empty) { listEl.innerHTML = '<div class="empty">No Institution Admins granted yet.</div>'; return; }
+          let html = "";
+          for (const doc of snap.docs) {
+            const d = doc.data();
+            let label = doc.id;
+            try {
+              const userDoc = await db.collection("users").doc(doc.id).get();
+              if (userDoc.exists) label = (userDoc.data().fullName || userDoc.data().email || doc.id);
+            } catch (e) {}
+            html += '<div class="prow"><div class="info"><b>' + escapeHtml(label) + '</b>' +
+                    "<span>" + escapeHtml(d.institutionName || d.institutionId) + '</span></div>' +
+                    '<div class="actions"><button class="btn-sm btn-reject" data-revoke="' + doc.id + '">Revoke</button></div></div>';
+          }
+          listEl.innerHTML = html;
+          listEl.querySelectorAll("[data-revoke]").forEach(function (btn) {
+            btn.addEventListener("click", async function () {
+              if (!confirm("Revoke Institution Admin access for this person?")) return;
+              await db.collection("userRoles").doc(btn.getAttribute("data-revoke")).delete();
+              loadInstAdminList();
+            });
+          });
+        } catch (err) {
+          listEl.innerHTML = '<div class="empty">Could not load list: ' + escapeHtml(err.message || "") + "</div>";
+        }
       }
     </script>
   </body>
