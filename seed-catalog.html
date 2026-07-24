@@ -30,6 +30,15 @@
       </div>
 
       <div id="authGate" class="authnote">Checking your sign-in status...</div>
+
+      <div id="loginArea" style="display:none;">
+        <p class="authnote" style="margin-bottom:14px;">Sign in with your normal FeMOS email &amp; password — no special admin account is needed right now.</p>
+        <input type="email" id="seedEmail" placeholder="Your FeMOS email" style="width:100%;padding:12px;border-radius:10px;border:1.5px solid var(--line);margin-bottom:10px;font-size:0.9rem;"/>
+        <input type="password" id="seedPassword" placeholder="Your FeMOS password" style="width:100%;padding:12px;border-radius:10px;border:1.5px solid var(--line);margin-bottom:10px;font-size:0.9rem;"/>
+        <button id="btnSeedLogin">Sign In &amp; Continue</button>
+        <div class="msg-inline" id="loginErr" style="color:var(--danger);font-size:0.82rem;text-align:center;"></div>
+      </div>
+
       <div id="seedArea" style="display:none;">
         <button id="btnSeed">Run Seed</button>
       </div>
@@ -115,14 +124,35 @@
 
       auth.onAuthStateChanged(function (user) {
         const gate = document.getElementById("authGate");
+        const loginArea = document.getElementById("loginArea");
         const area = document.getElementById("seedArea");
         if (!user) {
-          gate.innerHTML = 'You must be signed in to run this. <a href="login.html">Log in first</a>, then reload this page.';
+          gate.textContent = "Not signed in.";
+          loginArea.style.display = "block";
           area.style.display = "none";
           return;
         }
         gate.textContent = "Signed in as " + (user.email || user.uid) + ". Ready to seed.";
+        loginArea.style.display = "none";
         area.style.display = "block";
+      });
+
+      document.getElementById("btnSeedLogin").addEventListener("click", async function () {
+        const email = document.getElementById("seedEmail").value.trim();
+        const password = document.getElementById("seedPassword").value;
+        const errEl = document.getElementById("loginErr");
+        errEl.textContent = "";
+        if (!email || !password) { errEl.textContent = "Enter both email and password."; return; }
+        const btn = this;
+        btn.disabled = true; btn.textContent = "Signing in...";
+        try {
+          await auth.signInWithEmailAndPassword(email, password);
+          // onAuthStateChanged above will flip the UI to the seed button automatically
+        } catch (err) {
+          errEl.textContent = "Sign-in failed: " + (err.message || "Check your email and password");
+        } finally {
+          btn.disabled = false; btn.textContent = "Sign In & Continue";
+        }
       });
 
       document.getElementById("btnSeed").addEventListener("click", async function () {
