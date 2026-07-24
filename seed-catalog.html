@@ -122,7 +122,7 @@
         box.scrollTop = box.scrollHeight;
       }
 
-      auth.onAuthStateChanged(function (user) {
+      auth.onAuthStateChanged(async function (user) {
         const gate = document.getElementById("authGate");
         const loginArea = document.getElementById("loginArea");
         const area = document.getElementById("seedArea");
@@ -132,9 +132,22 @@
           area.style.display = "none";
           return;
         }
-        gate.textContent = "Signed in as " + (user.email || user.uid) + ". Ready to seed.";
         loginArea.style.display = "none";
-        area.style.display = "block";
+        gate.textContent = "Checking admin access for " + (user.email || user.uid) + "...";
+        try {
+          const adminDoc = await db.collection("admins").doc(user.uid).get();
+          if (!adminDoc.exists) {
+            gate.innerHTML =
+              "This account (" + user.email + ") is not an admin, so the catalog is locked for it. Add a document in " +
+              "Firestore collection <b>admins</b> with document ID <code>" + user.uid + "</code>, then reload.";
+            area.style.display = "none";
+            return;
+          }
+          gate.textContent = "Signed in as admin " + (user.email || user.uid) + ". Ready to seed.";
+          area.style.display = "block";
+        } catch (err) {
+          gate.textContent = "Error checking admin access: " + (err.message || "");
+        }
       });
 
       document.getElementById("btnSeedLogin").addEventListener("click", async function () {
