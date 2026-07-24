@@ -2,282 +2,55 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>FeMOS — Institution & Course Registration</title>
     <style>
       :root {
-        --water-light: #5fd4f0;
-        --water-mid: #2ea8ee;
-        --water-deep: #155fd1;
-        --water-abyss: #0b2f9e;
-        --ink: #0d1b4b;
-        --muted: #5c6b9a;
-        --line: #dbe6fb;
-        --danger: #e14b4b;
-        --success: #1fae6e;
+        --water-light: #5fd4f0; --water-mid: #2ea8ee; --water-deep: #155fd1; --water-abyss: #0b2f9e;
+        --ink: #0d1b4b; --muted: #5c6b9a; --line: #dbe6fb; --danger: #e14b4b; --success: #1fae6e;
       }
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      html,
-      body {
-        width: 100%;
-        min-height: 100%;
-      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { width: 100%; min-height: 100%; }
       body {
         background: linear-gradient(180deg, #eef5ff 0%, #f7fbff 100%);
-        font-family:
-          "Segoe UI",
-          system-ui,
-          -apple-system,
-          Roboto,
-          sans-serif;
-        color: var(--ink);
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 24px 16px;
-        overflow-x: hidden;
+        font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+        color: var(--ink); min-height: 100vh; display: flex; align-items: center; justify-content: center;
+        padding: 24px 16px; overflow-x: hidden;
       }
-      body::before,
-      body::after {
-        content: "";
-        position: fixed;
-        inset: auto;
-        width: 260px;
-        height: 260px;
-        border-radius: 50%;
-        background: radial-gradient(
-          circle,
-          rgba(46, 168, 238, 0.22),
-          transparent 70%
-        );
-        filter: blur(24px);
-        z-index: -1;
-        animation: floatOrb 6s ease-in-out infinite;
-      }
-      body::before {
-        top: -70px;
-        left: -40px;
-      }
-      body::after {
-        bottom: -80px;
-        right: -40px;
-        animation-delay: 1.8s;
-      }
-      .card {
-        width: 100%;
-        max-width: 460px;
-        background: rgba(255, 255, 255, 0.97);
-        border-radius: 24px;
-        box-shadow: 0 20px 60px rgba(13, 27, 75, 0.12);
-        padding: 34px 26px;
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.75);
-        animation: riseIn 0.7s ease both;
-      }
-      .logo-mini {
-        width: 74px;
-        height: 74px;
-        margin: 0 auto 12px;
-        border-radius: 50%;
-        overflow: hidden;
-        background: linear-gradient(135deg, #eef8ff 0%, #dcefff 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow:
-          0 0 0 4px rgba(255, 255, 255, 0.9),
-          0 16px 40px rgba(21, 95, 209, 0.24);
-        border: 3px solid rgba(255, 255, 255, 0.95);
-        animation: floatLogo 3.8s ease-in-out infinite;
-        position: relative;
-      }
-      .logo-mini::before {
-        content: "";
-        position: absolute;
-        inset: -2px;
-        border-radius: inherit;
-        background: linear-gradient(
-          135deg,
-          rgba(46, 168, 238, 0.65),
-          rgba(21, 95, 209, 0.9)
-        );
-        z-index: -1;
-        filter: blur(8px);
-        opacity: 0.35;
-      }
-      .logo-mini img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-        padding: 4px;
-      }
-      h1.brand {
-        text-align: center;
-        font-size: 1.3rem;
-        font-weight: 700;
-        background: linear-gradient(90deg, var(--water-mid), var(--water-deep));
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-        margin-bottom: 6px;
-      }
-      p.sub {
-        text-align: center;
-        font-size: 0.85rem;
-        color: var(--muted);
-        margin-bottom: 26px;
-      }
-
-      .userpill {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        background: #f5f9ff;
-        border-radius: 14px;
-        padding: 12px 14px;
-        margin-bottom: 24px;
-      }
-      .userpill .av {
-        width: 38px;
-        height: 38px;
-        border-radius: 50%;
-        background: linear-gradient(
-          135deg,
-          var(--water-light),
-          var(--water-deep)
-        );
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #fff;
-        font-weight: 700;
-        font-size: 0.9rem;
-        overflow: hidden;
-        flex-shrink: 0;
-      }
-      .userpill .av img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-      .userpill .name {
-        font-weight: 700;
-        font-size: 0.92rem;
-      }
-      .userpill .email {
-        font-size: 0.76rem;
-        color: var(--muted);
-      }
-
-      .field {
-        margin-bottom: 18px;
-      }
-      .field label {
-        display: block;
-        font-size: 0.8rem;
-        font-weight: 600;
-        color: var(--muted);
-        margin-bottom: 6px;
-      }
+      .card { width: 100%; max-width: 460px; background: rgba(255,255,255,0.97); border-radius: 24px; box-shadow: 0 20px 60px rgba(13,27,75,0.12); padding: 34px 26px; border: 1px solid rgba(255,255,255,0.75); }
+      .logo-mini { width: 70px; height: 70px; margin: 0 auto 12px; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 4px rgba(255,255,255,0.9), 0 16px 40px rgba(21,95,209,0.24); }
+      .logo-mini img { width: 100%; height: 100%; object-fit: cover; }
+      h1.brand { text-align: center; font-size: 1.3rem; font-weight: 700; background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 6px; }
+      p.sub { text-align: center; font-size: 0.85rem; color: var(--muted); margin-bottom: 26px; }
+      .userpill { display: flex; align-items: center; gap: 12px; background: #f5f9ff; border-radius: 14px; padding: 12px 14px; margin-bottom: 24px; }
+      .userpill .av { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--water-light), var(--water-deep)); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 0.9rem; overflow: hidden; flex-shrink: 0; }
+      .userpill .av img { width: 100%; height: 100%; object-fit: cover; }
+      .userpill .name { font-weight: 700; font-size: 0.92rem; }
+      .userpill .email { font-size: 0.76rem; color: var(--muted); }
+      .field { margin-bottom: 18px; }
+      .field label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
       select {
-        width: 100%;
-        padding: 13px 14px;
-        border-radius: 12px;
-        border: 1.5px solid var(--line);
-        font-size: 0.95rem;
-        color: var(--ink);
-        background: #fbfdff;
-        appearance: none;
+        width: 100%; padding: 13px 14px; border-radius: 12px; border: 1.5px solid var(--line);
+        font-size: 0.95rem; color: var(--ink); background: #fbfdff; appearance: none;
         background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235c6b9a' stroke-width='2'><path d='m6 9 6 6 6-6'/></svg>");
-        background-repeat: no-repeat;
-        background-position: right 14px center;
-        background-size: 18px;
+        background-repeat: no-repeat; background-position: right 14px center; background-size: 18px;
       }
-      select:focus {
-        outline: none;
-        border-color: var(--water-mid);
-        box-shadow: 0 0 0 3px rgba(46, 168, 238, 0.15);
-      }
-      select:disabled {
-        background-color: #f2f4f8;
-        color: var(--muted);
-      }
-
-      .btn {
-        width: 100%;
-        padding: 14px;
-        border: none;
-        border-radius: 12px;
-        font-weight: 700;
-        font-size: 0.95rem;
-        cursor: pointer;
-        background: linear-gradient(90deg, var(--water-mid), var(--water-deep));
-        color: #fff;
-        transition:
-          transform 0.15s,
-          box-shadow 0.15s;
-      }
-      .btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 10px 24px rgba(21, 95, 209, 0.3);
-      }
-      .btn:disabled {
-        opacity: 0.55;
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
-      }
-
-      .note {
-        font-size: 0.76rem;
-        color: var(--muted);
-        margin-top: 14px;
-        line-height: 1.5;
-        text-align: center;
-      }
-      .msg {
-        margin-top: 14px;
-        padding: 11px 14px;
-        border-radius: 10px;
-        font-size: 0.85rem;
-        display: none;
-      }
-      .msg.show {
-        display: block;
-      }
-      .msg.err {
-        background: #fdecec;
-        color: var(--danger);
-      }
-      .msg.ok {
-        background: #e9f9f1;
-        color: var(--success);
-      }
-
-      @media (max-width: 380px) {
-        .card {
-          padding: 24px 16px;
-        }
-      }
+      select:focus { outline: none; border-color: var(--water-mid); box-shadow: 0 0 0 3px rgba(46,168,238,0.15); }
+      select:disabled { background-color: #f2f4f8; color: var(--muted); }
+      .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 700; font-size: 0.95rem; cursor: pointer; background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); color: #fff; transition: transform .15s, box-shadow .15s; }
+      .btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(21,95,209,0.3); }
+      .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+      .note { font-size: 0.76rem; color: var(--muted); margin-top: 14px; line-height: 1.5; text-align: center; }
+      .msg { margin-top: 14px; padding: 11px 14px; border-radius: 10px; font-size: 0.85rem; display: none; }
+      .msg.show { display: block; }
+      .msg.err { background: #fdecec; color: var(--danger); }
+      .msg.ok { background: #e9f9f1; color: var(--success); }
+      @media (max-width: 380px) { .card { padding: 24px 16px; } }
     </style>
   </head>
   <body>
     <div class="card">
-      <div class="logo-mini">
-        <img
-          src="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png"
-          alt="FeMOS logo"
-        />
-      </div>
+      <div class="logo-mini"><img src="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png" alt="FeMOS logo"/></div>
       <h1 class="brand">Institution & Course Registration</h1>
       <p class="sub">Final step before you enter the system</p>
 
@@ -293,33 +66,34 @@
         <div class="field">
           <label for="institution">Institution</label>
           <select id="institution" required>
-            <option value="" disabled selected>-- Select Institution --</option>
+            <option value="" disabled selected>-- Loading institutions... --</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="campus">Campus</label>
+          <select id="campus" required disabled>
+            <option value="" disabled selected>-- Select Institution First --</option>
           </select>
         </div>
 
         <div class="field">
           <label for="course">Course</label>
           <select id="course" required disabled>
-            <option value="" disabled selected>
-              -- Select Institution First --
-            </option>
+            <option value="" disabled selected>-- Select Campus First --</option>
           </select>
         </div>
 
-        <button type="submit" class="btn" id="btnSaveReg">
-          Complete Registration
-        </button>
+        <button type="submit" class="btn" id="btnSaveReg">Complete Registration</button>
         <div class="msg" id="msgReg"></div>
       </form>
 
       <div class="note">
-        After you complete this step, your course's Class Representative (CR)
-        will<br />
-        confirm your registration on the official student roster.
+        After you complete this step, your registration status will be <strong>Pending</strong> until a Class
+        Representative or system administrator confirms it on the official student roster.
       </div>
     </div>
 
-    <!-- ================= FIREBASE SDK (compat) ================= -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -334,210 +108,137 @@
         appId: "1:1022203442714:web:4fa06d28d788c024bf83a3",
         measurementId: "G-M4DEBFVJCV",
       };
-
-      function validateFirebaseConfig() {
-        const missing = [];
-        if (!firebaseConfig.apiKey || firebaseConfig.apiKey.includes("PUT_"))
-          missing.push("Firebase API key");
-        if (
-          !firebaseConfig.authDomain ||
-          firebaseConfig.authDomain.includes("PUT_")
-        )
-          missing.push("Firebase auth domain");
-        if (
-          !firebaseConfig.projectId ||
-          firebaseConfig.projectId.includes("PUT_")
-        )
-          missing.push("Firebase project ID");
-        if (
-          !firebaseConfig.storageBucket ||
-          firebaseConfig.storageBucket.includes("PUT_")
-        )
-          missing.push("Firebase storage bucket");
-        if (
-          !firebaseConfig.messagingSenderId ||
-          firebaseConfig.messagingSenderId.includes("PUT_")
-        )
-          missing.push("Firebase messaging sender ID");
-        if (!firebaseConfig.appId || firebaseConfig.appId.includes("PUT_"))
-          missing.push("Firebase app ID");
-        if (missing.length) {
-          throw new Error(
-            "Missing required Firebase config values: " + missing.join(", "),
-          );
-        }
-      }
-
-      validateFirebaseConfig();
-      const app = firebase.apps.length
-        ? firebase.app()
-        : firebase.initializeApp(firebaseConfig);
+      const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
       const auth = firebase.auth(app);
       const db = firebase.firestore(app);
 
-      // ================= COURSES PER INSTITUTION (replace with your real data) =================
-      // Better long-term approach: store this list in a Firestore collection called
-      // "institutions" so it can be updated without touching the code. For now this
-      // static object is used to keep the demo simple to wire up.
-      const INSTITUTIONS = {
-        MUST: {
-          name: "Mbeya University of Science and Technology",
-          courses: [
-            "Computer Science",
-            "Electrical Engineering",
-            "Mechanical Engineering",
-            "Information Technology",
-          ],
-        },
-        UDSM: {
-          name: "University of Dar es Salaam",
-          courses: [
-            "Law",
-            "Business Administration",
-            "Medicine",
-            "Education",
-            "Civil Engineering",
-          ],
-        },
-        UDOM: {
-          name: "University of Dodoma",
-          courses: [
-            "Science Education",
-            "Social Sciences",
-            "Agriculture",
-            "Computer Science",
-          ],
-        },
-      };
-
       const institutionSelect = document.getElementById("institution");
+      const campusSelect = document.getElementById("campus");
       const courseSelect = document.getElementById("course");
 
-      Object.keys(INSTITUTIONS).forEach(function (code) {
-        const opt = document.createElement("option");
-        opt.value = code;
-        opt.textContent = INSTITUTIONS[code].name;
-        institutionSelect.appendChild(opt);
-      });
+      let selectedInstitutionName = "";
+      let selectedCampusName = "";
+
+      async function loadInstitutions() {
+        institutionSelect.innerHTML = '<option value="" disabled selected>-- Select Institution --</option>';
+        const snap = await db.collection("institutions").orderBy("name").get();
+        if (snap.empty) {
+          institutionSelect.innerHTML = '<option value="" disabled selected>-- No institutions found, ask admin to seed the catalog --</option>';
+          return;
+        }
+        snap.forEach(function (doc) {
+          const opt = document.createElement("option");
+          opt.value = doc.id;
+          opt.textContent = doc.data().name;
+          institutionSelect.appendChild(opt);
+        });
+      }
+
+      async function loadCampuses(institutionId) {
+        campusSelect.innerHTML = '<option value="" disabled selected>-- Loading campuses... --</option>';
+        campusSelect.disabled = true;
+        courseSelect.innerHTML = '<option value="" disabled selected>-- Select Campus First --</option>';
+        courseSelect.disabled = true;
+        const snap = await db.collection("institutions").doc(institutionId).collection("campuses").orderBy("name").get();
+        campusSelect.innerHTML = '<option value="" disabled selected>-- Select Campus --</option>';
+        if (snap.empty) {
+          campusSelect.innerHTML = '<option value="" disabled selected>-- No campuses found for this institution --</option>';
+          return;
+        }
+        snap.forEach(function (doc) {
+          const opt = document.createElement("option");
+          opt.value = doc.id;
+          opt.textContent = doc.data().name;
+          campusSelect.appendChild(opt);
+        });
+        campusSelect.disabled = false;
+      }
+
+      async function loadCourses(institutionId, campusId) {
+        courseSelect.innerHTML = '<option value="" disabled selected>-- Loading courses... --</option>';
+        courseSelect.disabled = true;
+        const snap = await db.collection("institutions").doc(institutionId).collection("campuses").doc(campusId)
+          .collection("courses").orderBy("name").get();
+        courseSelect.innerHTML = '<option value="" disabled selected>-- Select Course --</option>';
+        if (snap.empty) {
+          courseSelect.innerHTML = '<option value="" disabled selected>-- No courses found for this campus --</option>';
+          return;
+        }
+        snap.forEach(function (doc) {
+          const opt = document.createElement("option");
+          opt.value = doc.id;
+          opt.textContent = doc.data().name;
+          courseSelect.appendChild(opt);
+        });
+        courseSelect.disabled = false;
+      }
 
       institutionSelect.addEventListener("change", function () {
-        const code = this.value;
-        courseSelect.innerHTML =
-          '<option value="" disabled selected>-- Select Course --</option>';
-        if (INSTITUTIONS[code]) {
-          INSTITUTIONS[code].courses.forEach(function (c) {
-            const opt = document.createElement("option");
-            opt.value = c;
-            opt.textContent = c;
-            courseSelect.appendChild(opt);
-          });
-          courseSelect.disabled = false;
-        } else {
-          courseSelect.disabled = true;
-        }
+        selectedInstitutionName = this.options[this.selectedIndex].textContent;
+        loadCampuses(this.value);
+      });
+      campusSelect.addEventListener("change", function () {
+        selectedCampusName = this.options[this.selectedIndex].textContent;
+        loadCourses(institutionSelect.value, this.value);
       });
 
       function showMsg(text, type) {
         const el = document.getElementById("msgReg");
-        el.textContent = text;
-        el.className = "msg show " + type;
+        el.textContent = text; el.className = "msg show " + type;
       }
 
       let currentUser = null;
 
       auth.onAuthStateChanged(async function (user) {
-        if (!user) {
-          window.location.href = "login.html";
-          return;
-        }
+        if (!user) { window.location.href = "login.html"; return; }
         currentUser = user;
-        document.getElementById("userName").textContent =
-          user.displayName || user.email;
+        document.getElementById("userName").textContent = user.displayName || user.email;
         document.getElementById("userEmail").textContent = user.email;
         if (user.photoURL) {
-          document.getElementById("userAv").innerHTML =
-            '<img src="' + user.photoURL + '" alt="Profile"/>';
+          document.getElementById("userAv").innerHTML = '<img src="' + user.photoURL + '" alt="Profile"/>';
         } else {
-          const initials = (user.displayName || user.email || "?")
-            .trim()
-            .split(/\s+/)
-            .map(function (p) {
-              return p[0];
-            })
-            .slice(0, 2)
-            .join("")
-            .toUpperCase();
+          const initials = (user.displayName || user.email || "?").trim().split(/\s+/).map(function (p) { return p[0]; }).slice(0, 2).join("").toUpperCase();
           document.getElementById("userAv").textContent = initials;
         }
+        loadInstitutions();
       });
 
-      document
-        .getElementById("regForm")
-        .addEventListener("submit", async function (e) {
-          e.preventDefault();
-          if (!currentUser) {
-            showMsg("You are not logged in. Please log in again.", "err");
-            return;
-          }
-          const instCode = institutionSelect.value;
-          const course = courseSelect.value;
-          if (!instCode || !course) {
-            showMsg(
-              "Select both an institution and a course before continuing.",
-              "err",
-            );
-            return;
-          }
+      document.getElementById("regForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        if (!currentUser) { showMsg("You are not logged in. Please log in again.", "err"); return; }
+        const institutionId = institutionSelect.value;
+        const campusId = campusSelect.value;
+        const courseId = courseSelect.value;
+        const courseName = courseSelect.options[courseSelect.selectedIndex] ? courseSelect.options[courseSelect.selectedIndex].textContent : "";
+        if (!institutionId || !campusId || !courseId) { showMsg("Select an institution, campus, and course before continuing.", "err"); return; }
 
-          const btn = document.getElementById("btnSaveReg");
-          btn.disabled = true;
-          btn.textContent = "Saving...";
-          try {
-            const institutionName = INSTITUTIONS[instCode].name;
+        const btn = document.getElementById("btnSaveReg");
+        btn.disabled = true; btn.textContent = "Saving...";
+        try {
+          await db.collection("users").doc(currentUser.uid).set({
+            institutionId: institutionId, institutionName: selectedInstitutionName,
+            campusId: campusId, campusName: selectedCampusName,
+            courseId: courseId, courseName: courseName,
+            registrationStatus: "pending", confirmedByCR: false,
+          }, { merge: true });
 
-            // 1) Update the user's profile with the chosen institution/course
-            await db.collection("users").doc(currentUser.uid).set(
-              {
-                institution: instCode,
-                institutionName: institutionName,
-                course: course,
-                confirmedByCR: false,
-              },
-              { merge: true },
-            );
+          const rosterId = institutionId + "_" + campusId + "_" + courseId;
+          await db.collection("courseRosters").doc(rosterId).collection("pendingStudents").doc(currentUser.uid).set({
+            fullName: currentUser.displayName || "", email: currentUser.email,
+            institutionId: institutionId, institutionName: selectedInstitutionName,
+            campusId: campusId, campusName: selectedCampusName,
+            courseId: courseId, courseName: courseName,
+            requestedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          });
 
-            // 2) Add a record to that course's roster - the Class Representative will confirm it
-            const courseDocId = instCode + "_" + course.replace(/\s+/g, "_");
-            await db
-              .collection("courseRosters")
-              .doc(courseDocId)
-              .collection("pendingStudents")
-              .doc(currentUser.uid)
-              .set({
-                fullName: currentUser.displayName || "",
-                email: currentUser.email,
-                institution: instCode,
-                course: course,
-                requestedAt: firebase.firestore.FieldValue.serverTimestamp(),
-              });
-
-            showMsg(
-              "Registration complete! Waiting for your Class Representative to confirm you.",
-              "ok",
-            );
-            setTimeout(function () {
-              window.location.href = "proof.html";
-            }, 1200);
-          } catch (err) {
-            showMsg(
-              "Error: " + (err.message || "Could not save your registration"),
-              "err",
-            );
-          } finally {
-            btn.disabled = false;
-            btn.textContent = "Complete Registration";
-          }
-        });
+          showMsg("Registration submitted! Your status is Pending until confirmed.", "ok");
+          setTimeout(function () { window.location.href = "proof.html"; }, 1200);
+        } catch (err) {
+          showMsg("Error: " + (err.message || "Could not save your registration"), "err");
+        } finally {
+          btn.disabled = false; btn.textContent = "Complete Registration";
+        }
+      });
     </script>
   </body>
 </html>

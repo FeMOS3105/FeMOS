@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FeMOS — Catalog Seeder (Developer Tool)</title>
+    <style>
+      :root { --water-mid:#2ea8ee; --water-deep:#155fd1; --ink:#0d1b4b; --muted:#5c6b9a; --line:#dbe6fb; --success:#1fae6e; --danger:#e14b4b; }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: "Segoe UI", system-ui, sans-serif; background: #eef5ff; color: var(--ink); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+      .card { width: 100%; max-width: 560px; background: #fff; border-radius: 20px; box-shadow: 0 20px 60px rgba(13,27,75,0.12); padding: 32px; }
+      h1 { font-size: 1.25rem; margin-bottom: 6px; }
+      p.sub { color: var(--muted); font-size: 0.88rem; margin-bottom: 20px; }
+      .warn { background: #fff7e6; border: 1.5px dashed #e0a020; border-radius: 10px; padding: 12px 14px; font-size: 0.82rem; color: #8a6100; margin-bottom: 20px; }
+      button { width: 100%; padding: 13px; border: none; border-radius: 10px; font-weight: 700; font-size: 0.92rem; cursor: pointer; background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); color: #fff; margin-bottom: 10px; }
+      button:disabled { opacity: 0.5; cursor: not-allowed; }
+      .log { background: #0d1b4b; color: #eaf6ff; font-family: 'Consolas', monospace; font-size: 0.78rem; border-radius: 10px; padding: 14px; max-height: 260px; overflow-y: auto; white-space: pre-wrap; margin-top: 14px; }
+      .authnote { text-align: center; font-size: 0.85rem; color: var(--muted); }
+      .authnote a { color: var(--water-deep); font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>FeMOS Catalog Seeder</h1>
+      <p class="sub">One-time developer tool — populates Institutions → Campuses → Courses in Firestore.</p>
+      <div class="warn">
+        This is a starter catalog only (a handful of sample courses per campus), not the full ~50-course
+        list for each institution. Use admin.html afterwards to add every remaining course. Running this
+        twice will just overwrite the same starter documents (safe to re-run).
+      </div>
+
+      <div id="authGate" class="authnote">Checking your sign-in status...</div>
+      <div id="seedArea" style="display:none;">
+        <button id="btnSeed">Run Seed</button>
+      </div>
+      <div class="log" id="logBox" style="display:none;"></div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyCb-Y69glDSkNDwgzoCXyUVAz6D86Ccdfo",
+        authDomain: "femos-fe742.firebaseapp.com",
+        projectId: "femos-fe742",
+        storageBucket: "femos-fe742.firebasestorage.app",
+        messagingSenderId: "1022203442714",
+        appId: "1:1022203442714:web:4fa06d28d788c024bf83a3",
+        measurementId: "G-M4DEBFVJCV",
+      };
+      const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth(app);
+      const db = firebase.firestore(app);
+
+      const CATALOG = [
+        {
+          id: "MUST", name: "Mbeya University of Science and Technology",
+          campuses: [
+            {
+              id: "main", name: "Main Campus",
+              courses: [
+                "BSc. Computer Science", "BSc. Information and Communication Technology",
+                "BEng. Electrical Engineering", "BEng. Mechanical Engineering",
+                "BEng. Civil Engineering", "BSc. Mining Engineering",
+                "BSc. Geology", "Diploma in Information Technology",
+              ],
+            },
+            {
+              id: "iyunga", name: "Iyunga Campus",
+              courses: [
+                "Diploma in Civil Engineering", "Diploma in Electrical Engineering",
+                "Certificate in ICT", "Certificate in Building Technology",
+              ],
+            },
+          ],
+        },
+        {
+          id: "UDSM", name: "University of Dar es Salaam",
+          campuses: [
+            {
+              id: "main", name: "Main Campus",
+              courses: [
+                "LLB Law", "BSc. Medicine (MD)", "BA Education",
+                "BSc. Civil Engineering", "Bachelor of Commerce",
+                "BSc. Computer Science", "BA Economics",
+              ],
+            },
+            {
+              id: "mlimani", name: "Mlimani Campus",
+              courses: ["BSc. Statistics", "BSc. Actuarial Science", "BA Geography"],
+            },
+          ],
+        },
+        {
+          id: "UDOM", name: "University of Dodoma",
+          campuses: [
+            {
+              id: "main", name: "Main Campus",
+              courses: [
+                "BSc. Science Education", "BA Social Sciences", "BSc. Agriculture",
+                "BSc. Computer Science", "Bachelor of Nursing",
+              ],
+            },
+          ],
+        },
+      ];
+
+      function log(text) {
+        const box = document.getElementById("logBox");
+        box.style.display = "block";
+        box.textContent += text + "\n";
+        box.scrollTop = box.scrollHeight;
+      }
+
+      auth.onAuthStateChanged(function (user) {
+        const gate = document.getElementById("authGate");
+        const area = document.getElementById("seedArea");
+        if (!user) {
+          gate.innerHTML = 'You must be signed in to run this. <a href="login.html">Log in first</a>, then reload this page.';
+          area.style.display = "none";
+          return;
+        }
+        gate.textContent = "Signed in as " + (user.email || user.uid) + ". Ready to seed.";
+        area.style.display = "block";
+      });
+
+      document.getElementById("btnSeed").addEventListener("click", async function () {
+        const btn = this;
+        btn.disabled = true;
+        log("Starting seed...");
+        try {
+          for (const inst of CATALOG) {
+            await db.collection("institutions").doc(inst.id).set({ name: inst.name, code: inst.id });
+            log("✓ Institution: " + inst.name);
+            for (const camp of inst.campuses) {
+              await db.collection("institutions").doc(inst.id).collection("campuses").doc(camp.id).set({ name: camp.name });
+              log("  ✓ Campus: " + camp.name);
+              for (const courseName of camp.courses) {
+                const courseId = courseName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+                await db.collection("institutions").doc(inst.id).collection("campuses").doc(camp.id)
+                  .collection("courses").doc(courseId).set({ name: courseName });
+              }
+              log("    ✓ " + camp.courses.length + " courses added");
+            }
+          }
+          log("\nDone! Catalog seeded successfully.");
+        } catch (err) {
+          log("\nERROR: " + (err.message || err));
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>

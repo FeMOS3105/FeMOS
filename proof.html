@@ -180,6 +180,8 @@
         </div>
       </div>
 
+      <div class="banner" id="regBanner" style="display:none;"></div>
+
       <div class="grid">
         <div class="box">
           <h3>Continue Setup</h3>
@@ -240,6 +242,24 @@
             .join("")
             .toUpperCase();
         }
+
+        const banner = document.getElementById("regBanner");
+        try {
+          const doc = await db.collection("users").doc(user.uid).get();
+          const data = doc.exists ? doc.data() : null;
+          if (data && data.courseId) {
+            const status = data.registrationStatus || (data.confirmedByCR ? "confirmed" : "pending");
+            banner.style.display = "block";
+            if (status === "confirmed") {
+              banner.textContent = "✓ Confirmed — " + data.courseName + ", " + data.campusName + ", " + data.institutionName;
+            } else {
+              banner.textContent = "⏳ Pending — " + data.courseName + " at " + data.campusName + " (" + data.institutionName + ") is awaiting confirmation.";
+            }
+          } else {
+            banner.style.display = "block";
+            banner.textContent = "You haven't completed institution & course registration yet.";
+          }
+        } catch (e) { /* ignore - banner just stays hidden */ }
       });
 
       document
