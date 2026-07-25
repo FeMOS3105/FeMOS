@@ -324,12 +324,17 @@
       }
 
       async function routeAfterAuth(user) {
+        const params = new URLSearchParams(window.location.search);
+        const returnTo = params.get("return");
+        if (returnTo) { window.location.href = returnTo; return; }
+
         try {
           const roleDoc = await db.collection("userRoles").doc(user.uid).get();
           if (roleDoc.exists) {
             const role = roleDoc.data().role;
             if (role === "superAdmin") { window.location.href = "admin.html"; return; }
             if (role === "institutionAdmin") { window.location.href = "institution-admin.html"; return; }
+            if (role === "cr") { window.location.href = "cr-dashboard.html"; return; }
           }
         } catch (e) { /* if the role check fails, fall through to the normal student flow */ }
 

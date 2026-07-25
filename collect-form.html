@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>FeMOS — Quick Form</title>
+    <style>
+      :root { --water-light:#5fd4f0; --water-mid:#2ea8ee; --water-deep:#155fd1; --ink:#0d1b4b; --muted:#5c6b9a; --line:#dbe6fb; --danger:#e14b4b; --success:#1fae6e; }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { width: 100%; min-height: 100%; }
+      body { background: linear-gradient(180deg, #eef5ff 0%, #f7fbff 100%); font-family: "Segoe UI", system-ui, sans-serif; color: var(--ink); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 16px; }
+      .card { width: 100%; max-width: 420px; background: #fff; border-radius: 20px; box-shadow: 0 20px 60px rgba(13,27,75,0.12); padding: 32px 26px; }
+      .logo { width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 14px; display: block; box-shadow: 0 0 0 4px #fff, 0 12px 26px rgba(21,95,209,0.28); }
+      h1 { text-align: center; font-size: 1.15rem; margin-bottom: 6px; color: var(--ink); }
+      p.instr { text-align: center; font-size: 0.86rem; color: var(--muted); margin-bottom: 22px; }
+      .field { margin-bottom: 16px; }
+      .field input { width: 100%; padding: 13px 14px; border-radius: 12px; border: 1.5px solid var(--line); font-size: 0.95rem; background: #fbfdff; }
+      .field input:focus { outline: none; border-color: var(--water-mid); box-shadow: 0 0 0 3px rgba(46,168,238,0.15); }
+      .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 700; font-size: 0.95rem; cursor: pointer; background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); color: #fff; }
+      .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+      .msg { margin-top: 14px; padding: 11px 14px; border-radius: 10px; font-size: 0.85rem; display: none; }
+      .msg.show { display: block; }
+      .msg.err { background: #fdecec; color: var(--danger); }
+      .msg.ok { background: #e9f9f1; color: var(--success); }
+      .closedNote { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 20px; }
+      .prevValue { background: #f5f9ff; border-radius: 10px; padding: 12px 14px; font-size: 0.85rem; color: var(--muted); margin-bottom: 16px; }
+      .prevValue b { color: var(--ink); }
+    </style>
+  </head>
+  <body>
+    <div class="card" id="card">
+      <img class="logo" src="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png" alt="FeMOS"/>
+      <div id="content"><p class="instr">Loading form...</p></div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyCb-Y69glDSkNDwgzoCXyUVAz6D86Ccdfo",
+        authDomain: "femos-fe742.firebaseapp.com",
+        projectId: "femos-fe742",
+        storageBucket: "femos-fe742.firebasestorage.app",
+        messagingSenderId: "1022203442714",
+        appId: "1:1022203442714:web:4fa06d28d788c024bf83a3",
+        measurementId: "G-M4DEBFVJCV",
+      };
+      const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth(app);
+      const db = firebase.firestore(app);
+
+      const contentEl = document.getElementById("content");
+      const formId = new URLSearchParams(window.location.search).get("id");
+
+      function escapeHtml(s) {
+        return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; });
+      }
+
+      if (!formId) {
+        contentEl.innerHTML = '<p class="instr">No form ID was provided in the link.</p>';
+      } else {
+        auth.onAuthStateChanged(async function (user) {
+          if (!user) {
+            const returnUrl = window.location.href;
+            window.location.href = "login.html?return=" + encodeURIComponent(returnUrl);
+            return;
+          }
+          try {
+            const formDoc = await db.collection("collectForms").doc(formId).get();
+            if (!formDoc.exists) { contentEl.innerHTML = '<p class="instr">This form link is invalid or was removed.</p>'; return; }
+            const form = formDoc.data();
+
+            const mySub = await db.collection("collectForms").doc(formId).collection("submissions").doc(user.uid).get();
+
+            if (!form.isOpen) {
+              contentEl.innerHTML =
+                "<h1>" + escapeHtml(form.title) + "</h1>" +
+                '<p class="closedNote">This form is closed and no longer accepting submissions.</p>' +
+                (mySub.exists ? '<div class="prevValue">Your submitted answer: <b>' + escapeHtml(mySub.data().value) + "</b></div>" : "");
+              return;
+            }
+
+            contentEl.innerHTML =
+              "<h1>" + escapeHtml(form.title) + "</h1>" +
+              '<p class="instr">' + escapeHtml(form.instructions) + "</p>" +
+              (mySub.exists ? '<div class="prevValue">You already submitted: <b>' + escapeHtml(mySub.data().value) + "</b> — submitting again below will update it.</div>" : "") +
+              '<div class="field"><input type="text" id="answerInput" placeholder="Type your answer here" value="' + (mySub.exists ? escapeHtml(mySub.data().value) : "") + '"/></div>' +
+              '<button class="btn" id="btnSubmit">Submit</button>' +
+              '<div class="msg" id="msgBox"></div>';
+
+            document.getElementById("btnSubmit").addEventListener("click", async function () {
+              const value = document.getElementById("answerInput").value.trim();
+              const msgBox = document.getElementById("msgBox");
+              if (!value) { msgBox.textContent = "Please type an answer first."; msgBox.className = "msg show err"; return; }
+              const btn = this;
+              btn.disabled = true; btn.textContent = "Submitting...";
+              try {
+                await db.collection("collectForms").doc(formId).collection("submissions").doc(user.uid).set({
+                  value: value, submittedBy: user.uid, submittedByName: user.displayName || user.email,
+                  submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                }, { merge: true });
+                msgBox.textContent = "Submitted! Thank you.";
+                msgBox.className = "msg show ok";
+              } catch (err) {
+                msgBox.textContent = "Error: " + (err.message || "Could not submit");
+                msgBox.className = "msg show err";
+              } finally {
+                btn.disabled = false; btn.textContent = "Submit";
+              }
+            });
+          } catch (err) {
+            contentEl.innerHTML = '<p class="instr">Could not load this form: ' + escapeHtml(err.message || "") + "</p>";
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

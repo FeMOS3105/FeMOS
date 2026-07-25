@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FeMOS — CR Dashboard</title>
+    <style>
+      :root {
+        --water-light: #5fd4f0; --water-mid: #2ea8ee; --water-deep: #155fd1;
+        --ink: #0d1b4b; --muted: #5c6b9a; --line: #dbe6fb; --danger: #e14b4b; --success: #1fae6e; --warn: #e0a020;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: "Segoe UI", system-ui, sans-serif; background: linear-gradient(180deg, #eef5ff 0%, #f7fbff 100%);
+        color: var(--ink); min-height: 100vh; padding: 20px 16px 60px;
+      }
+      .shell { max-width: 880px; margin: 0 auto; }
+      .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; flex-wrap: wrap; }
+      .brand { display: flex; align-items: center; gap: 10px; }
+      .brand img { width: 42px; height: 42px; border-radius: 50%; box-shadow: 0 6px 16px rgba(21,95,209,0.25); }
+      .brand h1 { font-size: 1.15rem; background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .userchip { display: flex; align-items: center; gap: 8px; background: #fff; border-radius: 999px; padding: 6px 14px 6px 6px; box-shadow: 0 6px 16px rgba(13,27,75,0.08); font-size: 0.82rem; }
+      .userchip .av { width: 26px; height: 26px; border-radius: 50%; background: var(--water-mid); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; overflow: hidden; }
+      .userchip .av img { width: 100%; height: 100%; object-fit: cover; }
+      .userchip button { background: none; border: none; color: var(--danger); font-weight: 600; cursor: pointer; font-size: 0.78rem; margin-left: 6px; }
+      .courseTag { font-size: 0.8rem; color: var(--muted); margin-bottom: 18px; }
+      .courseTag b { color: var(--water-deep); }
+
+      .tabbar { display: flex; gap: 4px; background: #fff; padding: 4px; border-radius: 12px; box-shadow: 0 6px 16px rgba(13,27,75,0.06); margin-bottom: 20px; width: fit-content; flex-wrap: wrap; }
+      .tabbtn { padding: 9px 16px; border: none; background: transparent; border-radius: 9px; font-weight: 600; font-size: 0.84rem; color: var(--muted); cursor: pointer; }
+      .tabbtn.active { background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); color: #fff; }
+      .panel { display: none; }
+      .panel.active { display: block; }
+
+      .card { background: #fff; border-radius: 18px; box-shadow: 0 14px 40px rgba(13,27,75,0.08); padding: 22px; margin-bottom: 16px; }
+      .card h2 { font-size: 1rem; margin-bottom: 4px; }
+      .card .hint { font-size: 0.8rem; color: var(--muted); margin-bottom: 16px; }
+      .empty { text-align: center; padding: 26px; color: var(--muted); font-size: 0.88rem; border: 1.5px dashed var(--line); border-radius: 12px; }
+
+      .field { margin-bottom: 14px; }
+      .field label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--muted); margin-bottom: 5px; }
+      .field input, .field textarea { width: 100%; padding: 11px 13px; border-radius: 10px; border: 1.5px solid var(--line); font-size: 0.92rem; background: #fbfdff; font-family: inherit; }
+      .field textarea { min-height: 90px; resize: vertical; }
+      .btn { padding: 11px 20px; border: none; border-radius: 10px; font-weight: 700; font-size: 0.87rem; cursor: pointer; background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); color: #fff; }
+      .btn-outline { background: transparent; border: 1.5px solid var(--line); color: var(--ink); }
+      .btn-sm { padding: 7px 13px; border-radius: 8px; border: none; font-weight: 600; font-size: 0.78rem; cursor: pointer; }
+
+      .itemCard { border: 1.5px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+      .itemCard .itop { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+      .itemCard .ititle { font-weight: 700; font-size: 0.96rem; }
+      .itemCard .imeta { font-size: 0.74rem; color: var(--muted); margin-top: 3px; }
+      .itemCard .ibody { font-size: 0.88rem; color: var(--ink); line-height: 1.5; margin: 10px 0; }
+      .itemActions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+
+      .readList { margin-top: 10px; font-size: 0.8rem; color: var(--muted); }
+      .readList .rrow { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed var(--line); }
+      .toggleLink { background: none; border: none; color: var(--water-deep); font-weight: 600; font-size: 0.8rem; cursor: pointer; padding: 0; }
+
+      .optionRow { display: flex; gap: 8px; margin-bottom: 8px; }
+      .optionRow input { flex: 1; }
+      .optionRow button { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 1rem; padding: 0 8px; }
+      .addOptBtn { background: none; border: 1.5px dashed var(--line); color: var(--water-deep); border-radius: 8px; padding: 8px; width: 100%; font-size: 0.82rem; font-weight: 600; cursor: pointer; margin-bottom: 12px; }
+
+      .barRow { margin-bottom: 10px; }
+      .barLabel { display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 4px; }
+      .barTrack { height: 10px; border-radius: 6px; background: #f0f4fb; overflow: hidden; }
+      .barFill { height: 100%; background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); border-radius: 6px; transition: width .3s; }
+
+      .linkBox { display: flex; gap: 8px; align-items: center; background: #f5f9ff; border-radius: 10px; padding: 10px 12px; margin: 10px 0; }
+      .linkBox code { flex: 1; font-size: 0.78rem; word-break: break-all; color: var(--water-deep); }
+      table.subTable { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.84rem; }
+      table.subTable th { text-align: left; font-size: 0.7rem; text-transform: uppercase; color: var(--muted); padding: 6px 8px; border-bottom: 1.5px solid var(--line); }
+      table.subTable td { padding: 7px 8px; border-bottom: 1px solid var(--line); }
+
+      .msg { margin-top: 12px; padding: 10px 13px; border-radius: 9px; font-size: 0.82rem; display: none; }
+      .msg.show { display: block; }
+      .msg.err { background: #fdecec; color: var(--danger); }
+      .msg.ok { background: #e9f9f1; color: var(--success); }
+
+      .gate-card { max-width: 460px; margin: 60px auto; text-align: center; background: #fff; border-radius: 18px; padding: 34px 26px; box-shadow: 0 14px 40px rgba(13,27,75,0.1); }
+
+      .overlay { position: fixed; inset: 0; background: rgba(13,27,75,0.55); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+      .overlay.show { display: flex; }
+      .confirmBox { background: #fff; border-radius: 18px; padding: 24px; max-width: 360px; width: 100%; text-align: center; }
+      .confirmBox p { font-size: 0.92rem; margin-bottom: 18px; line-height: 1.5; }
+      .confirmActions { display: flex; gap: 10px; }
+      .confirmActions button { flex: 1; padding: 11px; border-radius: 10px; border: none; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+      .confirmActions .cancel { background: #f2f4f8; color: var(--ink); }
+      .confirmActions .ok { background: var(--danger); color: #fff; }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div id="gate" class="gate-card">Checking access...</div>
+
+      <div id="app" style="display:none;">
+        <div class="topbar">
+          <div class="brand">
+            <img src="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png" alt="FeMOS"/>
+            <h1>CR Dashboard</h1>
+          </div>
+          <div class="userchip">
+            <div class="av" id="crAv">?</div>
+            <span id="crName">...</span>
+            <button id="btnLogout">Log Out</button>
+          </div>
+        </div>
+        <div class="courseTag">Course Representative for: <b id="courseNameLabel">...</b></div>
+
+        <div class="tabbar">
+          <button class="tabbtn active" data-tab="ann">Announcements</button>
+          <button class="tabbtn" data-tab="polls">Polls</button>
+          <button class="tabbtn" data-tab="collect">Quick Collect</button>
+        </div>
+
+        <!-- ============ ANNOUNCEMENTS ============ -->
+        <div class="panel active" id="panel-ann">
+          <div class="card">
+            <h2>Post an Announcement</h2>
+            <div class="hint">Every student who reads it must tap "I've read this" — you'll always see exactly who has, and who hasn't.</div>
+            <div class="field"><label>Title</label><input id="annTitle" placeholder="e.g. Venue change for tomorrow's test"/></div>
+            <div class="field"><label>Message</label><textarea id="annBody" placeholder="Write the full announcement..."></textarea></div>
+            <button class="btn" id="btnPostAnn">Post Announcement</button>
+            <div class="msg" id="msgAnn"></div>
+          </div>
+          <div id="annList"><div class="empty">Loading...</div></div>
+        </div>
+
+        <!-- ============ POLLS ============ -->
+        <div class="panel" id="panel-polls">
+          <div class="card">
+            <h2>Create a Poll</h2>
+            <div class="field"><label>Question</label><input id="pollQuestion" placeholder="e.g. Which day works for the makeup class?"/></div>
+            <label style="display:block;font-size:0.78rem;font-weight:600;color:var(--muted);margin-bottom:6px;">Options</label>
+            <div id="pollOptions">
+              <div class="optionRow"><input type="text" placeholder="Option 1"/><button data-remove-opt>✕</button></div>
+              <div class="optionRow"><input type="text" placeholder="Option 2"/><button data-remove-opt>✕</button></div>
+            </div>
+            <button type="button" class="addOptBtn" id="btnAddOption">+ Add Another Option</button>
+            <button class="btn" id="btnCreatePoll">Create Poll</button>
+            <div class="msg" id="msgPoll"></div>
+          </div>
+          <div id="pollList"><div class="empty">Loading...</div></div>
+        </div>
+
+        <!-- ============ QUICK COLLECT ============ -->
+        <div class="panel" id="panel-collect">
+          <div class="card">
+            <h2>Create a Quick Collect Form</h2>
+            <div class="hint">Share the generated link — each student opens it, fills in the one field you asked for (e.g. registration number), and submits.</div>
+            <div class="field"><label>Form Title</label><input id="collectTitle" placeholder="e.g. Submit Your Registration Number"/></div>
+            <div class="field"><label>Instructions (what should they type?)</label><input id="collectInstructions" placeholder="e.g. Enter your registration number exactly as on your ID"/></div>
+            <button class="btn" id="btnCreateCollect">Create Form &amp; Get Link</button>
+            <div class="msg" id="msgCollect"></div>
+          </div>
+          <div id="collectList"><div class="empty">Loading...</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay" id="confirmOverlay">
+      <div class="confirmBox">
+        <p id="confirmMsg">Are you sure?</p>
+        <div class="confirmActions">
+          <button class="cancel" id="confirmCancelBtn">Cancel</button>
+          <button class="ok" id="confirmOkBtn">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyCb-Y69glDSkNDwgzoCXyUVAz6D86Ccdfo",
+        authDomain: "femos-fe742.firebaseapp.com",
+        projectId: "femos-fe742",
+        storageBucket: "femos-fe742.firebasestorage.app",
+        messagingSenderId: "1022203442714",
+        appId: "1:1022203442714:web:4fa06d28d788c024bf83a3",
+        measurementId: "G-M4DEBFVJCV",
+      };
+      const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth(app);
+      const db = firebase.firestore(app);
+
+      let myInstitutionId = null, myCourseId = null, myCourseName = "";
+
+      function escapeHtml(s) {
+        return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; });
+      }
+      function showMsg(id, text, type) {
+        const el = document.getElementById(id);
+        el.textContent = text; el.className = "msg show " + type;
+        setTimeout(function () { el.classList.remove("show"); }, 4000);
+      }
+      function fmtDate(ts) {
+        if (!ts || !ts.toDate) return "";
+        return ts.toDate().toLocaleString();
+      }
+      function showConfirm(message, onConfirm) {
+        const overlay = document.getElementById("confirmOverlay");
+        document.getElementById("confirmMsg").textContent = message;
+        overlay.classList.add("show");
+        const okBtn = document.getElementById("confirmOkBtn");
+        const cancelBtn = document.getElementById("confirmCancelBtn");
+        function cleanup() { overlay.classList.remove("show"); okBtn.removeEventListener("click", onOk); cancelBtn.removeEventListener("click", onCancel); }
+        function onOk() { cleanup(); onConfirm(); }
+        function onCancel() { cleanup(); }
+        okBtn.addEventListener("click", onOk);
+        cancelBtn.addEventListener("click", onCancel);
+      }
+
+      auth.onAuthStateChanged(async function (user) {
+        const gate = document.getElementById("gate");
+        if (!user) { gate.innerHTML = 'You must be signed in. <a href="login.html">Go to login</a>.'; return; }
+        try {
+          const roleDoc = await db.collection("userRoles").doc(user.uid).get();
+          if (!roleDoc.exists || roleDoc.data().role !== "cr") {
+            gate.innerHTML = "<h2>Access Denied</h2><p style='color:var(--muted);font-size:0.85rem;margin-top:8px;'>Your account (" + user.email + ") is not a Class Representative.</p>";
+            return;
+          }
+          const r = roleDoc.data();
+          myInstitutionId = r.institutionId; myCourseId = r.courseId; myCourseName = r.courseName || r.courseId;
+          gate.style.display = "none";
+          document.getElementById("app").style.display = "block";
+          document.getElementById("crName").textContent = user.displayName || user.email;
+          document.getElementById("courseNameLabel").textContent = myCourseName;
+          if (user.photoURL) { document.getElementById("crAv").innerHTML = '<img src="' + user.photoURL + '" alt=""/>'; }
+          else { document.getElementById("crAv").textContent = (user.email || "?")[0].toUpperCase(); }
+          initApp();
+        } catch (err) { gate.innerHTML = "Error checking access: " + (err.message || ""); }
+      });
+
+      document.getElementById("btnLogout").addEventListener("click", async function () { await auth.signOut(); window.location.href = "login.html"; });
+
+      document.querySelectorAll(".tabbtn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          document.querySelectorAll(".tabbtn").forEach(function (b) { b.classList.remove("active"); });
+          document.querySelectorAll(".panel").forEach(function (p) { p.classList.remove("active"); });
+          btn.classList.add("active");
+          document.getElementById("panel-" + btn.getAttribute("data-tab")).classList.add("active");
+        });
+      });
+
+      let initialized = false;
+      function initApp() {
+        if (initialized) return;
+        initialized = true;
+        loadAnnouncements();
+        loadPolls();
+        loadCollectForms();
+      }
+
+      // ================= ANNOUNCEMENTS =================
+      document.getElementById("btnPostAnn").addEventListener("click", async function () {
+        const title = document.getElementById("annTitle").value.trim();
+        const body = document.getElementById("annBody").value.trim();
+        if (!title || !body) { showMsg("msgAnn", "Fill in both title and message.", "err"); return; }
+        try {
+          await db.collection("announcements").add({
+            institutionId: myInstitutionId, courseId: myCourseId, courseName: myCourseName,
+            title: title, body: body,
+            createdBy: auth.currentUser.uid, createdByName: auth.currentUser.displayName || auth.currentUser.email,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+          document.getElementById("annTitle").value = ""; document.getElementById("annBody").value = "";
+          showMsg("msgAnn", "Announcement posted.", "ok");
+          loadAnnouncements();
+        } catch (err) { showMsg("msgAnn", "Error: " + (err.message || ""), "err"); }
+      });
+
+      async function loadAnnouncements() {
+        const listEl = document.getElementById("annList");
+        listEl.innerHTML = "Loading...";
+        const snap = await db.collection("announcements")
+          .where("createdBy", "==", auth.currentUser.uid).orderBy("createdAt", "desc").get();
+        if (snap.empty) { listEl.innerHTML = '<div class="empty">You haven\'t posted any announcements yet.</div>'; return; }
+        listEl.innerHTML = "";
+        for (const doc of snap.docs) {
+          const d = doc.data();
+          const readsSnap = await db.collection("announcements").doc(doc.id).collection("reads").get();
+          const card = document.createElement("div");
+          card.className = "itemCard";
+          card.innerHTML =
+            '<div class="itop"><div><div class="ititle">' + escapeHtml(d.title) + '</div><div class="imeta">' + fmtDate(d.createdAt) + '</div></div></div>' +
+            '<div class="ibody">' + escapeHtml(d.body) + '</div>' +
+            '<button class="toggleLink" data-toggle-reads>' + readsSnap.size + " student(s) have confirmed reading — view names</button>" +
+            '<div class="readList" style="display:none;" data-reads-box>' +
+              (readsSnap.empty ? '<div>No one yet.</div>' : readsSnap.docs.map(function (r) {
+                const rd = r.data();
+                return '<div class="rrow"><span>' + escapeHtml(rd.name || r.id) + '</span><span>' + fmtDate(rd.confirmedAt) + '</span></div>';
+              }).join("")) +
+            '</div>' +
+            '<div class="itemActions"><button class="btn-sm" style="background:transparent;border:1.5px solid var(--danger);color:var(--danger);" data-delete-ann>Delete</button></div>';
+          card.querySelector("[data-toggle-reads]").addEventListener("click", function () {
+            const box = card.querySelector("[data-reads-box]");
+            box.style.display = box.style.display === "none" ? "block" : "none";
+          });
+          card.querySelector("[data-delete-ann]").addEventListener("click", function () {
+            showConfirm('Delete the announcement "' + d.title + '"?', async function () {
+              await db.collection("announcements").doc(doc.id).delete();
+              loadAnnouncements();
+            });
+          });
+          listEl.appendChild(card);
+        }
+      }
+
+      // ================= POLLS =================
+      document.getElementById("btnAddOption").addEventListener("click", function () {
+        const wrap = document.getElementById("pollOptions");
+        const row = document.createElement("div");
+        row.className = "optionRow";
+        row.innerHTML = '<input type="text" placeholder="Option ' + (wrap.children.length + 1) + '"/><button data-remove-opt>✕</button>';
+        wrap.appendChild(row);
+        wireOptionRemove(row);
+      });
+      function wireOptionRemove(row) {
+        row.querySelector("[data-remove-opt]").addEventListener("click", function () {
+          if (document.getElementById("pollOptions").children.length > 2) row.remove();
+        });
+      }
+      document.querySelectorAll("#pollOptions .optionRow").forEach(wireOptionRemove);
+
+      document.getElementById("btnCreatePoll").addEventListener("click", async function () {
+        const question = document.getElementById("pollQuestion").value.trim();
+        const options = Array.from(document.querySelectorAll("#pollOptions input")).map(function (i) { return i.value.trim(); }).filter(Boolean);
+        if (!question || options.length < 2) { showMsg("msgPoll", "Enter a question and at least 2 options.", "err"); return; }
+        try {
+          await db.collection("polls").add({
+            institutionId: myInstitutionId, courseId: myCourseId, courseName: myCourseName,
+            question: question, options: options, isOpen: true,
+            createdBy: auth.currentUser.uid, createdByName: auth.currentUser.displayName || auth.currentUser.email,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+          document.getElementById("pollQuestion").value = "";
+          document.querySelectorAll("#pollOptions input").forEach(function (i) { i.value = ""; });
+          showMsg("msgPoll", "Poll created.", "ok");
+          loadPolls();
+        } catch (err) { showMsg("msgPoll", "Error: " + (err.message || ""), "err"); }
+      });
+
+      async function loadPolls() {
+        const listEl = document.getElementById("pollList");
+        listEl.innerHTML = "Loading...";
+        const snap = await db.collection("polls").where("createdBy", "==", auth.currentUser.uid).orderBy("createdAt", "desc").get();
+        if (snap.empty) { listEl.innerHTML = '<div class="empty">No polls yet.</div>'; return; }
+        listEl.innerHTML = "";
+        for (const doc of snap.docs) {
+          const d = doc.data();
+          const votesSnap = await db.collection("polls").doc(doc.id).collection("votes").get();
+          const counts = d.options.map(function () { return 0; });
+          votesSnap.forEach(function (v) { const idx = v.data().optionIndex; if (counts[idx] !== undefined) counts[idx]++; });
+          const total = votesSnap.size || 1;
+
+          const card = document.createElement("div");
+          card.className = "itemCard";
+          card.innerHTML =
+            '<div class="itop"><div><div class="ititle">' + escapeHtml(d.question) + '</div><div class="imeta">' + fmtDate(d.createdAt) + " · " + votesSnap.size + " vote(s) · " + (d.isOpen ? "Open" : "Closed") + '</div></div></div>' +
+            d.options.map(function (opt, i) {
+              const pct = Math.round((counts[i] / total) * 100);
+              return '<div class="barRow"><div class="barLabel"><span>' + escapeHtml(opt) + '</span><span>' + counts[i] + " (" + pct + '%)</span></div><div class="barTrack"><div class="barFill" style="width:' + pct + '%"></div></div></div>';
+            }).join("") +
+            '<div class="itemActions">' +
+              '<button class="btn-sm btn-outline" data-toggle-open>' + (d.isOpen ? "Close Poll" : "Reopen Poll") + '</button>' +
+              '<button class="btn-sm" style="background:transparent;border:1.5px solid var(--danger);color:var(--danger);" data-delete-poll>Delete</button>' +
+            '</div>';
+          card.querySelector("[data-toggle-open]").addEventListener("click", async function () {
+            await db.collection("polls").doc(doc.id).set({ isOpen: !d.isOpen }, { merge: true });
+            loadPolls();
+          });
+          card.querySelector("[data-delete-poll]").addEventListener("click", function () {
+            showConfirm('Delete the poll "' + d.question + '"?', async function () {
+              await db.collection("polls").doc(doc.id).delete();
+              loadPolls();
+            });
+          });
+          listEl.appendChild(card);
+        }
+      }
+
+      // ================= QUICK COLLECT =================
+      document.getElementById("btnCreateCollect").addEventListener("click", async function () {
+        const title = document.getElementById("collectTitle").value.trim();
+        const instructions = document.getElementById("collectInstructions").value.trim();
+        if (!title || !instructions) { showMsg("msgCollect", "Fill in both the title and instructions.", "err"); return; }
+        try {
+          await db.collection("collectForms").add({
+            institutionId: myInstitutionId, courseId: myCourseId, courseName: myCourseName,
+            title: title, instructions: instructions, isOpen: true,
+            createdBy: auth.currentUser.uid, createdByName: auth.currentUser.displayName || auth.currentUser.email,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+          document.getElementById("collectTitle").value = ""; document.getElementById("collectInstructions").value = "";
+          showMsg("msgCollect", "Form created.", "ok");
+          loadCollectForms();
+        } catch (err) { showMsg("msgCollect", "Error: " + (err.message || ""), "err"); }
+      });
+
+      function collectFormUrl(formId) {
+        return window.location.href.replace(/cr-dashboard\.html.*$/, "collect-form.html?id=" + formId);
+      }
+
+      async function loadCollectForms() {
+        const listEl = document.getElementById("collectList");
+        listEl.innerHTML = "Loading...";
+        const snap = await db.collection("collectForms").where("createdBy", "==", auth.currentUser.uid).orderBy("createdAt", "desc").get();
+        if (snap.empty) { listEl.innerHTML = '<div class="empty">No forms yet.</div>'; return; }
+        listEl.innerHTML = "";
+        for (const doc of snap.docs) {
+          const d = doc.data();
+          const subsSnap = await db.collection("collectForms").doc(doc.id).collection("submissions").orderBy("submittedAt", "asc").get();
+          const link = collectFormUrl(doc.id);
+
+          const card = document.createElement("div");
+          card.className = "itemCard";
+          card.innerHTML =
+            '<div class="itop"><div><div class="ititle">' + escapeHtml(d.title) + '</div><div class="imeta">' + escapeHtml(d.instructions) + '</div></div></div>' +
+            '<div class="linkBox"><code>' + escapeHtml(link) + '</code><button class="btn-sm btn-outline" data-copy-link>Copy Link</button></div>' +
+            '<button class="toggleLink" data-toggle-subs>' + subsSnap.size + " submission(s) — view list</button>" +
+            '<div style="display:none;" data-subs-box>' +
+              (subsSnap.empty ? '<div class="empty" style="padding:14px;">No submissions yet.</div>' :
+                '<table class="subTable"><thead><tr><th>Name</th><th>Value</th><th>When</th></tr></thead><tbody>' +
+                subsSnap.docs.map(function (s) { const sd = s.data(); return "<tr><td>" + escapeHtml(sd.submittedByName || "") + "</td><td>" + escapeHtml(sd.value || "") + "</td><td>" + fmtDate(sd.submittedAt) + "</td></tr>"; }).join("") +
+                "</tbody></table>") +
+            '</div>' +
+            '<div class="itemActions">' +
+              (subsSnap.empty ? "" : '<button class="btn-sm btn-outline" data-download-csv>Download CSV</button>') +
+              '<button class="btn-sm btn-outline" data-toggle-open>' + (d.isOpen ? "Close Form" : "Reopen Form") + '</button>' +
+              '<button class="btn-sm" style="background:transparent;border:1.5px solid var(--danger);color:var(--danger);" data-delete-form>Delete</button>' +
+            '</div>';
+
+          card.querySelector("[data-copy-link]").addEventListener("click", function () {
+            navigator.clipboard.writeText(link).then(function () {
+              const btn = card.querySelector("[data-copy-link]");
+              const old = btn.textContent; btn.textContent = "Copied!";
+              setTimeout(function () { btn.textContent = old; }, 1500);
+            });
+          });
+          card.querySelector("[data-toggle-subs]").addEventListener("click", function () {
+            const box = card.querySelector("[data-subs-box]");
+            box.style.display = box.style.display === "none" ? "block" : "none";
+          });
+          const csvBtn = card.querySelector("[data-download-csv]");
+          if (csvBtn) csvBtn.addEventListener("click", function () {
+            let csv = "Name,Value,Submitted At\n";
+            subsSnap.forEach(function (s) {
+              const sd = s.data();
+              csv += '"' + (sd.submittedByName || "").replace(/"/g, '""') + '","' + (sd.value || "").replace(/"/g, '""') + '","' + fmtDate(sd.submittedAt) + '"\n';
+            });
+            const blob = new Blob([csv], { type: "text/csv" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url; a.download = (d.title || "submissions").replace(/[^a-z0-9]+/gi, "_") + ".csv";
+            a.click();
+            URL.revokeObjectURL(url);
+          });
+          card.querySelector("[data-toggle-open]").addEventListener("click", async function () {
+            await db.collection("collectForms").doc(doc.id).set({ isOpen: !d.isOpen }, { merge: true });
+            loadCollectForms();
+          });
+          card.querySelector("[data-delete-form]").addEventListener("click", function () {
+            showConfirm('Delete the form "' + d.title + '" and all its submissions data reference?', async function () {
+              await db.collection("collectForms").doc(doc.id).delete();
+              loadCollectForms();
+            });
+          });
+          listEl.appendChild(card);
+        }
+      }
+    </script>
+  </body>
+</html>
