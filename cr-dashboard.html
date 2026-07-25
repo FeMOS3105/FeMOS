@@ -26,9 +26,10 @@
       .courseTag { font-size: 0.8rem; color: var(--muted); margin-bottom: 18px; }
       .courseTag b { color: var(--water-deep); }
 
-      .tabbar { display: flex; gap: 4px; background: #fff; padding: 4px; border-radius: 12px; box-shadow: 0 6px 16px rgba(13,27,75,0.06); margin-bottom: 20px; width: fit-content; flex-wrap: wrap; }
-      .tabbtn { padding: 9px 16px; border: none; background: transparent; border-radius: 9px; font-weight: 600; font-size: 0.84rem; color: var(--muted); cursor: pointer; }
+      .tabbar { display: flex; gap: 4px; background: #fff; padding: 4px; border-radius: 12px; box-shadow: 0 6px 16px rgba(13,27,75,0.06); margin-bottom: 20px; width: 100%; }
+      .tabbtn { flex: 1; padding: 10px 10px; border: none; background: transparent; border-radius: 9px; font-weight: 600; font-size: 0.82rem; color: var(--muted); cursor: pointer; white-space: nowrap; }
       .tabbtn.active { background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); color: #fff; }
+      @media (max-width: 640px) { .tabbar { flex-wrap: wrap; } .tabbtn { flex: 1 1 45%; } }
       .panel { display: none; }
       .panel.active { display: block; }
 
@@ -51,6 +52,12 @@
       .itemCard .imeta { font-size: 0.74rem; color: var(--muted); margin-top: 3px; }
       .itemCard .ibody { font-size: 0.88rem; color: var(--ink); line-height: 1.5; margin: 10px 0; }
       .itemActions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+
+      .prow { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px; border: 1.5px solid var(--line); border-radius: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+      .prow .info b { display: block; font-size: 0.92rem; }
+      .prow .info span { font-size: 0.78rem; color: var(--muted); display: block; margin-top: 2px; }
+      .btn-approve { background: var(--success); color: #fff; }
+      .btn-reject { background: transparent; border: 1.5px solid var(--danger); color: var(--danger); }
 
       .readList { margin-top: 10px; font-size: 0.8rem; color: var(--muted); }
       .readList .rrow { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed var(--line); }
@@ -111,6 +118,8 @@
           <button class="tabbtn active" data-tab="ann">Announcements</button>
           <button class="tabbtn" data-tab="polls">Polls</button>
           <button class="tabbtn" data-tab="collect">Quick Collect</button>
+          <button class="tabbtn" data-tab="approve">Approve Students</button>
+          <button class="tabbtn" data-tab="roster">Class Roster</button>
         </div>
 
         <!-- ============ ANNOUNCEMENTS ============ -->
@@ -154,6 +163,25 @@
             <div class="msg" id="msgCollect"></div>
           </div>
           <div id="collectList"><div class="empty">Loading...</div></div>
+        </div>
+
+        <!-- ============ APPROVE STUDENTS ============ -->
+        <div class="panel" id="panel-approve">
+          <div class="card">
+            <h2>Approve Students</h2>
+            <div class="hint" id="approveCount">Loading...</div>
+            <div id="approveList"></div>
+          </div>
+        </div>
+
+        <!-- ============ CLASS ROSTER ============ -->
+        <div class="panel" id="panel-roster">
+          <div class="card">
+            <h2>Class Roster</h2>
+            <div class="hint" id="rosterCount">Loading...</div>
+            <button class="btn-sm btn-outline" id="btnRosterCsv" style="margin-bottom:14px;display:none;">Download CSV</button>
+            <div id="rosterList"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -252,6 +280,8 @@
         loadAnnouncements();
         loadPolls();
         loadCollectForms();
+        loadApprove();
+        loadRoster();
       }
 
       // ================= ANNOUNCEMENTS =================
@@ -471,6 +501,98 @@
           listEl.appendChild(card);
         }
       }
+      // ================= APPROVE STUDENTS (scoped to my course only) =================
+      async function loadApprove() {
+        const listEl = document.getElementById("approveList");
+        const countEl = document.getElementById("approveCount");
+        listEl.innerHTML = "";
+        countEl.textContent = "Loading...";
+        try {
+          const snap = await db.collectionGroup("pendingStudents")
+            .where("institutionId", "==", myInstitutionId).where("courseId", "==", myCourseId).get();
+          if (snap.empty) {
+            countEl.textContent = "No students waiting for approval in " + myCourseName + ".";
+            listEl.innerHTML = '<div class="empty">All caught up.</div>';
+            return;
+          }
+          countEl.textContent = snap.size + " student(s) awaiting your approval";
+          snap.forEach(function (doc) {
+            const d = doc.data();
+            const row = document.createElement("div");
+            row.className = "prow";
+            row.innerHTML =
+              '<div class="info"><b>' + escapeHtml(d.fullName || "(no name)") + "</b>" +
+              "<span>" + escapeHtml(d.email || "") + "</span></div>" +
+              '<div class="itemActions"><button class="btn-sm btn-approve">Approve</button><button class="btn-sm btn-reject">Reject</button></div>';
+            row.querySelector(".btn-approve").addEventListener("click", async function () {
+              try {
+                await db.collection("users").doc(doc.id).set({ registrationStatus: "confirmed", confirmedByCR: true }, { merge: true });
+                await doc.ref.delete();
+                loadApprove(); loadRoster();
+              } catch (err) { alert("Could not approve: " + (err.message || "")); }
+            });
+            row.querySelector(".btn-reject").addEventListener("click", function () {
+              showConfirm("Reject " + (d.fullName || "this student") + "? They will need to register again.", async function () {
+                try {
+                  await doc.ref.delete();
+                  await db.collection("users").doc(doc.id).set(
+                    { institutionId: null, institutionName: null, campusId: null, campusName: null, courseId: null, courseName: null, registrationStatus: null },
+                    { merge: true }
+                  );
+                  loadApprove();
+                } catch (err) { alert("Could not reject: " + (err.message || "")); }
+              });
+            });
+            listEl.appendChild(row);
+          });
+        } catch (err) {
+          countEl.textContent = "";
+          listEl.innerHTML = '<div class="empty">Could not load list: ' + escapeHtml(err.message || "") +
+            '. If this mentions a missing index, open the link Firestore prints in your browser console (F12) once to auto-create it.</div>';
+        }
+      }
+
+      // ================= CLASS ROSTER (confirmed students in my course) =================
+      let rosterCache = [];
+      async function loadRoster() {
+        const listEl = document.getElementById("rosterList");
+        const countEl = document.getElementById("rosterCount");
+        const csvBtn = document.getElementById("btnRosterCsv");
+        listEl.innerHTML = "";
+        countEl.textContent = "Loading...";
+        try {
+          const snap = await db.collection("users")
+            .where("institutionId", "==", myInstitutionId).where("courseId", "==", myCourseId)
+            .where("registrationStatus", "==", "confirmed").get();
+          rosterCache = snap.docs.map(function (d) { return d.data(); });
+          if (snap.empty) {
+            countEl.textContent = "No confirmed students yet in " + myCourseName + ".";
+            listEl.innerHTML = '<div class="empty">Once you approve students, they will appear here.</div>';
+            csvBtn.style.display = "none";
+            return;
+          }
+          countEl.textContent = snap.size + " confirmed student(s) in " + myCourseName;
+          csvBtn.style.display = "inline-block";
+          listEl.innerHTML = '<table class="subTable"><thead><tr><th>Name</th><th>Email</th></tr></thead><tbody>' +
+            rosterCache.map(function (s) { return "<tr><td>" + escapeHtml(s.fullName || "") + "</td><td>" + escapeHtml(s.email || "") + "</td></tr>"; }).join("") +
+            "</tbody></table>";
+        } catch (err) {
+          countEl.textContent = "";
+          csvBtn.style.display = "none";
+          listEl.innerHTML = '<div class="empty">Could not load roster: ' + escapeHtml(err.message || "") +
+            '. If this mentions a missing index, open the link Firestore prints in your browser console (F12) once to auto-create it.</div>';
+        }
+      }
+      document.getElementById("btnRosterCsv").addEventListener("click", function () {
+        let csv = "Name,Email\n";
+        rosterCache.forEach(function (s) { csv += '"' + (s.fullName || "").replace(/"/g, '""') + '","' + (s.email || "").replace(/"/g, '""') + '"\n'; });
+        const blob = new Blob([csv], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = (myCourseName || "roster").replace(/[^a-z0-9]+/gi, "_") + "_roster.csv";
+        a.click();
+        URL.revokeObjectURL(url);
+      });
     </script>
   </body>
 </html>
