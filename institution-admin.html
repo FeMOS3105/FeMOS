@@ -14,7 +14,7 @@
         font-family: "Segoe UI", system-ui, sans-serif; background: linear-gradient(180deg, #eef5ff 0%, #f7fbff 100%);
         color: var(--ink); min-height: 100vh; padding: 20px 16px 60px;
       }
-      .shell { max-width: 880px; margin: 0 auto; }
+      .shell { max-width: 920px; margin: 0 auto; }
       .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; flex-wrap: wrap; }
       .brand { display: flex; align-items: center; gap: 10px; }
       .brand img { width: 42px; height: 42px; border-radius: 50%; box-shadow: 0 6px 16px rgba(21,95,209,0.25); }
@@ -51,11 +51,6 @@
       .field input, .field select { width: 100%; padding: 10px 12px; border-radius: 9px; border: 1.5px solid var(--line); font-size: 0.9rem; background: #fbfdff; }
       .btn { padding: 11px 18px; border: none; border-radius: 10px; font-weight: 700; font-size: 0.86rem; cursor: pointer; background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); color: #fff; }
 
-      .tree-campus { border: 1.5px solid var(--line); border-radius: 12px; margin-bottom: 12px; padding: 12px 14px; }
-      .tree-campus-head { display: flex; align-items: center; justify-content: space-between; font-weight: 700; font-size: 0.9rem; margin-bottom: 8px; }
-      .tree-course-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0 6px 10px; font-size: 0.82rem; }
-      .del-x { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 0.78rem; font-weight: 700; }
-
       .msg { margin-top: 12px; padding: 10px 13px; border-radius: 9px; font-size: 0.82rem; display: none; }
       .msg.show { display: block; }
       .msg.err { background: #fdecec; color: var(--danger); }
@@ -63,6 +58,57 @@
 
       .gate-card { max-width: 460px; margin: 60px auto; text-align: center; background: #fff; border-radius: 18px; padding: 34px 26px; box-shadow: 0 14px 40px rgba(13,27,75,0.1); }
       .gate-card code { display: block; background: #f5f9ff; padding: 10px; border-radius: 8px; font-size: 0.8rem; margin: 12px 0; word-break: break-all; }
+
+      /* ================= COLLEGE CARDS ================= */
+      .addCollegeBar { display: flex; justify-content: flex-end; margin-bottom: 16px; }
+      .pill { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 999px; border: none;
+        background: linear-gradient(90deg, var(--water-light), var(--water-mid) 60%, var(--water-deep)); color: #fff;
+        font-weight: 700; font-size: 0.85rem; cursor: pointer; box-shadow: 0 8px 20px rgba(46,168,238,0.32); }
+      .pill:hover { transform: translateY(-1px); }
+
+      .collegeGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+      .collegeCard { border-radius: 18px; overflow: visible; box-shadow: 0 14px 34px rgba(13,27,75,0.1); background: #fff; position: relative; }
+      .collegeHead { padding: 16px 18px; border-radius: 18px 18px 0 0; color: #fff; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+        background: linear-gradient(120deg, var(--c1, #2ea8ee), var(--c2, #155fd1)); }
+      .collegeHead .name { font-weight: 700; font-size: 1.02rem; word-break: break-word; }
+      .collegeHead .name .sub { display: block; font-size: 0.7rem; opacity: 0.85; font-weight: 500; margin-top: 2px; }
+      .menuBtn { background: rgba(255,255,255,0.22); border: none; color: #fff; width: 30px; height: 30px; border-radius: 8px; cursor: pointer; font-size: 1rem; flex-shrink: 0; }
+      .menuBtn:hover { background: rgba(255,255,255,0.36); }
+
+      .dropdown { position: absolute; right: 10px; top: 52px; background: #fff; border-radius: 12px; box-shadow: 0 16px 40px rgba(13,27,75,0.22); min-width: 190px; z-index: 40; overflow: hidden; display: none; }
+      .dropdown.show { display: block; }
+      .dropdown button { display: block; width: 100%; text-align: left; padding: 11px 14px; border: none; background: #fff; font-size: 0.84rem; color: var(--ink); cursor: pointer; }
+      .dropdown button:hover { background: #f5f9ff; }
+      .dropdown button.danger { color: var(--danger); }
+      .dropdown .swatches { display: flex; gap: 8px; padding: 12px 14px; flex-wrap: wrap; }
+      .swatch { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid #fff; box-shadow: 0 0 0 1.5px var(--line); }
+      .swatch:hover { box-shadow: 0 0 0 2px var(--ink); }
+
+      .collegeBody { padding: 14px 16px 16px; }
+      .courseRow { display: flex; align-items: center; justify-content: space-between; padding: 9px 4px; border-bottom: 1px solid var(--line); position: relative; }
+      .courseRow:last-of-type { border-bottom: none; }
+      .courseRow .cname { font-size: 0.86rem; color: var(--ink); }
+      .courseMenuBtn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 4px 8px; border-radius: 6px; }
+      .courseMenuBtn:hover { background: #f5f9ff; }
+      .addCourseRow { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+      .addCourseRow input { flex: 1; padding: 9px 10px; border-radius: 8px; border: 1.5px dashed var(--line); font-size: 0.84rem; background: #fbfdff; }
+      .addCourseRow button { padding: 9px 14px; border-radius: 8px; border: none; background: var(--ink); color: #fff; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+      .noCoursesNote { font-size: 0.78rem; color: var(--muted); padding: 6px 4px; }
+
+      /* ================= CONFIRM MODAL ================= */
+      .overlay { position: fixed; inset: 0; background: rgba(13,27,75,0.55); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+      .overlay.show { display: flex; }
+      .confirmBox { background: #fff; border-radius: 18px; padding: 24px; max-width: 360px; width: 100%; text-align: center; }
+      .confirmBox p { font-size: 0.92rem; color: var(--ink); margin-bottom: 18px; line-height: 1.5; }
+      .confirmActions { display: flex; gap: 10px; }
+      .confirmActions button { flex: 1; padding: 11px; border-radius: 10px; border: none; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+      .confirmActions .cancel { background: #f2f4f8; color: var(--ink); }
+      .confirmActions .ok { background: var(--danger); color: #fff; }
+
+      .promptBox { background: #fff; border-radius: 18px; padding: 24px; max-width: 360px; width: 100%; }
+      .promptBox h3 { font-size: 1rem; margin-bottom: 12px; }
+      .promptBox input { width: 100%; padding: 11px 12px; border-radius: 9px; border: 1.5px solid var(--line); font-size: 0.9rem; margin-bottom: 14px; }
+      .promptBox .confirmActions .ok { background: var(--water-deep); }
     </style>
   </head>
   <body>
@@ -85,7 +131,7 @@
 
         <div class="tabbar">
           <button class="tabbtn active" data-tab="pending">Pending Registrations</button>
-          <button class="tabbtn" data-tab="catalog">Campuses &amp; Courses</button>
+          <button class="tabbtn" data-tab="catalog">Colleges &amp; Courses</button>
           <button class="tabbtn" data-tab="crs">Class Representatives</button>
         </div>
 
@@ -98,27 +144,10 @@
           </div>
         </div>
 
-        <!-- ============ CAMPUSES & COURSES ============ -->
+        <!-- ============ COLLEGES & COURSES ============ -->
         <div class="panel" id="panel-catalog">
-          <div class="card">
-            <h2>Add Campus</h2>
-            <div class="field"><label>Campus Name</label><input id="newCampusName" placeholder="e.g. Iyunga Campus"/></div>
-            <button class="btn" id="btnAddCampus">Add Campus</button>
-            <div class="msg" id="msgCampus"></div>
-          </div>
-          <div class="card">
-            <h2>Add Course</h2>
-            <div class="row2">
-              <div class="field"><label>Campus</label><select id="courseCampusSelect"></select></div>
-              <div class="field"><label>Course Name</label><input id="newCourseName" placeholder="e.g. BSc. Software Engineering"/></div>
-            </div>
-            <button class="btn" id="btnAddCourse">Add Course</button>
-            <div class="msg" id="msgCourse"></div>
-          </div>
-          <div class="card">
-            <h2>Current Campuses &amp; Courses</h2>
-            <div id="catalogTree"></div>
-          </div>
+          <div class="addCollegeBar"><button class="pill" id="btnAddCollege">+ Add College</button></div>
+          <div class="collegeGrid" id="collegeGrid"><div class="empty">Loading...</div></div>
         </div>
 
         <!-- ============ CLASS REPRESENTATIVES ============ -->
@@ -127,8 +156,8 @@
             <h2>Assign a Class Representative</h2>
             <div class="hint">The person must already have a FeMOS account and be registered under this institution.</div>
             <div class="row2">
-              <div class="field"><label>Campus</label><select id="crCampusSelect"></select></div>
-              <div class="field"><label>Course</label><select id="crCourseSelect"><option value="">-- pick campus first --</option></select></div>
+              <div class="field"><label>College</label><select id="crCollegeSelect"></select></div>
+              <div class="field"><label>Course</label><select id="crCourseSelect"><option value="">-- pick college first --</option></select></div>
             </div>
             <div class="field"><label>Student's Email</label><input id="crEmail" placeholder="student@example.com"/></div>
             <button class="btn" id="btnAssignCr">Assign as Class Representative</button>
@@ -138,6 +167,29 @@
             <h2>Current Class Representatives</h2>
             <div id="crList"><div class="empty">Loading...</div></div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ CONFIRM MODAL (reusable) ============ -->
+    <div class="overlay" id="confirmOverlay">
+      <div class="confirmBox">
+        <p id="confirmMsg">Are you sure?</p>
+        <div class="confirmActions">
+          <button class="cancel" id="confirmCancelBtn">Cancel</button>
+          <button class="ok" id="confirmOkBtn">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ TEXT PROMPT MODAL (reusable) ============ -->
+    <div class="overlay" id="promptOverlay">
+      <div class="promptBox">
+        <h3 id="promptTitle">Enter a value</h3>
+        <input type="text" id="promptInput" placeholder=""/>
+        <div class="confirmActions">
+          <button class="cancel" id="promptCancelBtn">Cancel</button>
+          <button class="ok" id="promptOkBtn">Save</button>
         </div>
       </div>
     </div>
@@ -174,6 +226,44 @@
       function slugify(text) {
         return text.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       }
+
+      // ---------- Reusable styled confirm() replacement ----------
+      function showConfirm(message, onConfirm) {
+        const overlay = document.getElementById("confirmOverlay");
+        document.getElementById("confirmMsg").textContent = message;
+        overlay.classList.add("show");
+        const okBtn = document.getElementById("confirmOkBtn");
+        const cancelBtn = document.getElementById("confirmCancelBtn");
+        function cleanup() { overlay.classList.remove("show"); okBtn.removeEventListener("click", onOk); cancelBtn.removeEventListener("click", onCancel); }
+        function onOk() { cleanup(); onConfirm(); }
+        function onCancel() { cleanup(); }
+        okBtn.addEventListener("click", onOk);
+        cancelBtn.addEventListener("click", onCancel);
+      }
+      // ---------- Reusable styled prompt() replacement ----------
+      function showPrompt(title, placeholder, defaultValue, onSave) {
+        const overlay = document.getElementById("promptOverlay");
+        document.getElementById("promptTitle").textContent = title;
+        const input = document.getElementById("promptInput");
+        input.placeholder = placeholder || "";
+        input.value = defaultValue || "";
+        overlay.classList.add("show");
+        setTimeout(function () { input.focus(); }, 50);
+        const okBtn = document.getElementById("promptOkBtn");
+        const cancelBtn = document.getElementById("promptCancelBtn");
+        function cleanup() { overlay.classList.remove("show"); okBtn.removeEventListener("click", onOk); cancelBtn.removeEventListener("click", onCancel); }
+        function onOk() { const v = input.value.trim(); if (!v) return; cleanup(); onSave(v); }
+        function onCancel() { cleanup(); }
+        okBtn.addEventListener("click", onOk);
+        cancelBtn.addEventListener("click", onCancel);
+      }
+
+      // ---------- Close any open dropdown menu when clicking elsewhere ----------
+      document.addEventListener("click", function (e) {
+        if (!e.target.closest(".menuBtn") && !e.target.closest(".courseMenuBtn")) {
+          document.querySelectorAll(".dropdown.show").forEach(function (d) { d.classList.remove("show"); });
+        }
+      });
 
       auth.onAuthStateChanged(async function (user) {
         const gate = document.getElementById("gate");
@@ -220,12 +310,12 @@
         if (initialized) return;
         initialized = true;
         loadPending();
-        loadCampusSelects();
-        loadCatalogTree();
+        loadColleges();
+        loadCrCollegeSelect();
         loadCrList();
       }
 
-      // ================= PENDING REGISTRATIONS (scoped to my institution) =================
+      // ================= PENDING REGISTRATIONS =================
       async function loadPending() {
         const listEl = document.getElementById("pendingList");
         const countEl = document.getElementById("pendingCount");
@@ -265,105 +355,205 @@
           loadPending();
         } catch (err) { alert("Could not approve: " + (err.message || "")); }
       }
-      async function rejectStudent(pendingDocRef, studentUid) {
-        if (!confirm("Reject this registration?")) return;
-        try {
-          await pendingDocRef.delete();
-          await db.collection("users").doc(studentUid).set(
-            { institutionId: null, institutionName: null, campusId: null, campusName: null, courseId: null, courseName: null, registrationStatus: null },
-            { merge: true }
-          );
-          loadPending();
-        } catch (err) { alert("Could not reject: " + (err.message || "")); }
+      function rejectStudent(pendingDocRef, studentUid) {
+        showConfirm("Reject this registration? The student will need to register again.", async function () {
+          try {
+            await pendingDocRef.delete();
+            await db.collection("users").doc(studentUid).set(
+              { institutionId: null, institutionName: null, campusId: null, campusName: null, courseId: null, courseName: null, registrationStatus: null },
+              { merge: true }
+            );
+            loadPending();
+          } catch (err) { alert("Could not reject: " + (err.message || "")); }
+        });
       }
 
-      // ================= CAMPUSES & COURSES (scoped) =================
-      async function loadCampusSelects() {
+      // ================= COLLEGES & COURSES (card UI) =================
+      const COLOR_SWATCHES = [
+        { key: "blue", c1: "#5fd4f0", c2: "#155fd1" },
+        { key: "amber", c1: "#ffcf6b", c2: "#e0791b" },
+        { key: "green", c1: "#7be3b0", c2: "#1a9d63" },
+        { key: "purple", c1: "#c3a6f7", c2: "#7c3aed" },
+        { key: "pink", c1: "#f6a8c4", c2: "#d6336c" },
+        { key: "slate", c1: "#9fb0d6", c2: "#0d1b4b" },
+      ];
+      function colorFor(key) {
+        return COLOR_SWATCHES.find(function (s) { return s.key === key; }) || COLOR_SWATCHES[0];
+      }
+
+      document.getElementById("btnAddCollege").addEventListener("click", function () {
+        showPrompt("Add College", "e.g. College of ICT (CoICT)", "", async function (name) {
+          try {
+            await db.collection("institutions").doc(myInstitutionId).collection("campuses").doc(slugify(name)).set({ name: name, color: "blue" });
+            loadColleges();
+            loadCrCollegeSelect();
+          } catch (err) { alert("Error adding college: " + (err.message || "")); }
+        });
+      });
+
+      async function loadColleges() {
+        const grid = document.getElementById("collegeGrid");
+        grid.innerHTML = "Loading...";
+        const snap = await db.collection("institutions").doc(myInstitutionId).collection("campuses").orderBy("name").get();
+        if (snap.empty) { grid.innerHTML = '<div class="empty">No colleges yet — tap "+ Add College" above to create your first one.</div>'; return; }
+
+        grid.innerHTML = "";
+        for (const collegeDoc of snap.docs) {
+          const college = collegeDoc.data();
+          const colors = colorFor(college.color);
+          const courseSnap = await db.collection("institutions").doc(myInstitutionId).collection("campuses").doc(collegeDoc.id).collection("courses").orderBy("name").get();
+
+          const card = document.createElement("div");
+          card.className = "collegeCard";
+          card.innerHTML =
+            '<div class="collegeHead" style="--c1:' + colors.c1 + ";--c2:" + colors.c2 + '">' +
+              '<div class="name">' + escapeHtml(college.name) + '<span class="sub">' + courseSnap.size + " course" + (courseSnap.size === 1 ? "" : "s") + '</span></div>' +
+              '<button class="menuBtn" data-menu-toggle>⋮</button>' +
+              '<div class="dropdown" data-college-menu>' +
+                '<button data-edit-college>Edit Name</button>' +
+                '<div class="swatches">' +
+                  COLOR_SWATCHES.map(function (s) { return '<div class="swatch" style="background:linear-gradient(120deg,' + s.c1 + "," + s.c2 + ')" data-set-color="' + s.key + '" title="' + s.key + '"></div>'; }).join("") +
+                '</div>' +
+                '<button class="danger" data-delete-college>Delete College</button>' +
+              '</div>' +
+            '</div>' +
+            '<div class="collegeBody"><div class="courseList"></div>' +
+              '<div class="addCourseRow"><input type="text" placeholder="New course name..." data-new-course/><button data-save-course>Add</button></div>' +
+            '</div>';
+
+          const courseListEl = card.querySelector(".courseList");
+          if (courseSnap.empty) {
+            courseListEl.innerHTML = '<div class="noCoursesNote">No courses yet — add one below.</div>';
+          } else {
+            courseSnap.forEach(function (courseDoc) {
+              const row = document.createElement("div");
+              row.className = "courseRow";
+              row.innerHTML =
+                '<span class="cname">' + escapeHtml(courseDoc.data().name) + '</span>' +
+                '<button class="courseMenuBtn" data-course-menu-toggle>⋮</button>' +
+                '<div class="dropdown" data-course-menu>' +
+                  '<button data-edit-course>Edit Name</button>' +
+                  '<button data-assign-cr>Assign CR</button>' +
+                  '<button class="danger" data-delete-course>Delete Course</button>' +
+                '</div>';
+              wireCourseRow(row, collegeDoc.id, courseDoc.id, courseDoc.data().name);
+              courseListEl.appendChild(row);
+            });
+          }
+
+          wireCollegeCard(card, collegeDoc.id, college.name);
+          grid.appendChild(card);
+        }
+      }
+
+      function toggleDropdown(btn, dropdown) {
+        document.querySelectorAll(".dropdown.show").forEach(function (d) { if (d !== dropdown) d.classList.remove("show"); });
+        dropdown.classList.toggle("show");
+      }
+
+      function wireCollegeCard(card, collegeId, currentName) {
+        const menuBtn = card.querySelector("[data-menu-toggle]");
+        const dropdown = card.querySelector("[data-college-menu]");
+        menuBtn.addEventListener("click", function (e) { e.stopPropagation(); toggleDropdown(menuBtn, dropdown); });
+
+        card.querySelector("[data-edit-college]").addEventListener("click", function () {
+          dropdown.classList.remove("show");
+          showPrompt("Rename College", "College name", currentName, async function (newName) {
+            await db.collection("institutions").doc(myInstitutionId).collection("campuses").doc(collegeId).set({ name: newName }, { merge: true });
+            loadColleges(); loadCrCollegeSelect();
+          });
+        });
+        card.querySelectorAll("[data-set-color]").forEach(function (sw) {
+          sw.addEventListener("click", async function () {
+            dropdown.classList.remove("show");
+            await db.collection("institutions").doc(myInstitutionId).collection("campuses").doc(collegeId).set({ color: sw.getAttribute("data-set-color") }, { merge: true });
+            loadColleges();
+          });
+        });
+        card.querySelector("[data-delete-college]").addEventListener("click", async function () {
+          dropdown.classList.remove("show");
+          const courses = await db.collection("institutions").doc(myInstitutionId).collection("campuses").doc(collegeId).collection("courses").limit(1).get();
+          if (!courses.empty) { alert("This college still has courses inside it. Remove those first."); return; }
+          showConfirm("Delete this college? This cannot be undone.", async function () {
+            await db.collection("institutions").doc(myInstitutionId).collection("campuses").doc(collegeId).delete();
+            loadColleges(); loadCrCollegeSelect();
+          });
+        });
+
+        const input = card.querySelector("[data-new-course]");
+        card.querySelector("[data-save-course]").addEventListener("click", async function () {
+          const name = input.value.trim();
+          if (!name) return;
+          await db.collection("institutions").doc(myInstitutionId).collection("campuses").doc(collegeId).collection("courses").doc(slugify(name)).set({ name: name });
+          input.value = "";
+          loadColleges();
+        });
+        input.addEventListener("keydown", function (e) { if (e.key === "Enter") card.querySelector("[data-save-course]").click(); });
+      }
+
+      function wireCourseRow(row, collegeId, courseId, currentName) {
+        const menuBtn = row.querySelector("[data-course-menu-toggle]");
+        const dropdown = row.querySelector("[data-course-menu]");
+        menuBtn.addEventListener("click", function (e) { e.stopPropagation(); toggleDropdown(menuBtn, dropdown); });
+
+        row.querySelector("[data-edit-course]").addEventListener("click", function () {
+          dropdown.classList.remove("show");
+          showPrompt("Rename Course", "Course name", currentName, async function (newName) {
+            await db.collection("institutions").doc(myInstitutionId).collection("campuses").doc(collegeId).collection("courses").doc(courseId).set({ name: newName }, { merge: true });
+            loadColleges();
+          });
+        });
+        row.querySelector("[data-delete-course]").addEventListener("click", function () {
+          dropdown.classList.remove("show");
+          showConfirm('Delete "' + currentName + '"? This cannot be undone.', async function () {
+            await db.collection("institutions").doc(myInstitutionId).collection("campuses").doc(collegeId).collection("courses").doc(courseId).delete();
+            loadColleges();
+          });
+        });
+        row.querySelector("[data-assign-cr]").addEventListener("click", function () {
+          dropdown.classList.remove("show");
+          showPrompt("Assign CR for \"" + currentName + '"', "Student's email", "", async function (email) {
+            await assignCrDirect(collegeId, courseId, currentName, email);
+          });
+        });
+      }
+
+      async function assignCrDirect(collegeId, courseId, courseName, email) {
+        try {
+          const userSnap = await db.collection("users").where("email", "==", email).where("institutionId", "==", myInstitutionId).limit(1).get();
+          if (userSnap.empty) { alert("No student found with that email registered under your institution."); return; }
+          const targetUid = userSnap.docs[0].id;
+          await db.collection("userRoles").doc(targetUid).set({
+            role: "cr", institutionId: myInstitutionId, courseId: courseId, courseName: courseName,
+            assignedAt: firebase.firestore.FieldValue.serverTimestamp(), assignedBy: auth.currentUser.uid,
+          });
+          alert(email + " is now CR for " + courseName + ".");
+          loadCrList();
+        } catch (err) { alert("Error: " + (err.message || "")); }
+      }
+
+      // ================= CLASS REPRESENTATIVES TAB =================
+      async function loadCrCollegeSelect() {
         const snap = await db.collection("institutions").doc(myInstitutionId).collection("campuses").orderBy("name").get();
         const opts = snap.docs.map(function (d) { return '<option value="' + d.id + '">' + escapeHtml(d.data().name) + "</option>"; }).join("");
-        document.getElementById("courseCampusSelect").innerHTML = opts || '<option value="">-- add a campus first --</option>';
-        document.getElementById("crCampusSelect").innerHTML = opts || '<option value="">-- add a campus first --</option>';
-        if (snap.size) loadCrCourseOptions(document.getElementById("crCampusSelect").value);
+        document.getElementById("crCollegeSelect").innerHTML = opts || '<option value="">-- add a college first --</option>';
+        if (snap.size) loadCrCourseOptions(document.getElementById("crCollegeSelect").value);
       }
+      document.getElementById("crCollegeSelect").addEventListener("change", function () { loadCrCourseOptions(this.value); });
 
-      document.getElementById("btnAddCampus").addEventListener("click", async function () {
-        const name = document.getElementById("newCampusName").value.trim();
-        if (!name) { showMsg("msgCampus", "Enter a campus name.", "err"); return; }
-        try {
-          await db.collection("institutions").doc(myInstitutionId).collection("campuses").doc(slugify(name)).set({ name: name });
-          document.getElementById("newCampusName").value = "";
-          showMsg("msgCampus", "Campus added.", "ok");
-          loadCampusSelects();
-          loadCatalogTree();
-        } catch (err) { showMsg("msgCampus", "Error: " + (err.message || ""), "err"); }
-      });
-
-      document.getElementById("btnAddCourse").addEventListener("click", async function () {
-        const campusId = document.getElementById("courseCampusSelect").value;
-        const name = document.getElementById("newCourseName").value.trim();
-        if (!campusId || !name) { showMsg("msgCourse", "Pick a campus and enter a course name.", "err"); return; }
-        try {
-          await db.collection("institutions").doc(myInstitutionId).collection("campuses").doc(campusId)
-            .collection("courses").doc(slugify(name)).set({ name: name });
-          document.getElementById("newCourseName").value = "";
-          showMsg("msgCourse", "Course added.", "ok");
-          loadCatalogTree();
-        } catch (err) { showMsg("msgCourse", "Error: " + (err.message || ""), "err"); }
-      });
-
-      async function loadCatalogTree() {
-        const treeEl = document.getElementById("catalogTree");
-        treeEl.innerHTML = "Loading...";
-        const campSnap = await db.collection("institutions").doc(myInstitutionId).collection("campuses").orderBy("name").get();
-        if (campSnap.empty) { treeEl.innerHTML = '<div class="empty">No campuses yet. Add one above.</div>'; return; }
-        let html = "";
-        for (const campDoc of campSnap.docs) {
-          html += '<div class="tree-campus"><div class="tree-campus-head"><span>' + escapeHtml(campDoc.data().name) + '</span>' +
-                  '<button class="del-x" data-del-campus="' + campDoc.id + '">Delete Campus</button></div>';
-          const courseSnap = await db.collection("institutions").doc(myInstitutionId).collection("campuses").doc(campDoc.id).collection("courses").orderBy("name").get();
-          if (courseSnap.empty) { html += '<div style="color:var(--muted);font-size:0.78rem;">No courses yet.</div>'; }
-          courseSnap.forEach(function (courseDoc) {
-            html += '<div class="tree-course-row"><span>' + escapeHtml(courseDoc.data().name) + '</span>' +
-                    '<button class="del-x" data-del-course="' + campDoc.id + "|" + courseDoc.id + '">Remove</button></div>';
-          });
-          html += "</div>";
-        }
-        treeEl.innerHTML = html;
-        treeEl.querySelectorAll("[data-del-course]").forEach(function (btn) {
-          btn.addEventListener("click", async function () {
-            const parts = btn.getAttribute("data-del-course").split("|");
-            if (!confirm("Remove this course?")) return;
-            await db.collection("institutions").doc(myInstitutionId).collection("campuses").doc(parts[0]).collection("courses").doc(parts[1]).delete();
-            loadCatalogTree();
-          });
-        });
-        treeEl.querySelectorAll("[data-del-campus]").forEach(function (btn) {
-          btn.addEventListener("click", async function () {
-            const campusId = btn.getAttribute("data-del-campus");
-            const courses = await db.collection("institutions").doc(myInstitutionId).collection("campuses").doc(campusId).collection("courses").limit(1).get();
-            if (!courses.empty) { alert("This campus still has courses inside it. Remove those first."); return; }
-            if (!confirm("Delete this campus?")) return;
-            await db.collection("institutions").doc(myInstitutionId).collection("campuses").doc(campusId).delete();
-            loadCatalogTree();
-            loadCampusSelects();
-          });
-        });
-      }
-
-      // ================= CLASS REPRESENTATIVES =================
-      async function loadCrCourseOptions(campusId) {
+      async function loadCrCourseOptions(collegeId) {
         const sel = document.getElementById("crCourseSelect");
-        if (!campusId) { sel.innerHTML = '<option value="">-- pick campus first --</option>'; return; }
-        const snap = await db.collection("institutions").doc(myInstitutionId).collection("campuses").doc(campusId).collection("courses").orderBy("name").get();
+        if (!collegeId) { sel.innerHTML = '<option value="">-- pick college first --</option>'; return; }
+        const snap = await db.collection("institutions").doc(myInstitutionId).collection("campuses").doc(collegeId).collection("courses").orderBy("name").get();
         sel.innerHTML = snap.docs.map(function (d) { return '<option value="' + d.id + '">' + escapeHtml(d.data().name) + "</option>"; }).join("") || '<option value="">-- no courses yet --</option>';
       }
-      document.getElementById("crCampusSelect").addEventListener("change", function () { loadCrCourseOptions(this.value); });
 
       document.getElementById("btnAssignCr").addEventListener("click", async function () {
+        const collegeId = document.getElementById("crCollegeSelect").value;
         const courseId = document.getElementById("crCourseSelect").value;
         const courseName = document.getElementById("crCourseSelect").selectedOptions[0] ? document.getElementById("crCourseSelect").selectedOptions[0].textContent : "";
         const email = document.getElementById("crEmail").value.trim();
-        if (!courseId || !email) { showMsg("msgCr", "Pick a course and enter the student's email.", "err"); return; }
+        if (!collegeId || !courseId || !email) { showMsg("msgCr", "Pick a college, course, and enter the student's email.", "err"); return; }
         try {
           const userSnap = await db.collection("users").where("email", "==", email).where("institutionId", "==", myInstitutionId).limit(1).get();
           if (userSnap.empty) { showMsg("msgCr", "No student found with that email registered under your institution.", "err"); return; }
@@ -399,10 +589,11 @@
           }
           listEl.innerHTML = html;
           listEl.querySelectorAll("[data-revoke]").forEach(function (btn) {
-            btn.addEventListener("click", async function () {
-              if (!confirm("Revoke this Class Representative's access?")) return;
-              await db.collection("userRoles").doc(btn.getAttribute("data-revoke")).delete();
-              loadCrList();
+            btn.addEventListener("click", function () {
+              showConfirm("Revoke this Class Representative's access?", async function () {
+                await db.collection("userRoles").doc(btn.getAttribute("data-revoke")).delete();
+                loadCrList();
+              });
             });
           });
         } catch (err) {

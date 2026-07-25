@@ -164,6 +164,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
     <script>
       const firebaseConfig = {
@@ -178,6 +179,12 @@
       const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
       const auth = firebase.auth(app);
       const db = firebase.firestore(app);
+
+      // ================= EMAILJS CONFIG (reuses your existing Service ID/Public Key) =================
+      const EMAILJS_PUBLIC_KEY = "n1q50LOlnNH_wWusx";
+      const EMAILJS_SERVICE_ID = "service_lx1zlxc";
+      const EMAILJS_ADMIN_GRANT_TEMPLATE_ID ="template_i38al3f";
+      if (typeof emailjs !== "undefined") { emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY }); }
 
       function showMsg(id, text, type) {
         const el = document.getElementById(id);
@@ -452,6 +459,7 @@
           const userSnap = await db.collection("users").where("email", "==", email).limit(1).get();
           if (userSnap.empty) { showMsg("msgGrant", "No FeMOS user found with that email. They must sign up first.", "err"); return; }
           const targetUid = userSnap.docs[0].id;
+          const targetData = userSnap.docs[0].data();
           const instName = document.getElementById("grantInstSelect").selectedOptions[0].textContent;
           await db.collection("userRoles").doc(targetUid).set({
             role: "institutionAdmin", institutionId: instId, institutionName: instName,
@@ -460,6 +468,15 @@
           document.getElementById("grantEmail").value = "";
           showMsg("msgGrant", "Granted! " + email + " is now Institution Admin for " + instName + ".", "ok");
           loadInstAdminList();
+
+          // Best-effort email notification - if it fails, the grant itself has already succeeded.
+          if (typeof emailjs !== "undefined" && !EMAILJS_ADMIN_GRANT_TEMPLATE_ID.startsWith("PUT_")) {
+            try {
+              await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_ADMIN_GRANT_TEMPLATE_ID, {
+                to_email: email, to_name: targetData.fullName || email, institution_name: instName,
+              });
+            } catch (mailErr) { console.warn("Grant email failed to send:", mailErr); }
+          }
         } catch (err) {
           showMsg("msgGrant", "Error: " + (err.message || ""), "err");
         }
