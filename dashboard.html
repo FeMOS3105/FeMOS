@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FeMOS — Dashboard</title>
+    <style>
+      :root {
+        --water-light: #5fd4f0; --water-mid: #2ea8ee; --water-deep: #155fd1;
+        --ink: #0d1b4b; --muted: #5c6b9a; --line: #dbe6fb; --danger: #e14b4b; --success: #1fae6e; --warn: #e0a020;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: "Segoe UI", system-ui, sans-serif; background: linear-gradient(180deg, #eef5ff 0%, #f7fbff 100%);
+        color: var(--ink); min-height: 100vh; padding: 20px 16px 60px;
+      }
+      .shell { max-width: 820px; margin: 0 auto; }
+      .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; flex-wrap: wrap; }
+      .brand { display: flex; align-items: center; gap: 10px; }
+      .brand img { width: 42px; height: 42px; border-radius: 50%; box-shadow: 0 6px 16px rgba(21,95,209,0.25); }
+      .brand h1 { font-size: 1.15rem; background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .userchip { display: flex; align-items: center; gap: 8px; background: #fff; border-radius: 999px; padding: 6px 14px 6px 6px; box-shadow: 0 6px 16px rgba(13,27,75,0.08); font-size: 0.82rem; }
+      .userchip .av { width: 26px; height: 26px; border-radius: 50%; background: var(--water-mid); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; overflow: hidden; }
+      .userchip .av img { width: 100%; height: 100%; object-fit: cover; }
+      .userchip button { background: none; border: none; color: var(--danger); font-weight: 600; cursor: pointer; font-size: 0.78rem; margin-left: 6px; }
+
+      .profileCard { background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(13,27,75,0.08); padding: 16px 18px; margin: 14px 0 20px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+      .profileCard .av { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, var(--water-light), var(--water-deep)); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; overflow: hidden; flex-shrink: 0; }
+      .profileCard .av img { width: 100%; height: 100%; object-fit: cover; }
+      .profileCard .name { font-weight: 700; font-size: 1rem; }
+      .profileCard .course { font-size: 0.82rem; color: var(--muted); }
+      .statusPill { margin-left: auto; font-size: 0.76rem; font-weight: 700; padding: 6px 14px; border-radius: 999px; }
+      .statusPill.pending { background: #fff3d6; color: #8a6100; }
+      .statusPill.confirmed { background: #e9f9f1; color: var(--success); }
+
+      .tabbar { display: flex; gap: 4px; background: #fff; padding: 4px; border-radius: 12px; box-shadow: 0 6px 16px rgba(13,27,75,0.06); margin-bottom: 20px; width: 100%; }
+      .tabbtn { flex: 1; padding: 10px 8px; border: none; background: transparent; border-radius: 9px; font-weight: 600; font-size: 0.84rem; color: var(--muted); cursor: pointer; }
+      .tabbtn.active { background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); color: #fff; }
+      .panel { display: none; }
+      .panel.active { display: block; }
+
+      .empty { text-align: center; padding: 26px; color: var(--muted); font-size: 0.88rem; border: 1.5px dashed var(--line); border-radius: 12px; }
+
+      .itemCard { background: #fff; border: 1.5px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 12px; box-shadow: 0 8px 22px rgba(13,27,75,0.05); }
+      .itemCard .ititle { font-weight: 700; font-size: 0.96rem; }
+      .itemCard .imeta { font-size: 0.74rem; color: var(--muted); margin-top: 3px; }
+      .itemCard .ibody { font-size: 0.88rem; color: var(--ink); line-height: 1.5; margin: 10px 0; }
+      .readBtn { padding: 10px 18px; border: none; border-radius: 10px; font-weight: 700; font-size: 0.85rem; cursor: pointer; background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); color: #fff; }
+      .readConfirmed { font-size: 0.82rem; color: var(--success); font-weight: 600; }
+
+      .optBtn { display: block; width: 100%; text-align: left; padding: 11px 14px; border: 1.5px solid var(--line); border-radius: 10px; background: #fbfdff; margin-bottom: 8px; cursor: pointer; font-size: 0.88rem; color: var(--ink); }
+      .optBtn:hover { border-color: var(--water-mid); }
+      .barRow { margin-bottom: 10px; }
+      .barLabel { display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 4px; }
+      .barTrack { height: 10px; border-radius: 6px; background: #f0f4fb; overflow: hidden; }
+      .barFill { height: 100%; background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); border-radius: 6px; transition: width .3s; }
+      .votedNote { font-size: 0.78rem; color: var(--water-deep); font-weight: 600; margin-bottom: 10px; }
+
+      .collectRow { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 4px 0; }
+      .btn-outline-sm { padding: 8px 16px; border-radius: 8px; border: 1.5px solid var(--line); background: #fff; color: var(--ink); font-weight: 600; font-size: 0.82rem; cursor: pointer; text-decoration: none; display: inline-block; }
+      .submittedTag { font-size: 0.76rem; color: var(--success); font-weight: 600; }
+
+      .gate-card { max-width: 460px; margin: 60px auto; text-align: center; background: #fff; border-radius: 18px; padding: 34px 26px; box-shadow: 0 14px 40px rgba(13,27,75,0.1); }
+
+      .overlay { position: fixed; inset: 0; background: rgba(13,27,75,0.55); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+      .overlay.show { display: flex; }
+      .promptBox { background: #fff; border-radius: 18px; padding: 24px; max-width: 360px; width: 100%; }
+      .promptBox h3 { font-size: 1rem; margin-bottom: 8px; }
+      .promptBox p { font-size: 0.82rem; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
+      .promptBox input { width: 100%; padding: 11px 12px; border-radius: 9px; border: 1.5px solid var(--line); font-size: 0.9rem; margin-bottom: 14px; }
+      .promptActions { display: flex; gap: 10px; }
+      .promptActions button { flex: 1; padding: 11px; border-radius: 10px; border: none; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+      .promptActions .cancel { background: #f2f4f8; color: var(--ink); }
+      .promptActions .ok { background: var(--water-deep); color: #fff; }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div id="gate" class="gate-card">Loading your dashboard...</div>
+
+      <div id="app" style="display:none;">
+        <div class="topbar">
+          <div class="brand">
+            <img src="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png" alt="FeMOS"/>
+            <h1>FeMOS</h1>
+          </div>
+          <div class="userchip">
+            <div class="av" id="uAv">?</div>
+            <span id="uName">...</span>
+            <button id="btnLogout">Log Out</button>
+          </div>
+        </div>
+
+        <div class="profileCard">
+          <div class="av" id="pAv">?</div>
+          <div>
+            <div class="name" id="pName">...</div>
+            <div class="course" id="pCourse">...</div>
+          </div>
+          <div class="statusPill" id="pStatus">...</div>
+        </div>
+
+        <div class="tabbar">
+          <button class="tabbtn active" data-tab="ann">Announcements</button>
+          <button class="tabbtn" data-tab="polls">Polls</button>
+          <button class="tabbtn" data-tab="collect">Quick Collect</button>
+        </div>
+
+        <div class="panel active" id="panel-ann"><div id="annList"><div class="empty">Loading...</div></div></div>
+        <div class="panel" id="panel-polls"><div id="pollList"><div class="empty">Loading...</div></div></div>
+        <div class="panel" id="panel-collect"><div id="collectList"><div class="empty">Loading...</div></div></div>
+      </div>
+    </div>
+
+    <!-- Registration number prompt (asked once, then cached on the profile) -->
+    <div class="overlay" id="regNumOverlay">
+      <div class="promptBox">
+        <h3>Confirm Your Registration Number</h3>
+        <p>Your CR asked for this once so they know exactly who has read each announcement. It's saved so you won't be asked again.</p>
+        <input type="text" id="regNumInput" placeholder="e.g. T21-03-12345"/>
+        <div class="promptActions">
+          <button class="cancel" id="regNumCancel">Cancel</button>
+          <button class="ok" id="regNumSave">Save &amp; Confirm Reading</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyCb-Y69glDSkNDwgzoCXyUVAz6D86Ccdfo",
+        authDomain: "femos-fe742.firebaseapp.com",
+        projectId: "femos-fe742",
+        storageBucket: "femos-fe742.firebasestorage.app",
+        messagingSenderId: "1022203442714",
+        appId: "1:1022203442714:web:4fa06d28d788c024bf83a3",
+        measurementId: "G-M4DEBFVJCV",
+      };
+      const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth(app);
+      const db = firebase.firestore(app);
+
+      let myInstitutionId = null, myCourseId = null, myCourseName = "", myInstitutionName = "";
+      let myRegNumber = "";
+
+      function escapeHtml(s) {
+        return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; });
+      }
+      function fmtDate(ts) { return ts && ts.toDate ? ts.toDate().toLocaleString() : ""; }
+      function linkifyError(message) {
+        const escaped = escapeHtml(message || "Unknown error");
+        return escaped.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color:var(--water-deep);font-weight:600;">Click here to create the missing index</a>');
+      }
+
+      auth.onAuthStateChanged(async function (user) {
+        const gate = document.getElementById("gate");
+        if (!user) { gate.innerHTML = 'You must be signed in. <a href="login.html">Go to login</a>.'; return; }
+        try {
+          const doc = await db.collection("users").doc(user.uid).get();
+          const data = doc.exists ? doc.data() : null;
+          if (!data || !data.courseId) { window.location.href = "registration.html"; return; }
+
+          myInstitutionId = data.institutionId; myCourseId = data.courseId;
+          myCourseName = data.courseName || ""; myInstitutionName = data.institutionName || "";
+          myRegNumber = data.registrationNumber || "";
+
+          gate.style.display = "none";
+          document.getElementById("app").style.display = "block";
+          document.getElementById("uName").textContent = user.displayName || user.email;
+          document.getElementById("pName").textContent = user.displayName || user.email;
+          document.getElementById("pCourse").textContent = myCourseName + " · " + myInstitutionName;
+          const status = data.registrationStatus || (data.confirmedByCR ? "confirmed" : "pending");
+          const statusEl = document.getElementById("pStatus");
+          statusEl.textContent = status === "confirmed" ? "✓ Confirmed" : "⏳ Pending";
+          statusEl.className = "statusPill " + (status === "confirmed" ? "confirmed" : "pending");
+
+          if (user.photoURL) {
+            document.getElementById("uAv").innerHTML = '<img src="' + user.photoURL + '" alt=""/>';
+            document.getElementById("pAv").innerHTML = '<img src="' + user.photoURL + '" alt=""/>';
+          } else {
+            const initials = (user.displayName || user.email || "?").trim().split(/\s+/).map(function (p) { return p[0]; }).slice(0, 2).join("").toUpperCase();
+            document.getElementById("uAv").textContent = initials;
+            document.getElementById("pAv").textContent = initials;
+          }
+
+          initApp();
+        } catch (err) {
+          gate.innerHTML = "Error loading your dashboard: " + (err.message || "");
+        }
+      });
+
+      document.getElementById("btnLogout").addEventListener("click", async function () { await auth.signOut(); window.location.href = "login.html"; });
+
+      document.querySelectorAll(".tabbtn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          document.querySelectorAll(".tabbtn").forEach(function (b) { b.classList.remove("active"); });
+          document.querySelectorAll(".panel").forEach(function (p) { p.classList.remove("active"); });
+          btn.classList.add("active");
+          document.getElementById("panel-" + btn.getAttribute("data-tab")).classList.add("active");
+        });
+      });
+
+      let initialized = false;
+      function initApp() {
+        if (initialized) return;
+        initialized = true;
+        loadAnnouncements();
+        loadPolls();
+        loadCollectForms();
+      }
+
+      // ================= ANNOUNCEMENTS =================
+      async function loadAnnouncements() {
+        const listEl = document.getElementById("annList");
+        listEl.innerHTML = "Loading...";
+        try {
+          const snap = await db.collection("announcements")
+            .where("institutionId", "==", myInstitutionId).where("courseId", "==", myCourseId).get();
+          if (snap.empty) { listEl.innerHTML = '<div class="empty">No announcements yet for your course.</div>'; return; }
+          const docs = snap.docs.slice().sort(function (a, b) {
+            const at = a.data().createdAt ? a.data().createdAt.toMillis() : 0;
+            const bt = b.data().createdAt ? b.data().createdAt.toMillis() : 0;
+            return bt - at;
+          });
+          listEl.innerHTML = "";
+          for (const doc of docs) {
+            const d = doc.data();
+            const myRead = await db.collection("announcements").doc(doc.id).collection("reads").doc(auth.currentUser.uid).get();
+            const card = document.createElement("div");
+            card.className = "itemCard";
+            card.innerHTML =
+              '<div class="ititle">' + escapeHtml(d.title) + '</div>' +
+              '<div class="imeta">From ' + escapeHtml(d.createdByName || "your CR") + " · Sent " + fmtDate(d.createdAt) + '</div>' +
+              '<div class="ibody">' + escapeHtml(d.body) + '</div>' +
+              (myRead.exists
+                ? '<div class="readConfirmed">✓ You confirmed reading this on ' + fmtDate(myRead.data().confirmedAt) + '</div>'
+                : '<button class="readBtn" data-confirm-read>I\'ve Read This</button>');
+            const btn = card.querySelector("[data-confirm-read]");
+            if (btn) btn.addEventListener("click", function () { confirmRead(doc.id, btn); });
+            listEl.appendChild(card);
+          }
+        } catch (err) {
+          listEl.innerHTML = '<div class="empty">Could not load announcements: ' + linkifyError(err.message) + "</div>";
+        }
+      }
+
+      let pendingAnnId = null;
+      function confirmRead(annId, btnEl) {
+        if (myRegNumber) {
+          doConfirmRead(annId, myRegNumber, btnEl);
+        } else {
+          pendingAnnId = annId;
+          window._pendingReadBtn = btnEl;
+          document.getElementById("regNumOverlay").classList.add("show");
+          document.getElementById("regNumInput").focus();
+        }
+      }
+      document.getElementById("regNumCancel").addEventListener("click", function () {
+        document.getElementById("regNumOverlay").classList.remove("show");
+        pendingAnnId = null;
+      });
+      document.getElementById("regNumSave").addEventListener("click", async function () {
+        const val = document.getElementById("regNumInput").value.trim();
+        if (!val) return;
+        document.getElementById("regNumOverlay").classList.remove("show");
+        try {
+          await db.collection("users").doc(auth.currentUser.uid).set({ registrationNumber: val }, { merge: true });
+          myRegNumber = val;
+        } catch (e) {}
+        if (pendingAnnId) { await doConfirmRead(pendingAnnId, val, window._pendingReadBtn); pendingAnnId = null; }
+      });
+      async function doConfirmRead(annId, regNum, btnEl) {
+        try {
+          await db.collection("announcements").doc(annId).collection("reads").doc(auth.currentUser.uid).set({
+            name: auth.currentUser.displayName || auth.currentUser.email,
+            registrationNumber: regNum || "",
+            confirmedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+          loadAnnouncements();
+        } catch (err) { alert("Could not confirm: " + (err.message || "")); }
+      }
+
+      // ================= POLLS =================
+      async function loadPolls() {
+        const listEl = document.getElementById("pollList");
+        listEl.innerHTML = "Loading...";
+        try {
+          const snap = await db.collection("polls")
+            .where("institutionId", "==", myInstitutionId).where("courseId", "==", myCourseId).get();
+          if (snap.empty) { listEl.innerHTML = '<div class="empty">No polls yet for your course.</div>'; return; }
+          const docs = snap.docs.slice().sort(function (a, b) {
+            const at = a.data().createdAt ? a.data().createdAt.toMillis() : 0;
+            const bt = b.data().createdAt ? b.data().createdAt.toMillis() : 0;
+            return bt - at;
+          });
+          listEl.innerHTML = "";
+          for (const doc of docs) {
+            const d = doc.data();
+            const myVote = await db.collection("polls").doc(doc.id).collection("votes").doc(auth.currentUser.uid).get();
+            const card = document.createElement("div");
+            card.className = "itemCard";
+            let inner = '<div class="ititle">' + escapeHtml(d.question) + '</div><div class="imeta">' + (d.isOpen ? "Open" : "Closed") + '</div>';
+
+            if (!myVote.exists && d.isOpen) {
+              inner += d.options.map(function (opt, i) {
+                return '<button class="optBtn" data-vote="' + i + '">' + escapeHtml(opt) + "</button>";
+              }).join("");
+            } else {
+              const vc = d.voteCounts || {};
+              const counts = d.options.map(function (_, i) { return vc[i] || 0; });
+              const total = counts.reduce(function (a, b) { return a + b; }, 0) || 1;
+              if (myVote.exists) inner += '<div class="votedNote">You voted: ' + escapeHtml(d.options[myVote.data().optionIndex] || "") + "</div>";
+              inner += d.options.map(function (opt, i) {
+                const pct = Math.round((counts[i] / total) * 100);
+                return '<div class="barRow"><div class="barLabel"><span>' + escapeHtml(opt) + '</span><span>' + counts[i] + " (" + pct + '%)</span></div><div class="barTrack"><div class="barFill" style="width:' + pct + '%"></div></div></div>';
+              }).join("");
+            }
+            card.innerHTML = inner;
+            card.querySelectorAll("[data-vote]").forEach(function (voteBtn) {
+              voteBtn.addEventListener("click", async function () {
+                const idx = parseInt(voteBtn.getAttribute("data-vote"), 10);
+                try {
+                  await db.collection("polls").doc(doc.id).collection("votes").doc(auth.currentUser.uid).set({
+                    optionIndex: idx, votedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                  });
+                  const inc = {}; inc["voteCounts." + idx] = firebase.firestore.FieldValue.increment(1);
+                  await db.collection("polls").doc(doc.id).update(inc);
+                  loadPolls();
+                } catch (err) { alert("Could not vote: " + (err.message || "")); }
+              });
+            });
+            listEl.appendChild(card);
+          }
+        } catch (err) {
+          listEl.innerHTML = '<div class="empty">Could not load polls: ' + linkifyError(err.message) + "</div>";
+        }
+      }
+
+      // ================= QUICK COLLECT =================
+      async function loadCollectForms() {
+        const listEl = document.getElementById("collectList");
+        listEl.innerHTML = "Loading...";
+        try {
+          const snap = await db.collection("collectForms")
+            .where("institutionId", "==", myInstitutionId).where("courseId", "==", myCourseId).where("isOpen", "==", true).get();
+          if (snap.empty) { listEl.innerHTML = '<div class="empty">No open forms right now.</div>'; return; }
+          listEl.innerHTML = "";
+          for (const doc of snap.docs) {
+            const d = doc.data();
+            const mySub = await db.collection("collectForms").doc(doc.id).collection("submissions").doc(auth.currentUser.uid).get();
+            const card = document.createElement("div");
+            card.className = "itemCard";
+            card.innerHTML =
+              '<div class="collectRow"><div><div class="ititle">' + escapeHtml(d.title) + '</div><div class="imeta">' + escapeHtml(d.instructions) + '</div>' +
+              (mySub.exists ? '<div class="submittedTag">✓ Submitted: ' + escapeHtml(mySub.data().value) + '</div>' : "") +
+              '</div><a class="btn-outline-sm" href="collect-form.html?id=' + doc.id + '">' + (mySub.exists ? "Update" : "Fill Out") + '</a></div>';
+            listEl.appendChild(card);
+          }
+        } catch (err) {
+          listEl.innerHTML = '<div class="empty">Could not load forms: ' + linkifyError(err.message) + "</div>";
+        }
+      }
+    </script>
+  </body>
+</html>

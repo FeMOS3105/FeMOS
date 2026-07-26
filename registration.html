@@ -232,7 +232,7 @@
           });
 
           showMsg("Registration submitted! Your status is Pending until confirmed.", "ok");
-          setTimeout(function () { window.location.href = "proof.html"; }, 1200);
+          setTimeout(function () { window.location.href = "dashboard.html"; }, 1200);
         } catch (err) {
           showMsg("Error: " + (err.message || "Could not save your registration"), "err");
         } finally {

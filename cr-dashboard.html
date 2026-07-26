@@ -380,7 +380,7 @@
         try {
           await db.collection("polls").add({
             institutionId: myInstitutionId, courseId: myCourseId, courseName: myCourseName,
-            question: question, options: options, isOpen: true,
+            question: question, options: options, isOpen: true, voteCounts: {},
             createdBy: auth.currentUser.uid, createdByName: auth.currentUser.displayName || auth.currentUser.email,
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           });
@@ -405,15 +405,15 @@
           listEl.innerHTML = "";
           for (const doc of docs) {
             const d = doc.data();
-            const votesSnap = await db.collection("polls").doc(doc.id).collection("votes").get();
-            const counts = d.options.map(function () { return 0; });
-            votesSnap.forEach(function (v) { const idx = v.data().optionIndex; if (counts[idx] !== undefined) counts[idx]++; });
-            const total = votesSnap.size || 1;
+            const vc = d.voteCounts || {};
+            const counts = d.options.map(function (_, i) { return vc[i] || 0; });
+            const totalVotes = counts.reduce(function (a, b) { return a + b; }, 0);
+            const total = totalVotes || 1;
 
             const card = document.createElement("div");
             card.className = "itemCard";
             card.innerHTML =
-              '<div class="itop"><div><div class="ititle">' + escapeHtml(d.question) + '</div><div class="imeta">' + fmtDate(d.createdAt) + " · " + votesSnap.size + " vote(s) · " + (d.isOpen ? "Open" : "Closed") + '</div></div></div>' +
+              '<div class="itop"><div><div class="ititle">' + escapeHtml(d.question) + '</div><div class="imeta">' + fmtDate(d.createdAt) + " · " + totalVotes + " vote(s) · " + (d.isOpen ? "Open" : "Closed") + '</div></div></div>' +
               d.options.map(function (opt, i) {
                 const pct = Math.round((counts[i] / total) * 100);
                 return '<div class="barRow"><div class="barLabel"><span>' + escapeHtml(opt) + '</span><span>' + counts[i] + " (" + pct + '%)</span></div><div class="barTrack"><div class="barFill" style="width:' + pct + '%"></div></div></div>';

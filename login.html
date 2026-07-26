@@ -341,7 +341,7 @@
         const doc = await db.collection("users").doc(user.uid).get();
         const data = doc.exists ? doc.data() : null;
         if (data && data.courseId) {
-          window.location.href = "proof.html";
+          window.location.href = "dashboard.html";
         } else {
           window.location.href = "registration.html";
         }
