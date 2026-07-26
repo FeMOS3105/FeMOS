@@ -223,6 +223,10 @@
       function escapeHtml(s) {
         return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; });
       }
+      function linkifyError(message) {
+        const escaped = escapeHtml(message || "Unknown error");
+        return escaped.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color:var(--water-deep);font-weight:600;">Click here to create the missing index</a>');
+      }
       function slugify(text) {
         return text.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       }
@@ -344,8 +348,7 @@
           });
         } catch (err) {
           countEl.textContent = "";
-          listEl.innerHTML = '<div class="empty">Could not load pending list: ' + escapeHtml(err.message || "") +
-            '. If this mentions a missing index, open the link Firestore prints in your browser console (F12) once to auto-create it.</div>';
+          listEl.innerHTML = '<div class="empty">Could not load pending list: ' + linkifyError(err.message) + "</div>";
         }
       }
       async function approveStudent(pendingDocRef, studentUid) {
@@ -597,8 +600,7 @@
             });
           });
         } catch (err) {
-          listEl.innerHTML = '<div class="empty">Could not load list: ' + escapeHtml(err.message || "") +
-            '. If this mentions a missing index, open the link Firestore prints in your browser console (F12) once to auto-create it.</div>';
+          listEl.innerHTML = '<div class="empty">Could not load list: ' + linkifyError(err.message) + "</div>";
         }
       }
     </script>

@@ -228,6 +228,13 @@
         if (!ts || !ts.toDate) return "";
         return ts.toDate().toLocaleString();
       }
+      // Turns a Firestore "missing index" error (which contains a raw URL) into
+      // a clickable link right inside the app, instead of only being visible
+      // in the browser console.
+      function linkifyError(message) {
+        const escaped = escapeHtml(message || "Unknown error");
+        return escaped.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color:var(--water-deep);font-weight:600;">Click here to create the missing index</a>');
+      }
       function showConfirm(message, onConfirm) {
         const overlay = document.getElementById("confirmOverlay");
         document.getElementById("confirmMsg").textContent = message;
@@ -305,37 +312,48 @@
       async function loadAnnouncements() {
         const listEl = document.getElementById("annList");
         listEl.innerHTML = "Loading...";
-        const snap = await db.collection("announcements")
-          .where("createdBy", "==", auth.currentUser.uid).orderBy("createdAt", "desc").get();
-        if (snap.empty) { listEl.innerHTML = '<div class="empty">You haven\'t posted any announcements yet.</div>'; return; }
-        listEl.innerHTML = "";
-        for (const doc of snap.docs) {
-          const d = doc.data();
-          const readsSnap = await db.collection("announcements").doc(doc.id).collection("reads").get();
-          const card = document.createElement("div");
-          card.className = "itemCard";
-          card.innerHTML =
-            '<div class="itop"><div><div class="ititle">' + escapeHtml(d.title) + '</div><div class="imeta">' + fmtDate(d.createdAt) + '</div></div></div>' +
-            '<div class="ibody">' + escapeHtml(d.body) + '</div>' +
-            '<button class="toggleLink" data-toggle-reads>' + readsSnap.size + " student(s) have confirmed reading — view names</button>" +
-            '<div class="readList" style="display:none;" data-reads-box>' +
-              (readsSnap.empty ? '<div>No one yet.</div>' : readsSnap.docs.map(function (r) {
-                const rd = r.data();
-                return '<div class="rrow"><span>' + escapeHtml(rd.name || r.id) + '</span><span>' + fmtDate(rd.confirmedAt) + '</span></div>';
-              }).join("")) +
-            '</div>' +
-            '<div class="itemActions"><button class="btn-sm" style="background:transparent;border:1.5px solid var(--danger);color:var(--danger);" data-delete-ann>Delete</button></div>';
-          card.querySelector("[data-toggle-reads]").addEventListener("click", function () {
-            const box = card.querySelector("[data-reads-box]");
-            box.style.display = box.style.display === "none" ? "block" : "none";
+        try {
+          // No orderBy here on purpose - combining it with the where() below would
+          // require a manual Firestore composite index. We sort in JS instead.
+          const snap = await db.collection("announcements").where("createdBy", "==", auth.currentUser.uid).get();
+          if (snap.empty) { listEl.innerHTML = '<div class="empty">You haven\'t posted any announcements yet.</div>'; return; }
+          const docs = snap.docs.slice().sort(function (a, b) {
+            const at = a.data().createdAt ? a.data().createdAt.toMillis() : 0;
+            const bt = b.data().createdAt ? b.data().createdAt.toMillis() : 0;
+            return bt - at;
           });
-          card.querySelector("[data-delete-ann]").addEventListener("click", function () {
-            showConfirm('Delete the announcement "' + d.title + '"?', async function () {
-              await db.collection("announcements").doc(doc.id).delete();
-              loadAnnouncements();
+          listEl.innerHTML = "";
+          for (const doc of docs) {
+            const d = doc.data();
+            const readsSnap = await db.collection("announcements").doc(doc.id).collection("reads").get();
+            const card = document.createElement("div");
+            card.className = "itemCard";
+            card.innerHTML =
+              '<div class="itop"><div><div class="ititle">' + escapeHtml(d.title) + '</div><div class="imeta">Sent ' + fmtDate(d.createdAt) + '</div></div></div>' +
+              '<div class="ibody">' + escapeHtml(d.body) + '</div>' +
+              '<button class="toggleLink" data-toggle-reads>' + readsSnap.size + " student(s) have confirmed reading — view names</button>" +
+              '<div class="readList" style="display:none;" data-reads-box>' +
+                (readsSnap.empty ? '<div>No one yet.</div>' : '<table class="subTable"><thead><tr><th>Name</th><th>Reg. Number</th><th>Seen At</th></tr></thead><tbody>' +
+                  readsSnap.docs.map(function (r) {
+                    const rd = r.data();
+                    return "<tr><td>" + escapeHtml(rd.name || r.id) + "</td><td>" + escapeHtml(rd.registrationNumber || "—") + "</td><td>" + fmtDate(rd.confirmedAt) + "</td></tr>";
+                  }).join("") + "</tbody></table>") +
+              '</div>' +
+              '<div class="itemActions"><button class="btn-sm" style="background:transparent;border:1.5px solid var(--danger);color:var(--danger);" data-delete-ann>Delete</button></div>';
+            card.querySelector("[data-toggle-reads]").addEventListener("click", function () {
+              const box = card.querySelector("[data-reads-box]");
+              box.style.display = box.style.display === "none" ? "block" : "none";
             });
-          });
-          listEl.appendChild(card);
+            card.querySelector("[data-delete-ann]").addEventListener("click", function () {
+              showConfirm('Delete the announcement "' + d.title + '"?', async function () {
+                await db.collection("announcements").doc(doc.id).delete();
+                loadAnnouncements();
+              });
+            });
+            listEl.appendChild(card);
+          }
+        } catch (err) {
+          listEl.innerHTML = '<div class="empty">Could not load announcements: ' + linkifyError(err.message) + "</div>";
         }
       }
 
@@ -376,39 +394,48 @@
       async function loadPolls() {
         const listEl = document.getElementById("pollList");
         listEl.innerHTML = "Loading...";
-        const snap = await db.collection("polls").where("createdBy", "==", auth.currentUser.uid).orderBy("createdAt", "desc").get();
-        if (snap.empty) { listEl.innerHTML = '<div class="empty">No polls yet.</div>'; return; }
-        listEl.innerHTML = "";
-        for (const doc of snap.docs) {
-          const d = doc.data();
-          const votesSnap = await db.collection("polls").doc(doc.id).collection("votes").get();
-          const counts = d.options.map(function () { return 0; });
-          votesSnap.forEach(function (v) { const idx = v.data().optionIndex; if (counts[idx] !== undefined) counts[idx]++; });
-          const total = votesSnap.size || 1;
-
-          const card = document.createElement("div");
-          card.className = "itemCard";
-          card.innerHTML =
-            '<div class="itop"><div><div class="ititle">' + escapeHtml(d.question) + '</div><div class="imeta">' + fmtDate(d.createdAt) + " · " + votesSnap.size + " vote(s) · " + (d.isOpen ? "Open" : "Closed") + '</div></div></div>' +
-            d.options.map(function (opt, i) {
-              const pct = Math.round((counts[i] / total) * 100);
-              return '<div class="barRow"><div class="barLabel"><span>' + escapeHtml(opt) + '</span><span>' + counts[i] + " (" + pct + '%)</span></div><div class="barTrack"><div class="barFill" style="width:' + pct + '%"></div></div></div>';
-            }).join("") +
-            '<div class="itemActions">' +
-              '<button class="btn-sm btn-outline" data-toggle-open>' + (d.isOpen ? "Close Poll" : "Reopen Poll") + '</button>' +
-              '<button class="btn-sm" style="background:transparent;border:1.5px solid var(--danger);color:var(--danger);" data-delete-poll>Delete</button>' +
-            '</div>';
-          card.querySelector("[data-toggle-open]").addEventListener("click", async function () {
-            await db.collection("polls").doc(doc.id).set({ isOpen: !d.isOpen }, { merge: true });
-            loadPolls();
+        try {
+          const snap = await db.collection("polls").where("createdBy", "==", auth.currentUser.uid).get();
+          if (snap.empty) { listEl.innerHTML = '<div class="empty">No polls yet.</div>'; return; }
+          const docs = snap.docs.slice().sort(function (a, b) {
+            const at = a.data().createdAt ? a.data().createdAt.toMillis() : 0;
+            const bt = b.data().createdAt ? b.data().createdAt.toMillis() : 0;
+            return bt - at;
           });
-          card.querySelector("[data-delete-poll]").addEventListener("click", function () {
-            showConfirm('Delete the poll "' + d.question + '"?', async function () {
-              await db.collection("polls").doc(doc.id).delete();
+          listEl.innerHTML = "";
+          for (const doc of docs) {
+            const d = doc.data();
+            const votesSnap = await db.collection("polls").doc(doc.id).collection("votes").get();
+            const counts = d.options.map(function () { return 0; });
+            votesSnap.forEach(function (v) { const idx = v.data().optionIndex; if (counts[idx] !== undefined) counts[idx]++; });
+            const total = votesSnap.size || 1;
+
+            const card = document.createElement("div");
+            card.className = "itemCard";
+            card.innerHTML =
+              '<div class="itop"><div><div class="ititle">' + escapeHtml(d.question) + '</div><div class="imeta">' + fmtDate(d.createdAt) + " · " + votesSnap.size + " vote(s) · " + (d.isOpen ? "Open" : "Closed") + '</div></div></div>' +
+              d.options.map(function (opt, i) {
+                const pct = Math.round((counts[i] / total) * 100);
+                return '<div class="barRow"><div class="barLabel"><span>' + escapeHtml(opt) + '</span><span>' + counts[i] + " (" + pct + '%)</span></div><div class="barTrack"><div class="barFill" style="width:' + pct + '%"></div></div></div>';
+              }).join("") +
+              '<div class="itemActions">' +
+                '<button class="btn-sm btn-outline" data-toggle-open>' + (d.isOpen ? "Close Poll" : "Reopen Poll") + '</button>' +
+                '<button class="btn-sm" style="background:transparent;border:1.5px solid var(--danger);color:var(--danger);" data-delete-poll>Delete</button>' +
+              '</div>';
+            card.querySelector("[data-toggle-open]").addEventListener("click", async function () {
+              await db.collection("polls").doc(doc.id).set({ isOpen: !d.isOpen }, { merge: true });
               loadPolls();
             });
-          });
-          listEl.appendChild(card);
+            card.querySelector("[data-delete-poll]").addEventListener("click", function () {
+              showConfirm('Delete the poll "' + d.question + '"?', async function () {
+                await db.collection("polls").doc(doc.id).delete();
+                loadPolls();
+              });
+            });
+            listEl.appendChild(card);
+          }
+        } catch (err) {
+          listEl.innerHTML = '<div class="empty">Could not load polls: ' + linkifyError(err.message) + "</div>";
         }
       }
 
@@ -437,10 +464,16 @@
       async function loadCollectForms() {
         const listEl = document.getElementById("collectList");
         listEl.innerHTML = "Loading...";
-        const snap = await db.collection("collectForms").where("createdBy", "==", auth.currentUser.uid).orderBy("createdAt", "desc").get();
-        if (snap.empty) { listEl.innerHTML = '<div class="empty">No forms yet.</div>'; return; }
-        listEl.innerHTML = "";
-        for (const doc of snap.docs) {
+        try {
+          const snap = await db.collection("collectForms").where("createdBy", "==", auth.currentUser.uid).get();
+          if (snap.empty) { listEl.innerHTML = '<div class="empty">No forms yet.</div>'; return; }
+          const docs = snap.docs.slice().sort(function (a, b) {
+            const at = a.data().createdAt ? a.data().createdAt.toMillis() : 0;
+            const bt = b.data().createdAt ? b.data().createdAt.toMillis() : 0;
+            return bt - at;
+          });
+          listEl.innerHTML = "";
+          for (const doc of docs) {
           const d = doc.data();
           const subsSnap = await db.collection("collectForms").doc(doc.id).collection("submissions").orderBy("submittedAt", "asc").get();
           const link = collectFormUrl(doc.id);
@@ -499,6 +532,9 @@
             });
           });
           listEl.appendChild(card);
+          }
+        } catch (err) {
+          listEl.innerHTML = '<div class="empty">Could not load forms: ' + linkifyError(err.message) + "</div>";
         }
       }
       // ================= APPROVE STUDENTS (scoped to my course only) =================
@@ -508,8 +544,15 @@
         listEl.innerHTML = "";
         countEl.textContent = "Loading...";
         try {
-          const snap = await db.collectionGroup("pendingStudents")
-            .where("institutionId", "==", myInstitutionId).where("courseId", "==", myCourseId).get();
+          // Only one where() here on purpose - a collectionGroup query with two
+          // equality filters needs its own composite index. Filtering by courseId
+          // alone (then checking institutionId in JS) needs a simpler, single-field
+          // collection-group index instead.
+          const rawSnap = await db.collectionGroup("pendingStudents").where("courseId", "==", myCourseId).get();
+          const snap = { docs: rawSnap.docs.filter(function (d) { return d.data().institutionId === myInstitutionId; }), empty: false, size: 0 };
+          snap.empty = snap.docs.length === 0;
+          snap.size = snap.docs.length;
+          snap.forEach = function (cb) { snap.docs.forEach(cb); };
           if (snap.empty) {
             countEl.textContent = "No students waiting for approval in " + myCourseName + ".";
             listEl.innerHTML = '<div class="empty">All caught up.</div>';
@@ -547,8 +590,7 @@
           });
         } catch (err) {
           countEl.textContent = "";
-          listEl.innerHTML = '<div class="empty">Could not load list: ' + escapeHtml(err.message || "") +
-            '. If this mentions a missing index, open the link Firestore prints in your browser console (F12) once to auto-create it.</div>';
+          listEl.innerHTML = '<div class="empty">Could not load list: ' + linkifyError(err.message) + "</div>";
         }
       }
 
@@ -579,8 +621,7 @@
         } catch (err) {
           countEl.textContent = "";
           csvBtn.style.display = "none";
-          listEl.innerHTML = '<div class="empty">Could not load roster: ' + escapeHtml(err.message || "") +
-            '. If this mentions a missing index, open the link Firestore prints in your browser console (F12) once to auto-create it.</div>';
+          listEl.innerHTML = '<div class="empty">Could not load roster: ' + linkifyError(err.message) + "</div>";
         }
       }
       document.getElementById("btnRosterCsv").addEventListener("click", function () {
