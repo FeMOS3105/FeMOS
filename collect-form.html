@@ -77,27 +77,31 @@
               contentEl.innerHTML =
                 "<h1>" + escapeHtml(form.title) + "</h1>" +
                 '<p class="closedNote">This form is closed and no longer accepting submissions.</p>' +
-                (mySub.exists ? '<div class="prevValue">Your submitted answer: <b>' + escapeHtml(mySub.data().value) + "</b></div>" : "");
+                (mySub.exists ? '<div class="prevValue">Your submitted answer — <b>' + escapeHtml(mySub.data().submittedByName || "") + ": " + escapeHtml(mySub.data().value) + "</b></div>" : "");
               return;
             }
 
             contentEl.innerHTML =
               "<h1>" + escapeHtml(form.title) + "</h1>" +
               '<p class="instr">' + escapeHtml(form.instructions) + "</p>" +
-              (mySub.exists ? '<div class="prevValue">You already submitted: <b>' + escapeHtml(mySub.data().value) + "</b> — submitting again below will update it.</div>" : "") +
-              '<div class="field"><input type="text" id="answerInput" placeholder="Type your answer here" value="' + (mySub.exists ? escapeHtml(mySub.data().value) : "") + '"/></div>' +
+              (mySub.exists ? '<div class="prevValue">You already submitted — <b>' + escapeHtml(mySub.data().submittedByName || "") + ": " + escapeHtml(mySub.data().value) + "</b> — submitting again below will update it.</div>" : "") +
+              '<div class="field"><label style="display:block;font-size:0.78rem;font-weight:600;color:var(--muted);margin-bottom:6px;">Name</label>' +
+              '<input type="text" id="nameInput" placeholder="Your full name" value="' + escapeHtml(mySub.exists ? mySub.data().submittedByName : (user.displayName || "")) + '"/></div>' +
+              '<div class="field"><label style="display:block;font-size:0.78rem;font-weight:600;color:var(--muted);margin-bottom:6px;">Value</label>' +
+              '<input type="text" id="answerInput" placeholder="' + escapeHtml(form.instructions) + '" value="' + (mySub.exists ? escapeHtml(mySub.data().value) : "") + '"/></div>' +
               '<button class="btn" id="btnSubmit">Submit</button>' +
               '<div class="msg" id="msgBox"></div>';
 
             document.getElementById("btnSubmit").addEventListener("click", async function () {
+              const name = document.getElementById("nameInput").value.trim();
               const value = document.getElementById("answerInput").value.trim();
               const msgBox = document.getElementById("msgBox");
-              if (!value) { msgBox.textContent = "Please type an answer first."; msgBox.className = "msg show err"; return; }
+              if (!name || !value) { msgBox.textContent = "Please fill in both Name and Value."; msgBox.className = "msg show err"; return; }
               const btn = this;
               btn.disabled = true; btn.textContent = "Submitting...";
               try {
                 await db.collection("collectForms").doc(formId).collection("submissions").doc(user.uid).set({
-                  value: value, submittedBy: user.uid, submittedByName: user.displayName || user.email,
+                  value: value, submittedBy: user.uid, submittedByName: name,
                   submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
                 }, { merge: true });
                 msgBox.textContent = "Submitted! Thank you.";
