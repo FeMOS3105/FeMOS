@@ -89,6 +89,7 @@
           <button class="tabbtn active" data-tab="pending">Pending Registrations</button>
           <button class="tabbtn" data-tab="catalog">Catalog Management</button>
           <button class="tabbtn" data-tab="instadmins">Institution Admins</button>
+          <button class="tabbtn" data-tab="banners">Dashboard Banners</button>
         </div>
 
         <!-- ============ PENDING REGISTRATIONS ============ -->
@@ -158,6 +159,24 @@
             <div id="instAdminList"><div class="empty">Loading...</div></div>
           </div>
         </div>
+
+        <!-- ============ DASHBOARD BANNERS ============ -->
+        <div class="panel" id="panel-banners">
+          <div class="card">
+            <h2>Add a Banner Image</h2>
+            <div class="hint">These images slide at the top of every student's dashboard. Use an image URL (e.g. a Cloudinary link). Recommended shape: wide (like 1200x400).</div>
+            <div class="row2">
+              <div class="field"><label>Image URL</label><input id="newBannerUrl" placeholder="https://res.cloudinary.com/..."/></div>
+              <div class="field"><label>Order (lower shows first)</label><input id="newBannerOrder" type="number" value="1"/></div>
+            </div>
+            <button class="btn" id="btnAddBanner">Add Banner</button>
+            <div class="msg" id="msgBanner"></div>
+          </div>
+          <div class="card">
+            <h2>Current Banners</h2>
+            <div id="bannerList"><div class="empty">Loading...</div></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -183,7 +202,7 @@
       // ================= EMAILJS CONFIG (reuses your existing Service ID/Public Key) =================
       const EMAILJS_PUBLIC_KEY = "n1q50LOlnNH_wWusx";
       const EMAILJS_SERVICE_ID = "service_lx1zlxc";
-      const EMAILJS_ADMIN_GRANT_TEMPLATE_ID ="template_i38al3f";
+      const EMAILJS_ADMIN_GRANT_TEMPLATE_ID = "PUT_YOUR_ADMIN_GRANT_TEMPLATE_ID_HERE";
       if (typeof emailjs !== "undefined") { emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY }); }
 
       function showMsg(id, text, type) {
@@ -249,6 +268,7 @@
         loadCatalogTree();
         loadGrantInstSelect();
         loadInstAdminList();
+        loadBanners();
       }
 
       // ================= PENDING REGISTRATIONS =================
@@ -510,6 +530,60 @@
           });
         } catch (err) {
           listEl.innerHTML = '<div class="empty">Could not load list: ' + escapeHtml(err.message || "") + "</div>";
+        }
+      }
+
+      // ================= DASHBOARD BANNERS =================
+      document.getElementById("btnAddBanner").addEventListener("click", async function () {
+        const url = document.getElementById("newBannerUrl").value.trim();
+        const order = parseInt(document.getElementById("newBannerOrder").value, 10) || 1;
+        if (!url) { showMsg("msgBanner", "Paste an image URL.", "err"); return; }
+        try {
+          await db.collection("siteBanners").add({ imageUrl: url, order: order, active: true, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+          document.getElementById("newBannerUrl").value = "";
+          showMsg("msgBanner", "Banner added.", "ok");
+          loadBanners();
+        } catch (err) { showMsg("msgBanner", "Error: " + (err.message || ""), "err"); }
+      });
+
+      async function loadBanners() {
+        const listEl = document.getElementById("bannerList");
+        listEl.innerHTML = "Loading...";
+        try {
+          const snap = await db.collection("siteBanners").get();
+          if (snap.empty) { listEl.innerHTML = '<div class="empty">No banners yet.</div>'; return; }
+          const docs = snap.docs.slice().sort(function (a, b) { return (a.data().order || 0) - (b.data().order || 0); });
+          listEl.innerHTML = "";
+          docs.forEach(function (doc) {
+            const d = doc.data();
+            const row = document.createElement("div");
+            row.className = "prow";
+            row.innerHTML =
+              '<div class="info" style="display:flex;align-items:center;gap:12px;">' +
+              '<img src="' + escapeHtml(d.imageUrl) + '" style="width:80px;height:40px;object-fit:cover;border-radius:8px;" onerror="this.style.opacity=0.2"/>' +
+              "<span>Order: " + (d.order || 1) + (d.active === false ? " · (hidden)" : "") + "</span></div>" +
+              '<div class="actions">' +
+              '<button class="btn-sm btn-outline" data-toggle-active="' + doc.id + '">' + (d.active === false ? "Show" : "Hide") + "</button>" +
+              '<button class="btn-sm btn-reject" data-delete-banner="' + doc.id + '">Delete</button></div>';
+            listEl.appendChild(row);
+          });
+          listEl.querySelectorAll("[data-toggle-active]").forEach(function (btn) {
+            btn.addEventListener("click", async function () {
+              const id = btn.getAttribute("data-toggle-active");
+              const doc = docs.find(function (d) { return d.id === id; });
+              await db.collection("siteBanners").doc(id).set({ active: doc.data().active === false ? true : false }, { merge: true });
+              loadBanners();
+            });
+          });
+          listEl.querySelectorAll("[data-delete-banner]").forEach(function (btn) {
+            btn.addEventListener("click", async function () {
+              if (!confirm("Delete this banner?")) return;
+              await db.collection("siteBanners").doc(btn.getAttribute("data-delete-banner")).delete();
+              loadBanners();
+            });
+          });
+        } catch (err) {
+          listEl.innerHTML = '<div class="empty">Could not load banners: ' + escapeHtml(err.message || "") + "</div>";
         }
       }
     </script>
