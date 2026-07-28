@@ -222,15 +222,6 @@
             registrationStatus: "pending", confirmedByCR: false,
           }, { merge: true });
 
-          const rosterId = institutionId + "_" + campusId + "_" + courseId;
-          await db.collection("courseRosters").doc(rosterId).collection("pendingStudents").doc(currentUser.uid).set({
-            fullName: currentUser.displayName || "", email: currentUser.email,
-            institutionId: institutionId, institutionName: selectedInstitutionName,
-            campusId: campusId, campusName: selectedCampusName,
-            courseId: courseId, courseName: courseName,
-            requestedAt: firebase.firestore.FieldValue.serverTimestamp(),
-          });
-
           showMsg("Registration submitted! Your status is Pending until confirmed.", "ok");
           setTimeout(function () { window.location.href = "dashboard.html"; }, 1200);
         } catch (err) {

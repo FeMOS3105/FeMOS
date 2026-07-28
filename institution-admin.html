@@ -326,7 +326,13 @@
         listEl.innerHTML = "";
         countEl.textContent = "Loading...";
         try {
-          const snap = await db.collectionGroup("pendingStudents").where("institutionId", "==", myInstitutionId).get();
+          // Reading directly from "users" instead of the courseRosters
+          // collectionGroup - a plain equality query on a regular collection,
+          // no special index or collection-group permission scope needed.
+          const snap = await db.collection("users")
+            .where("institutionId", "==", myInstitutionId)
+            .where("registrationStatus", "==", "pending")
+            .get();
           if (snap.empty) {
             countEl.textContent = "No pending registrations for " + myInstitutionName + ".";
             listEl.innerHTML = '<div class="empty">All caught up.</div>';
@@ -342,8 +348,8 @@
               "<span>" + escapeHtml(d.email || "") + "</span>" +
               "<span>" + escapeHtml(d.courseName || "") + " — " + escapeHtml(d.campusName || "") + "</span></div>" +
               '<div class="actions"><button class="btn-sm btn-approve">Approve</button><button class="btn-sm btn-reject">Reject</button></div>';
-            row.querySelector(".btn-approve").addEventListener("click", async function () { await approveStudent(doc.ref, doc.id); });
-            row.querySelector(".btn-reject").addEventListener("click", async function () { await rejectStudent(doc.ref, doc.id); });
+            row.querySelector(".btn-approve").addEventListener("click", async function () { await approveStudent(doc.id); });
+            row.querySelector(".btn-reject").addEventListener("click", async function () { await rejectStudent(doc.id); });
             listEl.appendChild(row);
           });
         } catch (err) {
@@ -351,17 +357,15 @@
           listEl.innerHTML = '<div class="empty">Could not load pending list: ' + linkifyError(err.message) + "</div>";
         }
       }
-      async function approveStudent(pendingDocRef, studentUid) {
+      async function approveStudent(studentUid) {
         try {
           await db.collection("users").doc(studentUid).set({ registrationStatus: "confirmed", confirmedByCR: true }, { merge: true });
-          await pendingDocRef.delete();
           loadPending();
         } catch (err) { alert("Could not approve: " + (err.message || "")); }
       }
-      function rejectStudent(pendingDocRef, studentUid) {
+      function rejectStudent(studentUid) {
         showConfirm("Reject this registration? The student will need to register again.", async function () {
           try {
-            await pendingDocRef.delete();
             await db.collection("users").doc(studentUid).set(
               { institutionId: null, institutionName: null, campusId: null, campusName: null, courseId: null, courseName: null, registrationStatus: null },
               { merge: true }

@@ -579,15 +579,15 @@
         listEl.innerHTML = "";
         countEl.textContent = "Loading...";
         try {
-          // Only one where() here on purpose - a collectionGroup query with two
-          // equality filters needs its own composite index. Filtering by courseId
-          // alone (then checking institutionId in JS) needs a simpler, single-field
-          // collection-group index instead.
-          const rawSnap = await db.collectionGroup("pendingStudents").where("courseId", "==", myCourseId).get();
-          const snap = { docs: rawSnap.docs.filter(function (d) { return d.data().institutionId === myInstitutionId; }), empty: false, size: 0 };
-          snap.empty = snap.docs.length === 0;
-          snap.size = snap.docs.length;
-          snap.forEach = function (cb) { snap.docs.forEach(cb); };
+          // Reading directly from "users" (instead of the courseRosters
+          // collectionGroup) - it's a plain multi-equality query on a regular
+          // collection, which needs no special index and uses the same
+          // permission path that Class Roster already relies on successfully.
+          const snap = await db.collection("users")
+            .where("institutionId", "==", myInstitutionId)
+            .where("courseId", "==", myCourseId)
+            .where("registrationStatus", "==", "pending")
+            .get();
           if (snap.empty) {
             countEl.textContent = "No students waiting for approval in " + myCourseName + ".";
             listEl.innerHTML = '<div class="empty">All caught up.</div>';
@@ -605,14 +605,12 @@
             row.querySelector(".btn-approve").addEventListener("click", async function () {
               try {
                 await db.collection("users").doc(doc.id).set({ registrationStatus: "confirmed", confirmedByCR: true }, { merge: true });
-                await doc.ref.delete();
                 loadApprove(); loadRoster();
               } catch (err) { alert("Could not approve: " + (err.message || "")); }
             });
             row.querySelector(".btn-reject").addEventListener("click", function () {
               showConfirm("Reject " + (d.fullName || "this student") + "? They will need to register again.", async function () {
                 try {
-                  await doc.ref.delete();
                   await db.collection("users").doc(doc.id).set(
                     { institutionId: null, institutionName: null, campusId: null, campusName: null, courseId: null, courseName: null, registrationStatus: null },
                     { merge: true }

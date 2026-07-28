@@ -278,7 +278,7 @@
         listEl.innerHTML = "";
         countEl.textContent = "Loading...";
         try {
-          const snap = await db.collectionGroup("pendingStudents").get();
+          const snap = await db.collection("users").where("registrationStatus", "==", "pending").get();
           if (snap.empty) {
             countEl.textContent = "No pending registrations.";
             listEl.innerHTML = '<div class="empty">All caught up — nothing waiting for confirmation.</div>';
@@ -287,7 +287,6 @@
           countEl.textContent = snap.size + " student(s) awaiting confirmation";
           snap.forEach(function (doc) {
             const d = doc.data();
-            const rosterRef = doc.ref.parent.parent; // courseRosters/{rosterId}
             const row = document.createElement("div");
             row.className = "prow";
             row.innerHTML =
@@ -299,10 +298,10 @@
               '<button class="btn-sm btn-reject">Reject</button>' +
               "</div>";
             row.querySelector(".btn-approve").addEventListener("click", async function () {
-              await approveStudent(doc.ref, rosterRef.id, doc.id);
+              await approveStudent(doc.id);
             });
             row.querySelector(".btn-reject").addEventListener("click", async function () {
-              await rejectStudent(doc.ref, doc.id);
+              await rejectStudent(doc.id);
             });
             listEl.appendChild(row);
           });
@@ -312,22 +311,20 @@
         }
       }
 
-      async function approveStudent(pendingDocRef, rosterId, studentUid) {
+      async function approveStudent(studentUid) {
         try {
           await db.collection("users").doc(studentUid).set(
             { registrationStatus: "confirmed", confirmedByCR: true },
             { merge: true }
           );
-          await pendingDocRef.delete();
           loadPending();
         } catch (err) {
           alert("Could not approve: " + (err.message || ""));
         }
       }
-      async function rejectStudent(pendingDocRef, studentUid) {
+      async function rejectStudent(studentUid) {
         if (!confirm("Reject this registration? The student will need to register again.")) return;
         try {
-          await pendingDocRef.delete();
           await db.collection("users").doc(studentUid).set(
             { institutionId: null, institutionName: null, campusId: null, campusName: null, courseId: null, courseName: null, registrationStatus: null },
             { merge: true }
