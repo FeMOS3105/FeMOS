@@ -39,7 +39,7 @@
       .cardGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; margin-bottom: 22px; }
       .dashCard { border-radius: 18px; padding: 18px; cursor: pointer; box-shadow: 0 12px 30px rgba(13,27,75,0.1); color: #fff; position: relative; overflow: hidden; min-height: 118px; display: flex; flex-direction: column; justify-content: space-between; transition: transform .15s; }
       .dashCard:hover { transform: translateY(-2px); }
-      .dashCard .icon { font-size: 1.5rem; }
+      .dashCard .icon { width: 26px; height: 26px; }
       .dashCard .label { font-weight: 700; font-size: 0.94rem; margin-top: 8px; }
       .dashCard .stat { font-size: 0.76rem; opacity: 0.9; margin-top: 3px; }
       .c1 { background: linear-gradient(135deg, #5fd4f0, #155fd1); }
@@ -127,13 +127,13 @@
         <!-- ============ CARD GRID (home) ============ -->
         <div id="homeView">
           <div class="cardGrid">
-            <div class="dashCard c1" data-open="ann"><div class="icon">📢</div><div><div class="label">Announcements</div><div class="stat" id="statAnn">Loading...</div></div></div>
-            <div class="dashCard c2" data-open="profile"><div class="icon">👤</div><div><div class="label">My Profile</div><div class="stat">View &amp; check details</div></div></div>
-            <div class="dashCard c3" data-open="registration"><div class="icon">🎓</div><div><div class="label">My Registration</div><div class="stat" id="statReg">Loading...</div></div></div>
-            <div class="dashCard c6" data-open="attendanceHistory"><div class="icon">🗓️</div><div><div class="label">Attendance</div><div class="stat" id="statAttendance">Loading...</div></div></div>
-            <div class="dashCard c4" data-open="attendanceScan"><div class="icon">📷</div><div><div class="label">Scan Attendance</div><div class="stat" id="statScan">Check for open sessions</div></div></div>
-            <div class="dashCard c5" data-open="polls"><div class="icon">🗳️</div><div><div class="label">Polls</div><div class="stat" id="statPolls">Loading...</div></div></div>
-            <div class="dashCard c7" data-open="collect"><div class="icon">📝</div><div><div class="label">Quick Collect</div><div class="stat" id="statCollect">Loading...</div></div></div>
+            <div class="dashCard c1" data-open="ann"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M3 11v2a1 1 0 0 0 1 1h2l4 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15 8a4 4 0 0 1 0 8"/><path d="M18 5a8 8 0 0 1 0 14"/></svg><div><div class="label">Announcements</div><div class="stat" id="statAnn">Loading...</div></div></div>
+            <div class="dashCard c2" data-open="profile"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><div><div class="label">My Profile</div><div class="stat">View &amp; check details</div></div></div>
+            <div class="dashCard c3" data-open="registration"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg><div><div class="label">My Registration</div><div class="stat" id="statReg">Loading...</div></div></div>
+            <div class="dashCard c6" data-open="attendanceHistory"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18"/><path d="M8 3v4M16 3v4"/><path d="m9 15 2 2 4-4"/></svg><div><div class="label">Attendance</div><div class="stat" id="statAttendance">Loading...</div></div></div>
+            <div class="dashCard c4" data-open="attendanceScan"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM18 18h3v3h-3zM14 21h3M21 14v3"/></svg><div><div class="label">Scan Attendance</div><div class="stat" id="statScan">Check for open sessions</div></div></div>
+            <div class="dashCard c5" data-open="polls"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><div><div class="label">Polls</div><div class="stat" id="statPolls">Loading...</div></div></div>
+            <div class="dashCard c7" data-open="collect"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M9 13h6M9 17h6"/></svg><div><div class="label">Quick Collect</div><div class="stat" id="statCollect">Loading...</div></div></div>
           </div>
         </div>
 
@@ -471,12 +471,30 @@
         return code;
       }
 
+      function haversineMeters(lat1, lng1, lat2, lng2) {
+        const R = 6371000;
+        const toRad = function (d) { return (d * Math.PI) / 180; };
+        const dLat = toRad(lat2 - lat1), dLng = toRad(lng2 - lng1);
+        const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      }
+      function getMyLocation() {
+        return new Promise(function (resolve) {
+          if (!navigator.geolocation) { resolve(null); return; }
+          navigator.geolocation.getCurrentPosition(
+            function (pos) { resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }); },
+            function () { resolve(null); },
+            { enableHighAccuracy: true, timeout: 8000 }
+          );
+        });
+      }
+
       async function loadAttendanceScan() {
         const listEl = document.getElementById("scanList");
         listEl.innerHTML = "Loading...";
         try {
           const snap = await db.collection("attendanceSessions").where("institutionId", "==", myInstitutionId).where("courseId", "==", myCourseId).where("isOpen", "==", true).get();
-          if (snap.empty) { listEl.innerHTML = '<div class="empty">No live attendance session right now. Check back when your CR opens one.</div>'; return; }
+          if (snap.empty) { listEl.innerHTML = '<div class="empty">No live attendance session right now. Check back when your lecturer opens one.</div>'; return; }
           listEl.innerHTML = "";
           for (const doc of snap.docs) {
             const d = doc.data();
@@ -487,20 +505,37 @@
               card.innerHTML = '<div class="ititle">' + escapeHtml(d.label) + '</div><div class="readConfirmed">✓ Checked in at ' + fmtDate(myCheckin.data().checkedInAt) + "</div>";
             } else {
               card.innerHTML =
-                '<div class="ititle">' + escapeHtml(d.label) + '</div><div class="imeta">Enter the code your CR is displaying</div>' +
+                '<div class="ititle">' + escapeHtml(d.label) + '</div><div class="imeta">Enter the code your lecturer is displaying</div>' +
                 '<div class="field" style="margin-top:10px;"><input type="text" data-code-input placeholder="e.g. B7X9K2" style="text-transform:uppercase;letter-spacing:4px;font-weight:700;"/></div>' +
                 '<button class="btn" data-submit-code>Check In</button><div class="msg" data-msg style="margin-top:10px;font-size:0.82rem;"></div>';
               card.querySelector("[data-submit-code]").addEventListener("click", async function () {
                 const entered = card.querySelector("[data-code-input]").value.trim().toUpperCase();
                 const msgEl = card.querySelector("[data-msg]");
                 const expected = codeForSession(doc.id, Date.now());
-                if (entered !== expected) { msgEl.style.color = "var(--danger)"; msgEl.textContent = "Code incorrect or expired — check with your CR and try again."; return; }
+                if (entered !== expected) { msgEl.style.color = "var(--danger)"; msgEl.textContent = "Code incorrect or expired — check with your lecturer and try again."; return; }
+                const btn = card.querySelector("[data-submit-code]");
+                btn.disabled = true; btn.textContent = "Checking your location...";
+                const myLoc = await getMyLocation();
+                let distance = null;
+                if (d.location && myLoc) {
+                  distance = haversineMeters(d.location.lat, d.location.lng, myLoc.lat, myLoc.lng);
+                  if (distance > 100) {
+                    btn.disabled = false; btn.textContent = "Check In";
+                    msgEl.style.color = "var(--danger)";
+                    msgEl.textContent = "You appear to be about " + Math.round(distance) + "m from class — you must be within 100m to check in.";
+                    return;
+                  }
+                }
                 try {
                   await db.collection("attendanceSessions").doc(doc.id).collection("checkins").doc(auth.currentUser.uid).set({
                     name: auth.currentUser.displayName || auth.currentUser.email, checkedInAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    distanceMeters: distance,
                   });
                   loadAttendanceScan();
-                } catch (err) { msgEl.style.color = "var(--danger)"; msgEl.textContent = "Error: " + (err.message || ""); }
+                } catch (err) {
+                  btn.disabled = false; btn.textContent = "Check In";
+                  msgEl.style.color = "var(--danger)"; msgEl.textContent = "Error: " + (err.message || "");
+                }
               });
             }
             listEl.appendChild(card);

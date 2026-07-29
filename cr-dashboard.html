@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FeMOS — CR Dashboard</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
       :root {
         --water-light: #5fd4f0; --water-mid: #2ea8ee; --water-deep: #155fd1;
@@ -121,7 +120,6 @@
           <button class="tabbtn" data-tab="collect">Quick Collect</button>
           <button class="tabbtn" data-tab="approve">Approve Students</button>
           <button class="tabbtn" data-tab="roster">Class Roster</button>
-          <button class="tabbtn" data-tab="attendance">Attendance</button>
         </div>
 
         <!-- ============ ANNOUNCEMENTS ============ -->
@@ -183,38 +181,6 @@
             <div class="hint" id="rosterCount">Loading...</div>
             <button class="btn-sm btn-outline" id="btnRosterCsv" style="margin-bottom:14px;display:none;">Download CSV</button>
             <div id="rosterList"></div>
-          </div>
-        </div>
-
-        <!-- ============ ATTENDANCE ============ -->
-        <div class="panel" id="panel-attendance">
-          <div class="card" id="openSessionCard">
-            <h2>Open an Attendance Session</h2>
-            <div class="field"><label>Session Label</label><input id="attLabel" placeholder="e.g. Monday Lecture, Week 5"/></div>
-            <div class="field"><label>Room (optional)</label><input id="attRoom" placeholder="e.g. LT2"/></div>
-            <button class="btn" id="btnOpenSession">Open Session</button>
-            <div class="msg" id="msgAtt"></div>
-          </div>
-
-          <div class="card" id="activeSessionCard" style="display:none;">
-            <h2 id="activeSessionTitle">Active Session</h2>
-            <div class="hint" id="activeSessionMeta"></div>
-            <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;background:var(--ink);border-radius:14px;padding:18px;margin-bottom:16px;">
-              <div id="qrHolder" style="background:#fff;padding:10px;border-radius:10px;"></div>
-              <div>
-                <div style="font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.55);margin-bottom:6px;">Or type this code</div>
-                <div id="attCode" style="font-family:'Consolas',monospace;font-weight:700;font-size:1.8rem;letter-spacing:6px;color:#fff;"></div>
-                <div style="font-size:0.76rem;color:rgba(255,255,255,0.5);margin-top:6px;">Changes every 30 seconds</div>
-              </div>
-            </div>
-            <div class="hint" id="checkinCount">0 students checked in</div>
-            <div id="checkinList"></div>
-            <button class="btn-sm" style="background:transparent;border:1.5px solid var(--danger);color:var(--danger);margin-top:12px;" id="btnCloseSession">Close Session</button>
-          </div>
-
-          <div class="card">
-            <h2>Past Sessions</h2>
-            <div id="attHistoryList"><div class="empty">Loading...</div></div>
           </div>
         </div>
       </div>
@@ -323,7 +289,6 @@
         loadCollectForms();
         loadApprove();
         loadRoster();
-        loadAttendanceHistory();
       }
 
       // ================= ANNOUNCEMENTS =================
@@ -668,110 +633,6 @@
         URL.revokeObjectURL(url);
       });
 
-      // ================= ATTENDANCE =================
-      let activeSessionId = null;
-      let attTickTimer = null;
-      let qrRenderer = null;
-
-      function codeForSession(sessionId, ts) {
-        const bucket = Math.floor(ts / 30000);
-        const str = sessionId + "-" + bucket;
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) { hash = (hash * 31 + str.charCodeAt(i)) >>> 0; }
-        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-        let code = "", h = hash || 1;
-        for (let j = 0; j < 6; j++) { code += chars[h % chars.length]; h = Math.floor(h / chars.length) || 1; }
-        return code;
-      }
-
-      document.getElementById("btnOpenSession").addEventListener("click", async function () {
-        const label = document.getElementById("attLabel").value.trim();
-        if (!label) { showMsg("msgAtt", "Give this session a label.", "err"); return; }
-        try {
-          const ref = await db.collection("attendanceSessions").add({
-            institutionId: myInstitutionId, courseId: myCourseId, courseName: myCourseName,
-            label: label, room: document.getElementById("attRoom").value.trim(),
-            isOpen: true, createdBy: auth.currentUser.uid, createdByName: auth.currentUser.displayName || auth.currentUser.email,
-            startedAt: firebase.firestore.FieldValue.serverTimestamp(),
-          });
-          document.getElementById("attLabel").value = ""; document.getElementById("attRoom").value = "";
-          openActiveSessionView(ref.id, label);
-        } catch (err) { showMsg("msgAtt", "Error: " + (err.message || ""), "err"); }
-      });
-
-      function openActiveSessionView(sessionId, label) {
-        activeSessionId = sessionId;
-        document.getElementById("openSessionCard").style.display = "none";
-        document.getElementById("activeSessionCard").style.display = "block";
-        document.getElementById("activeSessionTitle").textContent = label;
-        document.getElementById("activeSessionMeta").textContent = "Students in " + myCourseName + " scan or type the code below to check in.";
-        renderQr();
-        tickAttendance();
-        attTickTimer = setInterval(tickAttendance, 1000);
-        loadCheckins();
-      }
-
-      function renderQr() {
-        const holder = document.getElementById("qrHolder");
-        holder.innerHTML = "";
-        const code = codeForSession(activeSessionId, Date.now());
-        if (typeof QRCode !== "undefined") {
-          new QRCode(holder, { text: code, width: 110, height: 110 });
-        }
-        document.getElementById("attCode").textContent = code;
-      }
-      let lastBucket = null;
-      function tickAttendance() {
-        const bucket = Math.floor(Date.now() / 30000);
-        if (bucket !== lastBucket) { lastBucket = bucket; renderQr(); }
-      }
-
-      async function loadCheckins() {
-        if (!activeSessionId) return;
-        const snap = await db.collection("attendanceSessions").doc(activeSessionId).collection("checkins").get();
-        document.getElementById("checkinCount").textContent = snap.size + " student(s) checked in";
-        const listEl = document.getElementById("checkinList");
-        if (snap.empty) { listEl.innerHTML = ""; return; }
-        listEl.innerHTML = '<table class="subTable"><thead><tr><th>Name</th><th>Time</th></tr></thead><tbody>' +
-          snap.docs.map(function (d) { const cd = d.data(); return "<tr><td>" + escapeHtml(cd.name || "") + "</td><td>" + fmtDate(cd.checkedInAt) + "</td></tr>"; }).join("") +
-          "</tbody></table>";
-      }
-      let checkinPoll = setInterval(function () { if (activeSessionId) loadCheckins(); }, 4000);
-
-      document.getElementById("btnCloseSession").addEventListener("click", function () {
-        showConfirm("Close this attendance session? Students will no longer be able to check in.", async function () {
-          await db.collection("attendanceSessions").doc(activeSessionId).set({ isOpen: false, closedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
-          clearInterval(attTickTimer);
-          activeSessionId = null;
-          document.getElementById("activeSessionCard").style.display = "none";
-          document.getElementById("openSessionCard").style.display = "block";
-          loadAttendanceHistory();
-        });
-      });
-
-      async function loadAttendanceHistory() {
-        const listEl = document.getElementById("attHistoryList");
-        listEl.innerHTML = "Loading...";
-        try {
-          const snap = await db.collection("attendanceSessions").where("createdBy", "==", auth.currentUser.uid).get();
-          const closedDocs = snap.docs.filter(function (d) { return d.data().isOpen === false; })
-            .sort(function (a, b) { const at = a.data().startedAt ? a.data().startedAt.toMillis() : 0; const bt = b.data().startedAt ? b.data().startedAt.toMillis() : 0; return bt - at; });
-          const openDoc = snap.docs.find(function (d) { return d.data().isOpen === true; });
-          if (openDoc && !activeSessionId) { openActiveSessionView(openDoc.id, openDoc.data().label); }
-          if (closedDocs.length === 0) { listEl.innerHTML = '<div class="empty">No past sessions yet.</div>'; return; }
-          listEl.innerHTML = "";
-          for (const doc of closedDocs) {
-            const d = doc.data();
-            const checkinsSnap = await db.collection("attendanceSessions").doc(doc.id).collection("checkins").get();
-            const row = document.createElement("div");
-            row.className = "prow";
-            row.innerHTML = '<div class="info"><b>' + escapeHtml(d.label) + '</b><span>' + fmtDate(d.startedAt) + " · " + checkinsSnap.size + " checked in</span></div>";
-            listEl.appendChild(row);
-          }
-        } catch (err) {
-          listEl.innerHTML = '<div class="empty">Could not load history: ' + linkifyError(err.message) + "</div>";
-        }
-      }
     </script>
   </body>
 </html>

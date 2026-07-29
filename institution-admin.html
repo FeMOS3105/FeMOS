@@ -133,6 +133,7 @@
           <button class="tabbtn active" data-tab="pending">Pending Registrations</button>
           <button class="tabbtn" data-tab="catalog">Colleges &amp; Courses</button>
           <button class="tabbtn" data-tab="crs">Class Representatives</button>
+          <button class="tabbtn" data-tab="lecturers">Lecturers</button>
         </div>
 
         <!-- ============ PENDING REGISTRATIONS ============ -->
@@ -166,6 +167,25 @@
           <div class="card">
             <h2>Current Class Representatives</h2>
             <div id="crList"><div class="empty">Loading...</div></div>
+          </div>
+        </div>
+
+        <!-- ============ LECTURERS ============ -->
+        <div class="panel" id="panel-lecturers">
+          <div class="card">
+            <h2>Assign a Lecturer</h2>
+            <div class="hint">The person must already have a FeMOS account registered under this institution. A lecturer can be assigned to multiple courses.</div>
+            <div class="row2">
+              <div class="field"><label>College</label><select id="lecCollegeSelect"></select></div>
+              <div class="field"><label>Course</label><select id="lecCourseSelect"><option value="">-- pick college first --</option></select></div>
+            </div>
+            <div class="field"><label>Lecturer's Email</label><input id="lecEmail" placeholder="lecturer@example.com"/></div>
+            <button class="btn" id="btnAssignLec">Assign as Lecturer</button>
+            <div class="msg" id="msgLec"></div>
+          </div>
+          <div class="card">
+            <h2>Current Lecturer Assignments</h2>
+            <div id="lecList"><div class="empty">Loading...</div></div>
           </div>
         </div>
       </div>
@@ -317,6 +337,8 @@
         loadColleges();
         loadCrCollegeSelect();
         loadCrList();
+        loadLecCollegeSelect();
+        loadLecList();
       }
 
       // ================= PENDING REGISTRATIONS =================
@@ -600,6 +622,74 @@
               showConfirm("Revoke this Class Representative's access?", async function () {
                 await db.collection("userRoles").doc(btn.getAttribute("data-revoke")).delete();
                 loadCrList();
+              });
+            });
+          });
+        } catch (err) {
+          listEl.innerHTML = '<div class="empty">Could not load list: ' + linkifyError(err.message) + "</div>";
+        }
+      }
+
+      // ================= LECTURERS =================
+      async function loadLecCollegeSelect() {
+        const snap = await db.collection("institutions").doc(myInstitutionId).collection("campuses").orderBy("name").get();
+        const opts = snap.docs.map(function (d) { return '<option value="' + d.id + '">' + escapeHtml(d.data().name) + "</option>"; }).join("");
+        document.getElementById("lecCollegeSelect").innerHTML = opts || '<option value="">-- add a college first --</option>';
+        if (snap.size) loadLecCourseOptions(document.getElementById("lecCollegeSelect").value);
+      }
+      document.getElementById("lecCollegeSelect").addEventListener("change", function () { loadLecCourseOptions(this.value); });
+
+      async function loadLecCourseOptions(collegeId) {
+        const sel = document.getElementById("lecCourseSelect");
+        if (!collegeId) { sel.innerHTML = '<option value="">-- pick college first --</option>'; return; }
+        const snap = await db.collection("institutions").doc(myInstitutionId).collection("campuses").doc(collegeId).collection("courses").orderBy("name").get();
+        sel.innerHTML = snap.docs.map(function (d) { return '<option value="' + d.id + '">' + escapeHtml(d.data().name) + "</option>"; }).join("") || '<option value="">-- no courses yet --</option>';
+      }
+
+      document.getElementById("btnAssignLec").addEventListener("click", async function () {
+        const courseId = document.getElementById("lecCourseSelect").value;
+        const courseName = document.getElementById("lecCourseSelect").selectedOptions[0] ? document.getElementById("lecCourseSelect").selectedOptions[0].textContent : "";
+        const collegeName = document.getElementById("lecCollegeSelect").selectedOptions[0] ? document.getElementById("lecCollegeSelect").selectedOptions[0].textContent : "";
+        const email = document.getElementById("lecEmail").value.trim();
+        if (!courseId || !email) { showMsg("msgLec", "Pick a course and enter the lecturer's email.", "err"); return; }
+        try {
+          const userSnap = await db.collection("users").where("email", "==", email).where("institutionId", "==", myInstitutionId).limit(1).get();
+          if (userSnap.empty) { showMsg("msgLec", "No FeMOS account found with that email registered under your institution.", "err"); return; }
+          const targetUid = userSnap.docs[0].id;
+          const targetData = userSnap.docs[0].data();
+          const assignmentId = targetUid + "_" + myInstitutionId + "_" + courseId;
+          await db.collection("lecturerAssignments").doc(assignmentId).set({
+            lecturerUid: targetUid, lecturerName: targetData.fullName || email, lecturerEmail: email,
+            institutionId: myInstitutionId, institutionName: myInstitutionName,
+            courseId: courseId, courseName: courseName, collegeName: collegeName,
+            assignedAt: firebase.firestore.FieldValue.serverTimestamp(), assignedBy: auth.currentUser.uid,
+          });
+          document.getElementById("lecEmail").value = "";
+          showMsg("msgLec", email + " is now the lecturer for " + courseName + ".", "ok");
+          loadLecList();
+        } catch (err) {
+          showMsg("msgLec", "Error: " + (err.message || ""), "err");
+        }
+      });
+
+      async function loadLecList() {
+        const listEl = document.getElementById("lecList");
+        listEl.innerHTML = "Loading...";
+        try {
+          const snap = await db.collection("lecturerAssignments").where("institutionId", "==", myInstitutionId).get();
+          if (snap.empty) { listEl.innerHTML = '<div class="empty">No lecturers assigned yet.</div>'; return; }
+          let html = "";
+          snap.forEach(function (doc) {
+            const d = doc.data();
+            html += '<div class="prow"><div class="info"><b>' + escapeHtml(d.lecturerName || d.lecturerEmail) + '</b><span>' + escapeHtml(d.courseName || d.courseId) + " — " + escapeHtml(d.collegeName || "") + '</span></div>' +
+                    '<div class="actions"><button class="btn-sm btn-reject" data-revoke-lec="' + doc.id + '">Revoke</button></div></div>';
+          });
+          listEl.innerHTML = html;
+          listEl.querySelectorAll("[data-revoke-lec]").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              showConfirm("Revoke this lecturer's access to this course?", async function () {
+                await db.collection("lecturerAssignments").doc(btn.getAttribute("data-revoke-lec")).delete();
+                loadLecList();
               });
             });
           });
