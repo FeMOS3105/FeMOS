@@ -250,14 +250,13 @@
       async function loadCarousel() {
         const el = document.getElementById("carousel");
         try {
-          const snap = await db.collection("siteBanners").get();
-          const active = snap.docs.filter(function (d) { return d.data().active !== false; })
-            .sort(function (a, b) { return (a.data().order || 0) - (b.data().order || 0); });
-          if (active.length === 0) return;
-          el.innerHTML = active.map(function (d, i) {
-            return '<div class="slide' + (i === 0 ? " show" : "") + '"><img src="' + escapeHtml(d.data().imageUrl) + '" alt=""/></div>';
-          }).join("") + '<div class="carousel-dots">' + active.map(function (_, i) { return '<span' + (i === 0 ? ' class="active"' : "") + "></span>"; }).join("") + "</div>";
-          if (active.length > 1) {
+          const doc = await db.collection("instBanners").doc(myInstitutionId).get();
+          const images = ((doc.exists && doc.data().images) || []).filter(function (u) { return u; });
+          if (images.length === 0) return;
+          el.innerHTML = images.map(function (url, i) {
+            return '<div class="slide' + (i === 0 ? " show" : "") + '"><img src="' + escapeHtml(url) + '" alt=""/></div>';
+          }).join("") + '<div class="carousel-dots">' + images.map(function (_, i) { return '<span' + (i === 0 ? ' class="active"' : "") + "></span>"; }).join("") + "</div>";
+          if (images.length > 1) {
             let idx = 0;
             setInterval(function () {
               const slides = el.querySelectorAll(".slide");
@@ -461,7 +460,7 @@
 
       // ================= ATTENDANCE: SCAN / CHECK-IN =================
       function codeForSession(sessionId, ts) {
-        const bucket = Math.floor(ts / 30000);
+        const bucket = Math.floor(ts / 60000);
         const str = sessionId + "-" + bucket;
         let hash = 0;
         for (let i = 0; i < str.length; i++) { hash = (hash * 31 + str.charCodeAt(i)) >>> 0; }

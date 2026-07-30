@@ -163,18 +163,20 @@
         <!-- ============ DASHBOARD BANNERS ============ -->
         <div class="panel" id="panel-banners">
           <div class="card">
-            <h2>Add a Banner Image</h2>
-            <div class="hint">These images slide at the top of every student's dashboard. Use an image URL (e.g. a Cloudinary link). Recommended shape: wide (like 1200x400).</div>
-            <div class="row2">
-              <div class="field"><label>Image URL</label><input id="newBannerUrl" placeholder="https://res.cloudinary.com/..."/></div>
-              <div class="field"><label>Order (lower shows first)</label><input id="newBannerOrder" type="number" value="1"/></div>
-            </div>
-            <button class="btn" id="btnAddBanner">Add Banner</button>
+            <h2>Dashboard Slider Images</h2>
+            <div class="hint">These 5 images slide at the top of every student's dashboard — separately for each institution. Choose an institution, paste up to 5 image URLs, and save. Leave a slot blank to skip it.</div>
+            <div class="field"><label>Institution</label><select id="bannerInstSelect"></select></div>
+            <div class="field"><label>Image 1 URL</label><input id="bannerUrl1" placeholder="https://res.cloudinary.com/..."/></div>
+            <div class="field"><label>Image 2 URL</label><input id="bannerUrl2" placeholder="https://res.cloudinary.com/..."/></div>
+            <div class="field"><label>Image 3 URL</label><input id="bannerUrl3" placeholder="https://res.cloudinary.com/..."/></div>
+            <div class="field"><label>Image 4 URL</label><input id="bannerUrl4" placeholder="https://res.cloudinary.com/..."/></div>
+            <div class="field"><label>Image 5 URL</label><input id="bannerUrl5" placeholder="https://res.cloudinary.com/..."/></div>
+            <button class="btn" id="btnSaveBanners">Save Slider for This Institution</button>
             <div class="msg" id="msgBanner"></div>
           </div>
           <div class="card">
-            <h2>Current Banners</h2>
-            <div id="bannerList"><div class="empty">Loading...</div></div>
+            <h2>Preview</h2>
+            <div id="bannerPreview"><div class="empty">Choose an institution above to see its current slides.</div></div>
           </div>
         </div>
       </div>
@@ -268,7 +270,7 @@
         loadCatalogTree();
         loadGrantInstSelect();
         loadInstAdminList();
-        loadBanners();
+        loadBannerInstSelect();
       }
 
       // ================= PENDING REGISTRATIONS =================
@@ -530,59 +532,47 @@
         }
       }
 
-      // ================= DASHBOARD BANNERS =================
-      document.getElementById("btnAddBanner").addEventListener("click", async function () {
-        const url = document.getElementById("newBannerUrl").value.trim();
-        const order = parseInt(document.getElementById("newBannerOrder").value, 10) || 1;
-        if (!url) { showMsg("msgBanner", "Paste an image URL.", "err"); return; }
-        try {
-          await db.collection("siteBanners").add({ imageUrl: url, order: order, active: true, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-          document.getElementById("newBannerUrl").value = "";
-          showMsg("msgBanner", "Banner added.", "ok");
-          loadBanners();
-        } catch (err) { showMsg("msgBanner", "Error: " + (err.message || ""), "err"); }
-      });
+      // ================= DASHBOARD BANNERS (per institution, 5 slots) =================
+      async function loadBannerInstSelect() {
+        const snap = await db.collection("institutions").orderBy("name").get();
+        const sel = document.getElementById("bannerInstSelect");
+        sel.innerHTML = snap.docs.map(function (d) { return '<option value="' + d.id + '">' + escapeHtml(d.data().name) + "</option>"; }).join("") || '<option value="">-- add an institution first --</option>';
+        if (snap.size) loadBannerFields(sel.value);
+      }
+      document.getElementById("bannerInstSelect").addEventListener("change", function () { loadBannerFields(this.value); });
 
-      async function loadBanners() {
-        const listEl = document.getElementById("bannerList");
-        listEl.innerHTML = "Loading...";
+      async function loadBannerFields(institutionId) {
+        const preview = document.getElementById("bannerPreview");
+        if (!institutionId) { preview.innerHTML = '<div class="empty">Choose an institution above to see its current slides.</div>'; return; }
+        for (let i = 1; i <= 5; i++) { document.getElementById("bannerUrl" + i).value = ""; }
         try {
-          const snap = await db.collection("siteBanners").get();
-          if (snap.empty) { listEl.innerHTML = '<div class="empty">No banners yet.</div>'; return; }
-          const docs = snap.docs.slice().sort(function (a, b) { return (a.data().order || 0) - (b.data().order || 0); });
-          listEl.innerHTML = "";
-          docs.forEach(function (doc) {
-            const d = doc.data();
-            const row = document.createElement("div");
-            row.className = "prow";
-            row.innerHTML =
-              '<div class="info" style="display:flex;align-items:center;gap:12px;">' +
-              '<img src="' + escapeHtml(d.imageUrl) + '" style="width:80px;height:40px;object-fit:cover;border-radius:8px;" onerror="this.style.opacity=0.2"/>' +
-              "<span>Order: " + (d.order || 1) + (d.active === false ? " · (hidden)" : "") + "</span></div>" +
-              '<div class="actions">' +
-              '<button class="btn-sm btn-outline" data-toggle-active="' + doc.id + '">' + (d.active === false ? "Show" : "Hide") + "</button>" +
-              '<button class="btn-sm btn-reject" data-delete-banner="' + doc.id + '">Delete</button></div>';
-            listEl.appendChild(row);
-          });
-          listEl.querySelectorAll("[data-toggle-active]").forEach(function (btn) {
-            btn.addEventListener("click", async function () {
-              const id = btn.getAttribute("data-toggle-active");
-              const doc = docs.find(function (d) { return d.id === id; });
-              await db.collection("siteBanners").doc(id).set({ active: doc.data().active === false ? true : false }, { merge: true });
-              loadBanners();
-            });
-          });
-          listEl.querySelectorAll("[data-delete-banner]").forEach(function (btn) {
-            btn.addEventListener("click", async function () {
-              if (!confirm("Delete this banner?")) return;
-              await db.collection("siteBanners").doc(btn.getAttribute("data-delete-banner")).delete();
-              loadBanners();
-            });
-          });
+          const doc = await db.collection("instBanners").doc(institutionId).get();
+          const images = (doc.exists && doc.data().images) || [];
+          images.forEach(function (url, i) { if (i < 5) document.getElementById("bannerUrl" + (i + 1)).value = url || ""; });
+          renderBannerPreview(images);
         } catch (err) {
-          listEl.innerHTML = '<div class="empty">Could not load banners: ' + escapeHtml(err.message || "") + "</div>";
+          preview.innerHTML = '<div class="empty">Could not load: ' + escapeHtml(err.message || "") + "</div>";
         }
       }
+      function renderBannerPreview(images) {
+        const preview = document.getElementById("bannerPreview");
+        const filled = (images || []).filter(function (u) { return u; });
+        if (filled.length === 0) { preview.innerHTML = '<div class="empty">No slides set for this institution yet.</div>'; return; }
+        preview.innerHTML = '<div style="display:flex;gap:10px;flex-wrap:wrap;">' +
+          filled.map(function (u) { return '<img src="' + escapeHtml(u) + '" style="width:140px;height:70px;object-fit:cover;border-radius:10px;" onerror="this.style.opacity=0.2"/>'; }).join("") +
+          "</div>";
+      }
+
+      document.getElementById("btnSaveBanners").addEventListener("click", async function () {
+        const institutionId = document.getElementById("bannerInstSelect").value;
+        if (!institutionId) { showMsg("msgBanner", "Choose an institution first.", "err"); return; }
+        const images = [1, 2, 3, 4, 5].map(function (i) { return document.getElementById("bannerUrl" + i).value.trim(); });
+        try {
+          await db.collection("instBanners").doc(institutionId).set({ images: images, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+          showMsg("msgBanner", "Slider saved for this institution.", "ok");
+          renderBannerPreview(images);
+        } catch (err) { showMsg("msgBanner", "Error: " + (err.message || ""), "err"); }
+      });
     </script>
   </body>
 </html>

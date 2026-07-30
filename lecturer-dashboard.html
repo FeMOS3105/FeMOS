@@ -103,7 +103,7 @@
               <div>
                 <div style="font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.55);margin-bottom:6px;">Or type this code</div>
                 <div id="attCode" style="font-family:'Consolas',monospace;font-weight:700;font-size:1.8rem;letter-spacing:6px;color:#fff;"></div>
-                <div style="font-size:0.76rem;color:rgba(255,255,255,0.5);margin-top:6px;">Changes every 30 seconds</div>
+                <div style="font-size:0.76rem;color:rgba(255,255,255,0.5);margin-top:6px;">Changes every 1 minute</div>
               </div>
             </div>
             <div class="hint" id="checkinCount">0 students checked in</div>
@@ -226,7 +226,7 @@
       let sessionLocation = null;
 
       function codeForSession(sessionId, ts) {
-        const bucket = Math.floor(ts / 30000);
+        const bucket = Math.floor(ts / 60000);
         const str = sessionId + "-" + bucket;
         let hash = 0;
         for (let i = 0; i < str.length; i++) { hash = (hash * 31 + str.charCodeAt(i)) >>> 0; }
