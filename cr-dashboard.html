@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FeMOS — CR Dashboard</title>
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png"/>
     <style>
       :root {
         --water-light: #5fd4f0; --water-mid: #2ea8ee; --water-deep: #155fd1;
@@ -299,6 +300,7 @@
         try {
           await db.collection("announcements").add({
             institutionId: myInstitutionId, courseId: myCourseId, courseName: myCourseName,
+            level: "course", authorRole: "Class Representative",
             title: title, body: body,
             createdBy: auth.currentUser.uid, createdByName: auth.currentUser.displayName || auth.currentUser.email,
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -538,6 +540,20 @@
         }
       }
       // ================= APPROVE STUDENTS (scoped to my course only) =================
+      async function generateStudentId(uid, institutionId) {
+        const year = new Date().getFullYear();
+        const counterRef = db.collection("idCounters").doc(institutionId + "_" + year);
+        let newId = null;
+        await db.runTransaction(async function (tx) {
+          const counterDoc = await tx.get(counterRef);
+          const next = (counterDoc.exists ? counterDoc.data().count : 0) + 1;
+          tx.set(counterRef, { count: next, institutionId: institutionId, year: year }, { merge: true });
+          newId = "FEMOS-" + institutionId.toUpperCase() + "-" + year + "-" + String(next).padStart(6, "0");
+        });
+        await db.collection("users").doc(uid).set({ studentId: newId }, { merge: true });
+        return newId;
+      }
+
       async function loadApprove() {
         const listEl = document.getElementById("approveList");
         const countEl = document.getElementById("approveCount");
@@ -570,6 +586,7 @@
             row.querySelector(".btn-approve").addEventListener("click", async function () {
               try {
                 await db.collection("users").doc(doc.id).set({ registrationStatus: "confirmed", confirmedByCR: true }, { merge: true });
+                if (!d.studentId) { await generateStudentId(doc.id, myInstitutionId); }
                 loadApprove(); loadRoster();
               } catch (err) { alert("Could not approve: " + (err.message || "")); }
             });

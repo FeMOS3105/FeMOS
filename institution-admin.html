@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FeMOS — Institution Admin</title>
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png"/>
     <style>
       :root {
         --water-light: #5fd4f0; --water-mid: #2ea8ee; --water-deep: #155fd1;
@@ -48,7 +49,17 @@
       .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
       .field { margin-bottom: 12px; }
       .field label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--muted); margin-bottom: 5px; }
-      .field input, .field select { width: 100%; padding: 10px 12px; border-radius: 9px; border: 1.5px solid var(--line); font-size: 0.9rem; background: #fbfdff; }
+      .field input, .field select, .field textarea { width: 100%; padding: 10px 12px; border-radius: 9px; border: 1.5px solid var(--line); font-size: 0.9rem; background: #fbfdff; font-family: inherit; }
+      .field textarea { min-height: 90px; resize: vertical; }
+      .itemCard { border: 1.5px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 12px; background: #fff; }
+      .itemCard .ititle { font-weight: 700; font-size: 0.96rem; }
+      .itemCard .imeta { font-size: 0.74rem; color: var(--muted); margin-top: 3px; }
+      .itemCard .ibody { font-size: 0.88rem; color: var(--ink); line-height: 1.5; margin: 10px 0; }
+      .toggleLink { background: none; border: none; color: var(--water-deep); font-weight: 600; font-size: 0.8rem; cursor: pointer; padding: 0; }
+      .readList { margin-top: 10px; font-size: 0.8rem; color: var(--muted); }
+      table.subTable { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.84rem; }
+      table.subTable th { text-align: left; font-size: 0.7rem; text-transform: uppercase; color: var(--muted); padding: 6px 8px; border-bottom: 1.5px solid var(--line); }
+      table.subTable td { padding: 7px 8px; border-bottom: 1px solid var(--line); }
       .btn { padding: 11px 18px; border: none; border-radius: 10px; font-weight: 700; font-size: 0.86rem; cursor: pointer; background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); color: #fff; }
 
       .msg { margin-top: 12px; padding: 10px 13px; border-radius: 9px; font-size: 0.82rem; display: none; }
@@ -134,6 +145,7 @@
           <button class="tabbtn" data-tab="catalog">Colleges &amp; Courses</button>
           <button class="tabbtn" data-tab="crs">Class Representatives</button>
           <button class="tabbtn" data-tab="lecturers">Lecturers</button>
+          <button class="tabbtn" data-tab="announcements">Announcements</button>
         </div>
 
         <!-- ============ PENDING REGISTRATIONS ============ -->
@@ -187,6 +199,19 @@
             <h2>Current Lecturer Assignments</h2>
             <div id="lecList"><div class="empty">Loading...</div></div>
           </div>
+        </div>
+
+        <!-- ============ INSTITUTION-WIDE ANNOUNCEMENTS ============ -->
+        <div class="panel" id="panel-announcements">
+          <div class="card">
+            <h2>Post an Institution-Wide Announcement</h2>
+            <div class="hint">This reaches every student across all colleges and courses at your institution — use it for official, institution-level notices.</div>
+            <div class="field"><label>Title</label><input id="instAnnTitle" placeholder="e.g. Semester Fees Deadline Extended"/></div>
+            <div class="field"><label>Message</label><textarea id="instAnnBody" placeholder="Write the full announcement..."></textarea></div>
+            <button class="btn" id="btnPostInstAnn">Post Announcement</button>
+            <div class="msg" id="msgInstAnn"></div>
+          </div>
+          <div id="instAnnList"><div class="empty">Loading...</div></div>
         </div>
       </div>
     </div>
@@ -339,6 +364,7 @@
         loadCrList();
         loadLecCollegeSelect();
         loadLecList();
+        loadInstAnnouncements();
       }
 
       // ================= PENDING REGISTRATIONS =================
@@ -370,7 +396,7 @@
               "<span>" + escapeHtml(d.email || "") + "</span>" +
               "<span>" + escapeHtml(d.courseName || "") + " — " + escapeHtml(d.campusName || "") + "</span></div>" +
               '<div class="actions"><button class="btn-sm btn-approve">Approve</button><button class="btn-sm btn-reject">Reject</button></div>';
-            row.querySelector(".btn-approve").addEventListener("click", async function () { await approveStudent(doc.id); });
+            row.querySelector(".btn-approve").addEventListener("click", async function () { await approveStudent(doc.id, !!d.studentId); });
             row.querySelector(".btn-reject").addEventListener("click", async function () { await rejectStudent(doc.id); });
             listEl.appendChild(row);
           });
@@ -379,9 +405,23 @@
           listEl.innerHTML = '<div class="empty">Could not load pending list: ' + linkifyError(err.message) + "</div>";
         }
       }
-      async function approveStudent(studentUid) {
+      async function generateStudentId(uid, institutionId) {
+        const year = new Date().getFullYear();
+        const counterRef = db.collection("idCounters").doc(institutionId + "_" + year);
+        let newId = null;
+        await db.runTransaction(async function (tx) {
+          const counterDoc = await tx.get(counterRef);
+          const next = (counterDoc.exists ? counterDoc.data().count : 0) + 1;
+          tx.set(counterRef, { count: next, institutionId: institutionId, year: year }, { merge: true });
+          newId = "FEMOS-" + institutionId.toUpperCase() + "-" + year + "-" + String(next).padStart(6, "0");
+        });
+        await db.collection("users").doc(uid).set({ studentId: newId }, { merge: true });
+        return newId;
+      }
+      async function approveStudent(studentUid, alreadyHasId) {
         try {
           await db.collection("users").doc(studentUid).set({ registrationStatus: "confirmed", confirmedByCR: true }, { merge: true });
+          if (!alreadyHasId) { await generateStudentId(studentUid, myInstitutionId); }
           loadPending();
         } catch (err) { alert("Could not approve: " + (err.message || "")); }
       }
@@ -697,6 +737,66 @@
           listEl.innerHTML = '<div class="empty">Could not load list: ' + linkifyError(err.message) + "</div>";
         }
       }
+
+      // ================= INSTITUTION-WIDE ANNOUNCEMENTS =================
+      document.getElementById("btnPostInstAnn").addEventListener("click", async function () {
+        const title = document.getElementById("instAnnTitle").value.trim();
+        const body = document.getElementById("instAnnBody").value.trim();
+        if (!title || !body) { showMsg("msgInstAnn", "Fill in both title and message.", "err"); return; }
+        try {
+          await db.collection("announcements").add({
+            institutionId: myInstitutionId, courseId: null, courseName: null,
+            level: "institution", authorRole: "Institution Admin",
+            title: title, body: body,
+            createdBy: auth.currentUser.uid, createdByName: auth.currentUser.displayName || auth.currentUser.email,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+          document.getElementById("instAnnTitle").value = ""; document.getElementById("instAnnBody").value = "";
+          showMsg("msgInstAnn", "Announcement posted institution-wide.", "ok");
+          loadInstAnnouncements();
+        } catch (err) { showMsg("msgInstAnn", "Error: " + (err.message || ""), "err"); }
+      });
+
+      async function loadInstAnnouncements() {
+        const listEl = document.getElementById("instAnnList");
+        listEl.innerHTML = "Loading...";
+        try {
+          const snap = await db.collection("announcements").where("createdBy", "==", auth.currentUser.uid).where("level", "==", "institution").get();
+          if (snap.empty) { listEl.innerHTML = '<div class="empty">You haven\'t posted any institution-wide announcements yet.</div>'; return; }
+          const docs = snap.docs.slice().sort(function (a, b) { const at = a.data().createdAt ? a.data().createdAt.toMillis() : 0; const bt = b.data().createdAt ? b.data().createdAt.toMillis() : 0; return bt - at; });
+          listEl.innerHTML = "";
+          for (const doc of docs) {
+            const d = doc.data();
+            const readsSnap = await db.collection("announcements").doc(doc.id).collection("reads").get();
+            const card = document.createElement("div");
+            card.className = "itemCard";
+            card.innerHTML =
+              '<div class="ititle">' + escapeHtml(d.title) + '</div><div class="imeta">Sent institution-wide · ' + fmtDate(d.createdAt) + '</div>' +
+              '<div class="ibody">' + escapeHtml(d.body) + '</div>' +
+              '<button class="toggleLink" data-toggle-reads>' + readsSnap.size + " student(s) have confirmed reading — view names</button>" +
+              '<div class="readList" style="display:none;" data-reads-box>' +
+                (readsSnap.empty ? "<div>No one yet.</div>" : '<table class="subTable"><thead><tr><th>Name</th><th>Reg. Number</th><th>Seen At</th></tr></thead><tbody>' +
+                  readsSnap.docs.map(function (r) { const rd = r.data(); return "<tr><td>" + escapeHtml(rd.name || r.id) + "</td><td>" + escapeHtml(rd.registrationNumber || "—") + "</td><td>" + fmtDate(rd.confirmedAt) + "</td></tr>"; }).join("") + "</tbody></table>") +
+              "</div>" +
+              '<div style="margin-top:10px;"><button class="btn-sm" style="background:transparent;border:1.5px solid var(--danger);color:var(--danger);" data-delete-ann>Delete</button></div>';
+            card.querySelector("[data-toggle-reads]").addEventListener("click", function () {
+              const box = card.querySelector("[data-reads-box]");
+              box.style.display = box.style.display === "none" ? "block" : "none";
+            });
+            card.querySelector("[data-delete-ann]").addEventListener("click", function () {
+              showConfirm('Delete the announcement "' + d.title + '"?', async function () {
+                await db.collection("announcements").doc(doc.id).delete();
+                loadInstAnnouncements();
+              });
+            });
+            listEl.appendChild(card);
+          }
+        } catch (err) {
+          listEl.innerHTML = '<div class="empty">Could not load announcements: ' + linkifyError(err.message) + "</div>";
+        }
+      }
+
+      function fmtDate(ts) { return ts && ts.toDate ? ts.toDate().toLocaleString() : ""; }
     </script>
   </body>
 </html>

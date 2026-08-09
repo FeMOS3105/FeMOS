@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FeMOS — Lecturer Dashboard</title>
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
       :root {
@@ -43,6 +44,12 @@
       .msg.err { background: #fdecec; color: var(--danger); }
       .msg.ok { background: #e9f9f1; color: var(--success); }
       .hint { font-size: 0.8rem; color: var(--muted); margin-bottom: 14px; }
+      .itemCard { border: 1.5px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 12px; background: #fff; }
+      .itemCard .ititle { font-weight: 700; font-size: 0.96rem; }
+      .itemCard .imeta { font-size: 0.74rem; color: var(--muted); margin-top: 3px; }
+      .itemCard .ibody { font-size: 0.88rem; color: var(--ink); line-height: 1.5; margin: 10px 0; }
+      .toggleLink { background: none; border: none; color: var(--water-deep); font-weight: 600; font-size: 0.8rem; cursor: pointer; padding: 0; }
+      .readList { margin-top: 10px; font-size: 0.8rem; color: var(--muted); }
       .prow { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px; border: 1.5px solid var(--line); border-radius: 12px; margin-bottom: 10px; flex-wrap: wrap; }
       .prow .info b { display: block; font-size: 0.92rem; }
       .prow .info span { font-size: 0.78rem; color: var(--muted); display: block; margin-top: 2px; }
@@ -115,6 +122,16 @@
             <h2>Past Sessions for This Course</h2>
             <div id="attHistoryList"><div class="empty">Loading...</div></div>
           </div>
+
+          <div class="card">
+            <h2>Post an Announcement to This Course</h2>
+            <div class="hint">Reaches every student registered in this course. You'll see exactly who has read it.</div>
+            <div class="field"><label>Title</label><input id="annTitle" placeholder="e.g. Assignment 2 deadline moved"/></div>
+            <div class="field"><label>Message</label><textarea id="annBody" style="width:100%;padding:11px 13px;border-radius:10px;border:1.5px solid var(--line);font-size:0.92rem;background:#fbfdff;min-height:90px;resize:vertical;font-family:inherit;" placeholder="Write the full announcement..."></textarea></div>
+            <button class="btn" id="btnPostAnn">Post Announcement</button>
+            <div class="msg" id="msgAnn"></div>
+          </div>
+          <div id="annList"><div class="empty">Loading...</div></div>
         </div>
       </div>
     </div>
@@ -218,6 +235,7 @@
         document.getElementById("activeSessionCard").style.display = "none";
         activeSessionId = null;
         loadAttendanceHistory();
+        loadAnnouncements();
       }
 
       // ================= ATTENDANCE =================
@@ -342,6 +360,59 @@
           }
         } catch (err) {
           listEl.innerHTML = '<div class="empty">Could not load history: ' + linkifyError(err.message) + "</div>";
+        }
+      }
+
+      // ================= ANNOUNCEMENTS (course-level) =================
+      document.getElementById("btnPostAnn").addEventListener("click", async function () {
+        const title = document.getElementById("annTitle").value.trim();
+        const body = document.getElementById("annBody").value.trim();
+        const msgEl = document.getElementById("msgAnn");
+        function showAnnMsg(text, type) { msgEl.textContent = text; msgEl.className = "msg show " + type; }
+        if (!title || !body) { showAnnMsg("Fill in both title and message.", "err"); return; }
+        try {
+          await db.collection("announcements").add({
+            institutionId: currentAssignment.institutionId, courseId: currentAssignment.courseId, courseName: currentAssignment.courseName,
+            level: "course", authorRole: "Lecturer",
+            title: title, body: body,
+            createdBy: auth.currentUser.uid, createdByName: auth.currentUser.displayName || auth.currentUser.email,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+          document.getElementById("annTitle").value = ""; document.getElementById("annBody").value = "";
+          showAnnMsg("Announcement posted.", "ok");
+          loadAnnouncements();
+        } catch (err) { showAnnMsg("Error: " + (err.message || ""), "err"); }
+      });
+
+      async function loadAnnouncements() {
+        const listEl = document.getElementById("annList");
+        listEl.innerHTML = "Loading...";
+        try {
+          const snap = await db.collection("announcements")
+            .where("createdBy", "==", auth.currentUser.uid).where("courseId", "==", currentAssignment.courseId).get();
+          if (snap.empty) { listEl.innerHTML = '<div class="empty">You haven\'t posted any announcements for this course yet.</div>'; return; }
+          const docs = snap.docs.slice().sort(function (a, b) { const at = a.data().createdAt ? a.data().createdAt.toMillis() : 0; const bt = b.data().createdAt ? b.data().createdAt.toMillis() : 0; return bt - at; });
+          listEl.innerHTML = "";
+          for (const doc of docs) {
+            const d = doc.data();
+            const readsSnap = await db.collection("announcements").doc(doc.id).collection("reads").get();
+            const card = document.createElement("div");
+            card.className = "itemCard";
+            card.innerHTML =
+              '<div class="ititle">' + escapeHtml(d.title) + '</div><div class="imeta">' + fmtDate(d.createdAt) + '</div>' +
+              '<div class="ibody">' + escapeHtml(d.body) + '</div>' +
+              '<button class="toggleLink" data-toggle-reads>' + readsSnap.size + " student(s) have confirmed reading — view names</button>" +
+              '<div class="readList" style="display:none;" data-reads-box>' +
+                (readsSnap.empty ? "<div>No one yet.</div>" : readsSnap.docs.map(function (r) { const rd = r.data(); return "<div>" + escapeHtml(rd.name || r.id) + " — " + escapeHtml(rd.registrationNumber || "—") + " — " + fmtDate(rd.confirmedAt) + "</div>"; }).join("")) +
+              "</div>";
+            card.querySelector("[data-toggle-reads]").addEventListener("click", function () {
+              const box = card.querySelector("[data-reads-box]");
+              box.style.display = box.style.display === "none" ? "block" : "none";
+            });
+            listEl.appendChild(card);
+          }
+        } catch (err) {
+          listEl.innerHTML = '<div class="empty">Could not load announcements: ' + linkifyError(err.message) + "</div>";
         }
       }
     </script>

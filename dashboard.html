@@ -6,6 +6,7 @@
     <title>FeMOS — Dashboard</title>
     <link rel="icon" type="image/png" href="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <style>
       :root {
         --water-light: #5fd4f0; --water-mid: #2ea8ee; --water-deep: #155fd1;
@@ -170,6 +171,7 @@
             <div class="row"><span>Institution</span><span id="pInst">—</span></div>
             <div class="row"><span>College</span><span id="pCampus">—</span></div>
             <div class="row"><span>Course</span><span id="pCourse">—</span></div>
+            <div class="row"><span>FeMOS Student ID</span><span id="pStudentId">—</span></div>
             <div class="row"><span>Registration No.</span><span id="pRegNum">—</span></div>
           </div>
         </div>
@@ -219,6 +221,16 @@
           <button class="cancel" id="regNumCancel">Cancel</button>
           <button class="ok" id="regNumSave">Save &amp; Confirm Reading</button>
         </div>
+      </div>
+    </div>
+
+    <div class="overlay" id="qrScanOverlay">
+      <div class="promptBox" style="max-width:380px;">
+        <h3>Scan the Attendance QR</h3>
+        <p>Point your camera at the QR code your lecturer is showing.</p>
+        <div id="qrReader" style="width:100%;border-radius:12px;overflow:hidden;"></div>
+        <div class="msg" id="qrScanMsg" style="margin-top:10px;"></div>
+        <button class="btn-outline" id="btnCancelScan" style="width:100%;margin-top:14px;padding:11px;border-radius:10px;border:1.5px solid var(--line);background:#f2f4f8;color:var(--ink);font-weight:700;cursor:pointer;">Cancel</button>
       </div>
     </div>
 
@@ -308,6 +320,7 @@
           document.getElementById("pCampus").textContent = myCampusName || "—";
           document.getElementById("pCourse").textContent = myCourseName || "—";
           document.getElementById("pRegNum").textContent = myRegNumber || "Not set yet";
+          document.getElementById("pStudentId").textContent = data.studentId || "Not assigned yet (issued once confirmed)";
           document.getElementById("rInst").textContent = myInstitutionName || "—";
           document.getElementById("rCampus").textContent = myCampusName || "—";
           document.getElementById("rCourse").textContent = myCourseName || "—";
@@ -347,13 +360,25 @@
       }
 
       // ================= ANNOUNCEMENTS =================
+      function levelBadge(d) {
+        if (d.level === "institution") return '<span style="font-size:0.68rem;font-weight:700;padding:3px 9px;border-radius:20px;background:#fdecec;color:var(--danger);margin-left:6px;">OFFICIAL — ' + escapeHtml(d.authorRole || "Institution") + "</span>";
+        return '<span style="font-size:0.68rem;font-weight:700;padding:3px 9px;border-radius:20px;background:#eaf6ff;color:var(--water-deep);margin-left:6px;">' + escapeHtml(d.authorRole || "Course") + "</span>";
+      }
+
       async function loadAnnouncements() {
         const listEl = document.getElementById("annList");
         listEl.innerHTML = "Loading...";
         try {
-          const snap = await db.collection("announcements").where("institutionId", "==", myInstitutionId).where("courseId", "==", myCourseId).get();
-          if (snap.empty) { listEl.innerHTML = '<div class="empty">No announcements yet for your course.</div>'; document.getElementById("statAnn").textContent = "Nothing new"; return; }
-          const docs = snap.docs.slice().sort(function (a, b) { const at = a.data().createdAt ? a.data().createdAt.toMillis() : 0; const bt = b.data().createdAt ? b.data().createdAt.toMillis() : 0; return bt - at; });
+          // A single equality filter (institutionId) is enough - we separate
+          // "institution-wide" vs "this course only" announcements in JS,
+          // which avoids needing a composite index for the combined query.
+          const snap = await db.collection("announcements").where("institutionId", "==", myInstitutionId).get();
+          const relevant = snap.docs.filter(function (d) {
+            const data = d.data();
+            return data.level === "institution" || data.courseId === myCourseId;
+          });
+          if (relevant.length === 0) { listEl.innerHTML = '<div class="empty">No announcements yet for your course.</div>'; document.getElementById("statAnn").textContent = "Nothing new"; return; }
+          const docs = relevant.slice().sort(function (a, b) { const at = a.data().createdAt ? a.data().createdAt.toMillis() : 0; const bt = b.data().createdAt ? b.data().createdAt.toMillis() : 0; return bt - at; });
           let unread = 0;
           listEl.innerHTML = "";
           for (const doc of docs) {
@@ -363,8 +388,8 @@
             const card = document.createElement("div");
             card.className = "itemCard";
             card.innerHTML =
-              '<div class="ititle">' + escapeHtml(d.title) + '</div>' +
-              '<div class="imeta">From ' + escapeHtml(d.createdByName || "your CR") + " · Sent " + fmtDate(d.createdAt) + '</div>' +
+              '<div class="ititle">' + escapeHtml(d.title) + levelBadge(d) + '</div>' +
+              '<div class="imeta">From ' + escapeHtml(d.createdByName || "") + " · Sent " + fmtDate(d.createdAt) + '</div>' +
               '<div class="ibody">' + escapeHtml(d.body) + '</div>' +
               (myRead.exists ? '<div class="readConfirmed">✓ You confirmed reading this on ' + fmtDate(myRead.data().confirmedAt) + '</div>' : '<button class="readBtn" data-confirm-read>I\'ve Read This</button>');
             const btn = card.querySelector("[data-confirm-read]");
@@ -488,6 +513,40 @@
         return code;
       }
 
+      let activeScanner = null;
+      function openQrScanner(onSuccess) {
+        const overlay = document.getElementById("qrScanOverlay");
+        const msgEl = document.getElementById("qrScanMsg");
+        msgEl.textContent = "";
+        overlay.classList.add("show");
+        if (typeof Html5Qrcode === "undefined") {
+          msgEl.style.color = "var(--danger)";
+          msgEl.textContent = "Camera scanner failed to load. Please type the code instead.";
+          return;
+        }
+        activeScanner = new Html5Qrcode("qrReader");
+        activeScanner.start(
+          { facingMode: "environment" },
+          { fps: 10, qrbox: 220 },
+          function (decodedText) {
+            closeQrScanner();
+            onSuccess(decodedText);
+          },
+          function () { /* ignore per-frame scan misses */ }
+        ).catch(function (err) {
+          msgEl.style.color = "var(--danger)";
+          msgEl.textContent = "Could not access your camera: " + (err.message || err) + ". Please type the code instead.";
+        });
+      }
+      function closeQrScanner() {
+        document.getElementById("qrScanOverlay").classList.remove("show");
+        if (activeScanner) {
+          activeScanner.stop().then(function () { activeScanner.clear(); }).catch(function () {});
+          activeScanner = null;
+        }
+      }
+      document.getElementById("btnCancelScan").addEventListener("click", closeQrScanner);
+
       function haversineMeters(lat1, lng1, lat2, lng2) {
         const R = 6371000;
         const toRad = function (d) { return (d * Math.PI) / 180; };
@@ -522,9 +581,16 @@
               card.innerHTML = '<div class="ititle">' + escapeHtml(d.label) + '</div><div class="readConfirmed">✓ Checked in at ' + fmtDate(myCheckin.data().checkedInAt) + "</div>";
             } else {
               card.innerHTML =
-                '<div class="ititle">' + escapeHtml(d.label) + '</div><div class="imeta">Enter the code your lecturer is displaying</div>' +
+                '<div class="ititle">' + escapeHtml(d.label) + '</div><div class="imeta">Scan the QR your lecturer is showing, or type the code</div>' +
+                '<button class="btn" data-scan-qr style="margin-top:10px;">📷 Scan QR Code</button>' +
                 '<div class="field" style="margin-top:10px;"><input type="text" data-code-input placeholder="e.g. B7X9K2" style="text-transform:uppercase;letter-spacing:4px;font-weight:700;"/></div>' +
-                '<button class="btn" data-submit-code>Check In</button><div class="msg" data-msg style="margin-top:10px;font-size:0.82rem;"></div>';
+                '<button class="btn-outline-sm" data-submit-code style="width:100%;padding:11px;text-align:center;">Check In</button><div class="msg" data-msg style="margin-top:10px;font-size:0.82rem;"></div>';
+              card.querySelector("[data-scan-qr]").addEventListener("click", function () {
+                openQrScanner(function (scannedText) {
+                  card.querySelector("[data-code-input]").value = scannedText.trim().toUpperCase();
+                  card.querySelector("[data-submit-code]").click();
+                });
+              });
               card.querySelector("[data-submit-code]").addEventListener("click", async function () {
                 const entered = card.querySelector("[data-code-input]").value.trim().toUpperCase();
                 const msgEl = card.querySelector("[data-msg]");

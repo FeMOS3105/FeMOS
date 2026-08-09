@@ -301,7 +301,7 @@
               '<button class="btn-sm btn-reject">Reject</button>' +
               "</div>";
             row.querySelector(".btn-approve").addEventListener("click", async function () {
-              await approveStudent(doc.id);
+              await approveStudent(doc.id, d.institutionId, !!d.studentId);
             });
             row.querySelector(".btn-reject").addEventListener("click", async function () {
               await rejectStudent(doc.id);
@@ -314,12 +314,27 @@
         }
       }
 
-      async function approveStudent(studentUid) {
+      async function generateStudentId(uid, institutionId) {
+        const year = new Date().getFullYear();
+        const counterRef = db.collection("idCounters").doc(institutionId + "_" + year);
+        let newId = null;
+        await db.runTransaction(async function (tx) {
+          const counterDoc = await tx.get(counterRef);
+          const next = (counterDoc.exists ? counterDoc.data().count : 0) + 1;
+          tx.set(counterRef, { count: next, institutionId: institutionId, year: year }, { merge: true });
+          newId = "FEMOS-" + institutionId.toUpperCase() + "-" + year + "-" + String(next).padStart(6, "0");
+        });
+        await db.collection("users").doc(uid).set({ studentId: newId }, { merge: true });
+        return newId;
+      }
+
+      async function approveStudent(studentUid, institutionId, alreadyHasId) {
         try {
           await db.collection("users").doc(studentUid).set(
             { registrationStatus: "confirmed", confirmedByCR: true },
             { merge: true }
           );
+          if (!alreadyHasId && institutionId) { await generateStudentId(studentUid, institutionId); }
           loadPending();
         } catch (err) {
           alert("Could not approve: " + (err.message || ""));
