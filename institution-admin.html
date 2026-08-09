@@ -488,6 +488,11 @@
             '</div>' +
             '<div class="collegeBody"><div class="courseList"></div>' +
               '<div class="addCourseRow"><input type="text" placeholder="New course name..." data-new-course/><button data-save-course>Add</button></div>' +
+              '<button type="button" class="toggleLink" data-toggle-bulk style="margin-top:10px;">+ Add Multiple Courses at Once</button>' +
+              '<div style="display:none;margin-top:10px;" data-bulk-box>' +
+                '<textarea data-bulk-input rows="5" placeholder="Paste one course per line, e.g.:&#10;BSc. Computer Science&#10;BSc. Software Engineering&#10;Diploma in IT" style="width:100%;padding:9px 10px;border-radius:8px;border:1.5px dashed var(--line);font-size:0.82rem;background:#fbfdff;font-family:inherit;resize:vertical;"></textarea>' +
+                '<button type="button" data-save-bulk style="margin-top:8px;padding:9px 14px;border-radius:8px;border:none;background:var(--ink);color:#fff;font-weight:700;font-size:0.8rem;cursor:pointer;">Add All</button>' +
+              '</div>' +
             '</div>';
 
           const courseListEl = card.querySelector(".courseList");
@@ -558,6 +563,35 @@
           loadColleges();
         });
         input.addEventListener("keydown", function (e) { if (e.key === "Enter") card.querySelector("[data-save-course]").click(); });
+
+        const bulkToggle = card.querySelector("[data-toggle-bulk]");
+        const bulkBox = card.querySelector("[data-bulk-box]");
+        bulkToggle.addEventListener("click", function () {
+          bulkBox.style.display = bulkBox.style.display === "none" ? "block" : "none";
+        });
+        card.querySelector("[data-save-bulk]").addEventListener("click", async function () {
+          const raw = card.querySelector("[data-bulk-input]").value;
+          // Accept one course per line, but also split on commas in case
+          // someone pastes a comma-separated list instead.
+          const names = raw.split(/\r?\n|,/).map(function (s) { return s.trim(); }).filter(Boolean);
+          if (names.length === 0) return;
+          const btn = this;
+          btn.disabled = true; btn.textContent = "Adding " + names.length + "...";
+          try {
+            const batch = db.batch();
+            names.forEach(function (name) {
+              const ref = db.collection("institutions").doc(myInstitutionId).collection("campuses").doc(collegeId).collection("courses").doc(slugify(name));
+              batch.set(ref, { name: name });
+            });
+            await batch.commit();
+            card.querySelector("[data-bulk-input]").value = "";
+            loadColleges();
+          } catch (err) {
+            alert("Could not add courses: " + (err.message || ""));
+          } finally {
+            btn.disabled = false; btn.textContent = "Add All";
+          }
+        });
       }
 
       function wireCourseRow(row, collegeId, courseId, currentName) {
