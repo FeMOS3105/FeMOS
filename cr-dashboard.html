@@ -64,15 +64,32 @@
       .readList .rrow { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed var(--line); }
       .toggleLink { background: none; border: none; color: var(--water-deep); font-weight: 600; font-size: 0.8rem; cursor: pointer; padding: 0; }
 
-      .optionRow { display: flex; gap: 8px; margin-bottom: 8px; }
-      .optionRow input { flex: 1; }
-      .optionRow button { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 1rem; padding: 0 8px; }
-      .addOptBtn { background: none; border: 1.5px dashed var(--line); color: var(--water-deep); border-radius: 8px; padding: 8px; width: 100%; font-size: 0.82rem; font-weight: 600; cursor: pointer; margin-bottom: 12px; }
+      .optionRow { display: flex; gap: 8px; margin-bottom: 10px; align-items: center; }
+      .optionRow input {
+        flex: 1; padding: 12px 18px; border-radius: 999px; border: 2px solid var(--line);
+        font-size: 0.88rem; background: linear-gradient(135deg, #f8fbff 0%, #eef5ff 100%);
+        transition: border-color 0.2s;
+      }
+      .optionRow input:focus { border-color: var(--water-mid); outline: none; }
+      .optionRow button {
+        background: none; border: none; color: var(--danger); cursor: pointer;
+        font-size: 1rem; padding: 4px 8px; border-radius: 50%;
+        transition: background 0.15s;
+      }
+      .optionRow button:hover { background: #fdecec; }
+      .addOptBtn {
+        background: none; border: 2px dashed var(--line); color: var(--water-deep);
+        border-radius: 999px; padding: 10px; width: 100%; font-size: 0.82rem;
+        font-weight: 600; cursor: pointer; margin-bottom: 14px;
+        transition: border-color 0.2s, background 0.2s;
+      }
+      .addOptBtn:hover { border-color: var(--water-mid); background: #f0f7ff; }
 
-      .barRow { margin-bottom: 10px; }
-      .barLabel { display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 4px; }
-      .barTrack { height: 10px; border-radius: 6px; background: #f0f4fb; overflow: hidden; }
-      .barFill { height: 100%; background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); border-radius: 6px; transition: width .3s; }
+      .barRow { margin-bottom: 12px; padding: 10px 14px; border: 1.5px solid var(--line); border-radius: 999px; background: linear-gradient(135deg, #f8fbff 0%, #eef5ff 100%); }
+      .barLabel { display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 6px; }
+      .barLabel span:first-child { font-weight: 600; color: var(--ink); }
+      .barTrack { height: 10px; border-radius: 999px; background: #e4ecfa; overflow: hidden; }
+      .barFill { height: 100%; background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); border-radius: 999px; transition: width .4s ease; }
 
       .linkBox { display: flex; gap: 8px; align-items: center; background: #f5f9ff; border-radius: 10px; padding: 10px 12px; margin: 10px 0; }
       .linkBox code { flex: 1; font-size: 0.78rem; word-break: break-all; color: var(--water-deep); }
@@ -84,6 +101,38 @@
       .msg.show { display: block; }
       .msg.err { background: #fdecec; color: var(--danger); }
       .msg.ok { background: #e9f9f1; color: var(--success); }
+
+      .fileUploadZone {
+        border: 2px dashed var(--line); border-radius: 14px; padding: 20px;
+        text-align: center; cursor: pointer; transition: all 0.2s;
+        background: linear-gradient(135deg, #f8fbff 0%, #eef5ff 100%);
+        margin-bottom: 14px; position: relative;
+      }
+      .fileUploadZone:hover { border-color: var(--water-mid); background: #f0f7ff; }
+      .fileUploadZone input[type="file"] {
+        position: absolute; inset: 0; opacity: 0; cursor: pointer;
+      }
+      .fileUploadZone .uploadIcon { font-size: 1.6rem; margin-bottom: 6px; color: var(--water-mid); }
+      .fileUploadZone .uploadText { font-size: 0.82rem; color: var(--muted); font-weight: 600; }
+      .fileUploadZone .uploadHint { font-size: 0.72rem; color: var(--muted); margin-top: 4px; }
+      .fileUploadZone.hasFile { border-color: var(--success); border-style: solid; background: #f0faf5; }
+      .filePreview { display: none; margin-bottom: 14px; position: relative; }
+      .filePreview.show { display: block; }
+      .filePreview img {
+        width: 100%; max-height: 220px; object-fit: cover; border-radius: 12px;
+        box-shadow: 0 4px 14px rgba(13,27,75,0.1);
+      }
+      .filePreview .removeFile {
+        position: absolute; top: 8px; right: 8px; background: var(--danger); color: #fff;
+        border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 0.85rem;
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 2px 8px rgba(225,75,75,0.3);
+      }
+      .annImage { margin-top: 10px; }
+      .annImage img {
+        width: 100%; max-height: 300px; object-fit: cover; border-radius: 12px;
+        box-shadow: 0 4px 14px rgba(13,27,75,0.1);
+      }
 
       .gate-card { max-width: 460px; margin: 60px auto; text-align: center; background: #fff; border-radius: 18px; padding: 34px 26px; box-shadow: 0 14px 40px rgba(13,27,75,0.1); }
 
@@ -128,8 +177,27 @@
           <div class="card">
             <h2>Post an Announcement</h2>
             <div class="hint">Every student who reads it must tap "I've read this" — you'll always see exactly who has, and who hasn't.</div>
+            <div class="field">
+              <label>Use a Template? (optional)</label>
+              <select id="annTemplateSelect" style="width:100%;padding:10px 12px;border-radius:9px;border:1.5px solid var(--line);font-size:0.9rem;background:#fbfdff;">
+                <option value="">— Write from scratch —</option>
+              </select>
+            </div>
             <div class="field"><label>Title</label><input id="annTitle" placeholder="e.g. Venue change for tomorrow's test"/></div>
             <div class="field"><label>Message</label><textarea id="annBody" placeholder="Write the full announcement..."></textarea></div>
+            <div class="field">
+              <label>Attach Image (optional)</label>
+              <div class="fileUploadZone" id="annFileZone">
+                <div class="uploadIcon">+</div>
+                <div class="uploadText">Tap to attach a poster or image</div>
+                <div class="uploadHint">PNG, JPG, GIF up to 5MB</div>
+                <input type="file" id="annFileInput" accept="image/png,image/jpeg,image/gif,image/webp"/>
+              </div>
+              <div class="filePreview" id="annFilePreview">
+                <img id="annFileImg" src="" alt="Preview"/>
+                <button class="removeFile" id="annRemoveFile">✕</button>
+              </div>
+            </div>
             <button class="btn" id="btnPostAnn">Post Announcement</button>
             <div class="msg" id="msgAnn"></div>
           </div>
@@ -286,6 +354,7 @@
         if (initialized) return;
         initialized = true;
         loadAnnouncements();
+        loadAnnTemplates();
         loadPolls();
         loadCollectForms();
         loadApprove();
@@ -293,22 +362,110 @@
       }
 
       // ================= ANNOUNCEMENTS =================
+      const CLOUDINARY_CLOUD_NAME = "j8zmetxr";
+      const CLOUDINARY_UPLOAD_PRESET = "FastLine_FeMOS";
+      let annSelectedFile = null;
+
+      async function loadAnnTemplates() {
+        const sel = document.getElementById("annTemplateSelect");
+        try {
+          const snap = await db.collection("posterTemplates").where("institutionId", "==", myInstitutionId).get();
+          if (snap.empty) { sel.innerHTML = '<option value="">— No templates available —</option>'; return; }
+          sel.innerHTML = '<option value="">— Write from scratch —</option>' +
+            snap.docs.map(function (d) { const t = d.data(); return '<option value="' + d.id + '">' + escapeHtml(t.title) + '</option>'; }).join("");
+        } catch (e) { sel.innerHTML = '<option value="">— Templates unavailable —</option>'; }
+      }
+
+      document.getElementById("annTemplateSelect").addEventListener("change", async function () {
+        const tplId = this.value;
+        if (!tplId) return;
+        try {
+          const doc = await db.collection("posterTemplates").doc(tplId).get();
+          if (!doc.exists) return;
+          const t = doc.data();
+          document.getElementById("annTitle").value = t.title || "";
+          document.getElementById("annBody").value = t.body || "";
+          if (t.imageUrl) {
+            annSelectedFile = null;
+            document.getElementById("annFileImg").src = t.imageUrl;
+            document.getElementById("annFilePreview").classList.add("show");
+            document.getElementById("annFileZone").classList.add("hasFile");
+            document.getElementById("annFileZone").querySelector(".uploadText").textContent = "Template image loaded";
+            document.getElementById("annFileZone").querySelector(".uploadHint").textContent = "Select a new file to replace, or keep this one";
+            annSelectedFile = { _templateUrl: t.imageUrl };
+          }
+        } catch (e) {}
+      });
+
+      async function uploadImageToCloudinary(file) {
+        const url = "https://api.cloudinary.com/v1_1/" + CLOUDINARY_CLOUD_NAME + "/image/upload";
+        const form = new FormData();
+        form.append("file", file);
+        form.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+        const res = await fetch(url, { method: "POST", body: form });
+        if (!res.ok) throw new Error("Image upload failed.");
+        const data = await res.json();
+        return data.secure_url;
+      }
+
+      document.getElementById("annFileInput").addEventListener("change", function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) { showMsg("msgAnn", "Image must be under 5MB.", "err"); e.target.value = ""; return; }
+        if (!file.type.startsWith("image/")) { showMsg("msgAnn", "Only image files are allowed.", "err"); e.target.value = ""; return; }
+        annSelectedFile = file;
+        const reader = new FileReader();
+        reader.onload = function (ev) {
+          document.getElementById("annFileImg").src = ev.target.result;
+          document.getElementById("annFilePreview").classList.add("show");
+          document.getElementById("annFileZone").classList.add("hasFile");
+          document.getElementById("annFileZone").querySelector(".uploadText").textContent = file.name;
+        };
+        reader.readAsDataURL(file);
+      });
+
+      document.getElementById("annRemoveFile").addEventListener("click", function () {
+        annSelectedFile = null;
+        document.getElementById("annFileInput").value = "";
+        document.getElementById("annFilePreview").classList.remove("show");
+        document.getElementById("annFileZone").classList.remove("hasFile");
+        document.getElementById("annFileZone").querySelector(".uploadText").textContent = "Tap to attach a poster or image";
+      });
+
       document.getElementById("btnPostAnn").addEventListener("click", async function () {
         const title = document.getElementById("annTitle").value.trim();
         const body = document.getElementById("annBody").value.trim();
         if (!title || !body) { showMsg("msgAnn", "Fill in both title and message.", "err"); return; }
+        const btn = document.getElementById("btnPostAnn");
+        btn.disabled = true; btn.textContent = "Posting...";
         try {
-          await db.collection("announcements").add({
+          let imageUrl = null;
+          if (annSelectedFile) {
+            if (annSelectedFile._templateUrl) {
+              imageUrl = annSelectedFile._templateUrl;
+            } else {
+              imageUrl = await uploadImageToCloudinary(annSelectedFile);
+            }
+          }
+          const docData = {
             institutionId: myInstitutionId, courseId: myCourseId, courseName: myCourseName,
             level: "course", authorRole: "Class Representative",
             title: title, body: body,
             createdBy: auth.currentUser.uid, createdByName: auth.currentUser.displayName || auth.currentUser.email,
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          });
+          };
+          if (imageUrl) docData.imageUrl = imageUrl;
+          await db.collection("announcements").add(docData);
           document.getElementById("annTitle").value = ""; document.getElementById("annBody").value = "";
+          annSelectedFile = null;
+          document.getElementById("annFileInput").value = "";
+          document.getElementById("annFilePreview").classList.remove("show");
+          document.getElementById("annFileZone").classList.remove("hasFile");
+          document.getElementById("annFileZone").querySelector(".uploadText").textContent = "Tap to attach a poster or image";
           showMsg("msgAnn", "Announcement posted.", "ok");
           loadAnnouncements();
         } catch (err) { showMsg("msgAnn", "Error: " + (err.message || ""), "err"); }
+        finally { btn.disabled = false; btn.textContent = "Post Announcement"; }
       });
 
       async function loadAnnouncements() {
@@ -333,6 +490,7 @@
             card.innerHTML =
               '<div class="itop"><div><div class="ititle">' + escapeHtml(d.title) + '</div><div class="imeta">Sent ' + fmtDate(d.createdAt) + '</div></div></div>' +
               '<div class="ibody">' + escapeHtml(d.body) + '</div>' +
+              (d.imageUrl ? '<div class="annImage"><img src="' + escapeHtml(d.imageUrl) + '" alt="Attachment"/></div>' : '') +
               '<button class="toggleLink" data-toggle-reads>' + readsSnap.size + " student(s) have confirmed reading — view names</button>" +
               '<div class="readList" style="display:none;" data-reads-box>' +
                 (readsSnap.empty ? '<div>No one yet.</div>' : '<table class="subTable"><thead><tr><th>Name</th><th>Reg. Number</th><th>Seen At</th></tr></thead><tbody>' +

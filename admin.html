@@ -67,6 +67,11 @@
 
       .gate-card { max-width: 460px; margin: 60px auto; text-align: center; background: #fff; border-radius: 18px; padding: 34px 26px; box-shadow: 0 14px 40px rgba(13,27,75,0.1); }
       .gate-card code { display: block; background: #f5f9ff; padding: 10px; border-radius: 8px; font-size: 0.8rem; margin: 12px 0; word-break: break-all; }
+      .annImage { margin-top: 10px; }
+      .annImage img {
+        width: 100%; max-height: 300px; object-fit: cover; border-radius: 12px;
+        box-shadow: 0 4px 14px rgba(13,27,75,0.1);
+      }
     </style>
   </head>
   <body>
@@ -91,6 +96,7 @@
           <button class="tabbtn" data-tab="catalog">Catalog Management</button>
           <button class="tabbtn" data-tab="instadmins">Institution Admins</button>
           <button class="tabbtn" data-tab="banners">Dashboard Banners</button>
+          <button class="tabbtn" data-tab="templates">Poster Templates</button>
         </div>
 
         <!-- ============ PENDING REGISTRATIONS ============ -->
@@ -178,6 +184,30 @@
           <div class="card">
             <h2>Preview</h2>
             <div id="bannerPreview"><div class="empty">Choose an institution above to see its current slides.</div></div>
+          </div>
+        </div>
+
+        <!-- ============ POSTER TEMPLATES ============ -->
+        <div class="panel" id="panel-templates">
+          <div class="card">
+            <h2>Create a Poster Template</h2>
+            <div class="hint">Templates help CRs, lecturers, and institution admins post announcements faster — they just pick a template, edit if needed, and send.</div>
+            <div class="field"><label>Institution</label><select id="tplInstSelect"></select></div>
+            <div class="field"><label>Template Title</label><input id="tplTitle" placeholder="e.g. Exam Schedule Announcement"/></div>
+            <div class="field"><label>Default Body Text</label><textarea id="tplBody" placeholder="Write the default message body that will pre-fill when this template is used..."></textarea></div>
+            <div class="field">
+              <label>Poster Image URL (optional)</label>
+              <input id="tplImageUrl" placeholder="https://res.cloudinary.com/..."/>
+              <div id="tplImagePreview" style="display:none;margin-top:8px;"><img id="tplPreviewImg" src="" style="width:100%;max-height:180px;object-fit:cover;border-radius:12px;"/></div>
+            </div>
+            <button class="btn" id="btnCreateTemplate">Save Template</button>
+            <div class="msg" id="msgTemplate"></div>
+          </div>
+
+          <div class="card">
+            <h2>Existing Templates</h2>
+            <div class="hint">Select an institution above to see its templates.</div>
+            <div id="templateList"><div class="empty">Choose an institution to view templates.</div></div>
           </div>
         </div>
       </div>
@@ -272,6 +302,7 @@
         loadGrantInstSelect();
         loadInstAdminList();
         loadBannerInstSelect();
+        loadTemplateInstSelect();
       }
 
       // ================= PENDING REGISTRATIONS =================
@@ -589,6 +620,84 @@
           renderBannerPreview(images);
         } catch (err) { showMsg("msgBanner", "Error: " + (err.message || ""), "err"); }
       });
+
+      // ================= POSTER TEMPLATES =================
+      async function loadTemplateInstSelect() {
+        const snap = await db.collection("institutions").orderBy("name").get();
+        const sel = document.getElementById("tplInstSelect");
+        sel.innerHTML = snap.docs.map(function (d) { return '<option value="' + d.id + '">' + escapeHtml(d.data().name) + "</option>"; }).join("") || '<option value="">-- add an institution first --</option>';
+        if (snap.size) loadTemplates(sel.value);
+      }
+      document.getElementById("tplInstSelect").addEventListener("change", function () { loadTemplates(this.value); });
+
+      document.getElementById("tplImageUrl").addEventListener("input", function () {
+        const url = this.value.trim();
+        const preview = document.getElementById("tplImagePreview");
+        if (url) {
+          document.getElementById("tplPreviewImg").src = url;
+          preview.style.display = "block";
+        } else {
+          preview.style.display = "none";
+        }
+      });
+
+      document.getElementById("btnCreateTemplate").addEventListener("click", async function () {
+        const institutionId = document.getElementById("tplInstSelect").value;
+        const title = document.getElementById("tplTitle").value.trim();
+        const body = document.getElementById("tplBody").value.trim();
+        const imageUrl = document.getElementById("tplImageUrl").value.trim() || null;
+        if (!institutionId) { showMsg("msgTemplate", "Choose an institution first.", "err"); return; }
+        if (!title) { showMsg("msgTemplate", "Enter a template title.", "err"); return; }
+        if (!body) { showMsg("msgTemplate", "Enter default body text.", "err"); return; }
+        try {
+          await db.collection("posterTemplates").add({
+            institutionId: institutionId,
+            title: title, body: body, imageUrl: imageUrl,
+            createdBy: auth.currentUser.uid,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+          document.getElementById("tplTitle").value = "";
+          document.getElementById("tplBody").value = "";
+          document.getElementById("tplImageUrl").value = "";
+          document.getElementById("tplImagePreview").style.display = "none";
+          showMsg("msgTemplate", "Template saved.", "ok");
+          loadTemplates(institutionId);
+        } catch (err) { showMsg("msgTemplate", "Error: " + (err.message || ""), "err"); }
+      });
+
+      async function loadTemplates(institutionId) {
+        const listEl = document.getElementById("templateList");
+        if (!institutionId) { listEl.innerHTML = '<div class="empty">Choose an institution to view templates.</div>'; return; }
+        listEl.innerHTML = "Loading...";
+        try {
+          const snap = await db.collection("posterTemplates").where("institutionId", "==", institutionId).get();
+          if (snap.empty) { listEl.innerHTML = '<div class="empty">No templates for this institution yet.</div>'; return; }
+          const docs = snap.docs.slice().sort(function (a, b) {
+            const at = a.data().createdAt ? a.data().createdAt.toMillis() : 0;
+            const bt = b.data().createdAt ? b.data().createdAt.toMillis() : 0;
+            return bt - at;
+          });
+          listEl.innerHTML = "";
+          for (const doc of docs) {
+            const d = doc.data();
+            const card = document.createElement("div");
+            card.className = "itemCard";
+            card.innerHTML =
+              '<div class="ititle">' + escapeHtml(d.title) + '</div>' +
+              '<div class="imeta">Created ' + fmtDate(d.createdAt) + '</div>' +
+              '<div class="ibody">' + escapeHtml(d.body) + '</div>' +
+              (d.imageUrl ? '<div class="annImage"><img src="' + escapeHtml(d.imageUrl) + '" alt="Template poster"/></div>' : '') +
+              '<div class="itemActions"><button class="btn-sm" style="background:transparent;border:1.5px solid var(--danger);color:var(--danger);" data-delete-tpl>Delete</button></div>';
+            card.querySelector("[data-delete-tpl]").addEventListener("click", function () {
+              if (!confirm('Delete the template "' + d.title + '"?')) return;
+              db.collection("posterTemplates").doc(doc.id).delete().then(function () { loadTemplates(institutionId); });
+            });
+            listEl.appendChild(card);
+          }
+        } catch (err) {
+          listEl.innerHTML = '<div class="empty">Could not load templates: ' + escapeHtml(err.message || "") + "</div>";
+        }
+      }
     </script>
   </body>
 </html>

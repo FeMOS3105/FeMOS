@@ -81,13 +81,34 @@
       .itemCard .ibody { font-size: 0.88rem; color: var(--ink); line-height: 1.5; margin: 10px 0; }
       .readBtn { padding: 10px 18px; border: none; border-radius: 10px; font-weight: 700; font-size: 0.85rem; cursor: pointer; background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); color: #fff; }
       .readConfirmed { font-size: 0.82rem; color: var(--success); font-weight: 600; }
+      .annImage { margin-top: 10px; }
+      .annImage img {
+        width: 100%; max-height: 300px; object-fit: cover; border-radius: 12px;
+        box-shadow: 0 4px 14px rgba(13,27,75,0.1); cursor: pointer;
+      }
 
-      .optBtn { display: block; width: 100%; text-align: left; padding: 11px 14px; border: 1.5px solid var(--line); border-radius: 10px; background: #fbfdff; margin-bottom: 8px; cursor: pointer; font-size: 0.88rem; color: var(--ink); }
-      .optBtn:hover { border-color: var(--water-mid); }
+      .optBtn {
+        display: flex; align-items: center; width: 100%; text-align: left;
+        padding: 14px 22px; border: 2px solid var(--line); border-radius: 999px;
+        background: linear-gradient(135deg, #f8fbff 0%, #eef5ff 100%);
+        margin-bottom: 10px; cursor: pointer; font-size: 0.9rem; font-weight: 600;
+        color: var(--ink); transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(13,27,75,0.04);
+      }
+      .optBtn:hover {
+        border-color: var(--water-mid);
+        background: linear-gradient(135deg, #e8f4ff 0%, #dceeff 100%);
+        transform: translateY(-1px); box-shadow: 0 4px 12px rgba(46,168,238,0.15);
+      }
+      .optBtn:active {
+        transform: translateY(0);
+        background: linear-gradient(135deg, var(--water-mid), var(--water-deep));
+        color: #fff; border-color: var(--water-deep);
+      }
       .barRow { margin-bottom: 10px; }
       .barLabel { display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 4px; }
-      .barTrack { height: 10px; border-radius: 6px; background: #f0f4fb; overflow: hidden; }
-      .barFill { height: 100%; background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); border-radius: 6px; transition: width .3s; }
+      .barTrack { height: 14px; border-radius: 999px; background: #f0f4fb; overflow: hidden; }
+      .barFill { height: 100%; background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); border-radius: 999px; transition: width .3s; }
       .votedNote { font-size: 0.78rem; color: var(--water-deep); font-weight: 600; margin-bottom: 10px; }
 
       .collectRow { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 4px 0; }
@@ -391,6 +412,7 @@
               '<div class="ititle">' + escapeHtml(d.title) + levelBadge(d) + '</div>' +
               '<div class="imeta">From ' + escapeHtml(d.createdByName || "") + " · Sent " + fmtDate(d.createdAt) + '</div>' +
               '<div class="ibody">' + escapeHtml(d.body) + '</div>' +
+              (d.imageUrl ? '<div class="annImage"><img src="' + escapeHtml(d.imageUrl) + '" alt="Attachment"/></div>' : '') +
               (myRead.exists ? '<div class="readConfirmed">✓ You confirmed reading this on ' + fmtDate(myRead.data().confirmedAt) + '</div>' : '<button class="readBtn" data-confirm-read>I\'ve Read This</button>');
             const btn = card.querySelector("[data-confirm-read]");
             if (btn) btn.addEventListener("click", function () { confirmRead(doc.id, btn); });

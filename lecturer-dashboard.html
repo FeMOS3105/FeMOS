@@ -66,6 +66,37 @@
       .confirmActions button { flex: 1; padding: 11px; border-radius: 10px; border: none; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
       .confirmActions .cancel { background: #f2f4f8; color: var(--ink); }
       .confirmActions .ok { background: var(--danger); color: #fff; }
+      .fileUploadZone {
+        border: 2px dashed var(--line); border-radius: 14px; padding: 20px;
+        text-align: center; cursor: pointer; transition: all 0.2s;
+        background: linear-gradient(135deg, #f8fbff 0%, #eef5ff 100%);
+        margin-bottom: 14px; position: relative;
+      }
+      .fileUploadZone:hover { border-color: var(--water-mid); background: #f0f7ff; }
+      .fileUploadZone input[type="file"] {
+        position: absolute; inset: 0; opacity: 0; cursor: pointer;
+      }
+      .fileUploadZone .uploadIcon { font-size: 1.6rem; margin-bottom: 6px; color: var(--water-mid); }
+      .fileUploadZone .uploadText { font-size: 0.82rem; color: var(--muted); font-weight: 600; }
+      .fileUploadZone .uploadHint { font-size: 0.72rem; color: var(--muted); margin-top: 4px; }
+      .fileUploadZone.hasFile { border-color: var(--success); border-style: solid; background: #f0faf5; }
+      .filePreview { display: none; margin-bottom: 14px; position: relative; }
+      .filePreview.show { display: block; }
+      .filePreview img {
+        width: 100%; max-height: 220px; object-fit: cover; border-radius: 12px;
+        box-shadow: 0 4px 14px rgba(13,27,75,0.1);
+      }
+      .filePreview .removeFile {
+        position: absolute; top: 8px; right: 8px; background: var(--danger); color: #fff;
+        border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 0.85rem;
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 2px 8px rgba(225,75,75,0.3);
+      }
+      .annImage { margin-top: 10px; }
+      .annImage img {
+        width: 100%; max-height: 300px; object-fit: cover; border-radius: 12px;
+        box-shadow: 0 4px 14px rgba(13,27,75,0.1);
+      }
     </style>
   </head>
   <body>
@@ -126,8 +157,27 @@
           <div class="card">
             <h2>Post an Announcement to This Course</h2>
             <div class="hint">Reaches every student registered in this course. You'll see exactly who has read it.</div>
+            <div class="field">
+              <label>Use a Template? (optional)</label>
+              <select id="annTemplateSelect" style="width:100%;padding:10px 12px;border-radius:9px;border:1.5px solid var(--line);font-size:0.9rem;background:#fbfdff;">
+                <option value="">— Write from scratch —</option>
+              </select>
+            </div>
             <div class="field"><label>Title</label><input id="annTitle" placeholder="e.g. Assignment 2 deadline moved"/></div>
             <div class="field"><label>Message</label><textarea id="annBody" style="width:100%;padding:11px 13px;border-radius:10px;border:1.5px solid var(--line);font-size:0.92rem;background:#fbfdff;min-height:90px;resize:vertical;font-family:inherit;" placeholder="Write the full announcement..."></textarea></div>
+            <div class="field">
+              <label>Attach Image (optional)</label>
+              <div class="fileUploadZone" id="annFileZone">
+                <div class="uploadIcon">+</div>
+                <div class="uploadText">Tap to attach a poster or image</div>
+                <div class="uploadHint">PNG, JPG, GIF up to 5MB</div>
+                <input type="file" id="annFileInput" accept="image/png,image/jpeg,image/gif,image/webp"/>
+              </div>
+              <div class="filePreview" id="annFilePreview">
+                <img id="annFileImg" src="" alt="Preview"/>
+                <button class="removeFile" id="annRemoveFile">✕</button>
+              </div>
+            </div>
             <button class="btn" id="btnPostAnn">Post Announcement</button>
             <div class="msg" id="msgAnn"></div>
           </div>
@@ -236,6 +286,7 @@
         activeSessionId = null;
         loadAttendanceHistory();
         loadAnnouncements();
+        loadAnnTemplates();
       }
 
       // ================= ATTENDANCE =================
@@ -364,24 +415,112 @@
       }
 
       // ================= ANNOUNCEMENTS (course-level) =================
+      const CLOUDINARY_CLOUD_NAME = "j8zmetxr";
+      const CLOUDINARY_UPLOAD_PRESET = "FastLine_FeMOS";
+      let annSelectedFile = null;
+
+      async function uploadImageToCloudinary(file) {
+        const url = "https://api.cloudinary.com/v1_1/" + CLOUDINARY_CLOUD_NAME + "/image/upload";
+        const form = new FormData();
+        form.append("file", file);
+        form.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+        const res = await fetch(url, { method: "POST", body: form });
+        if (!res.ok) throw new Error("Image upload failed.");
+        const data = await res.json();
+        return data.secure_url;
+      }
+
+      async function loadAnnTemplates() {
+        const sel = document.getElementById("annTemplateSelect");
+        try {
+          const snap = await db.collection("posterTemplates").where("institutionId", "==", currentAssignment.institutionId).get();
+          if (snap.empty) { sel.innerHTML = '<option value="">— No templates available —</option>'; return; }
+          sel.innerHTML = '<option value="">— Write from scratch —</option>' +
+            snap.docs.map(function (d) { const t = d.data(); return '<option value="' + d.id + '">' + escapeHtml(t.title) + '</option>'; }).join("");
+        } catch (e) { sel.innerHTML = '<option value="">— Templates unavailable —</option>'; }
+      }
+
+      document.getElementById("annTemplateSelect").addEventListener("change", async function () {
+        const tplId = this.value;
+        if (!tplId) return;
+        try {
+          const doc = await db.collection("posterTemplates").doc(tplId).get();
+          if (!doc.exists) return;
+          const t = doc.data();
+          document.getElementById("annTitle").value = t.title || "";
+          document.getElementById("annBody").value = t.body || "";
+          if (t.imageUrl) {
+            annSelectedFile = null;
+            document.getElementById("annFileImg").src = t.imageUrl;
+            document.getElementById("annFilePreview").classList.add("show");
+            document.getElementById("annFileZone").classList.add("hasFile");
+            document.getElementById("annFileZone").querySelector(".uploadText").textContent = "Template image loaded";
+            document.getElementById("annFileZone").querySelector(".uploadHint").textContent = "Select a new file to replace, or keep this one";
+            annSelectedFile = { _templateUrl: t.imageUrl };
+          }
+        } catch (e) {}
+      });
+
+      document.getElementById("annFileInput").addEventListener("change", function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) { alert("Image must be under 5MB."); e.target.value = ""; return; }
+        if (!file.type.startsWith("image/")) { alert("Only image files are allowed."); e.target.value = ""; return; }
+        annSelectedFile = file;
+        const reader = new FileReader();
+        reader.onload = function (ev) {
+          document.getElementById("annFileImg").src = ev.target.result;
+          document.getElementById("annFilePreview").classList.add("show");
+          document.getElementById("annFileZone").classList.add("hasFile");
+          document.getElementById("annFileZone").querySelector(".uploadText").textContent = file.name;
+        };
+        reader.readAsDataURL(file);
+      });
+
+      document.getElementById("annRemoveFile").addEventListener("click", function () {
+        annSelectedFile = null;
+        document.getElementById("annFileInput").value = "";
+        document.getElementById("annFilePreview").classList.remove("show");
+        document.getElementById("annFileZone").classList.remove("hasFile");
+        document.getElementById("annFileZone").querySelector(".uploadText").textContent = "Tap to attach a poster or image";
+      });
+
       document.getElementById("btnPostAnn").addEventListener("click", async function () {
         const title = document.getElementById("annTitle").value.trim();
         const body = document.getElementById("annBody").value.trim();
         const msgEl = document.getElementById("msgAnn");
         function showAnnMsg(text, type) { msgEl.textContent = text; msgEl.className = "msg show " + type; }
         if (!title || !body) { showAnnMsg("Fill in both title and message.", "err"); return; }
+        const btn = document.getElementById("btnPostAnn");
+        btn.disabled = true; btn.textContent = "Posting...";
         try {
-          await db.collection("announcements").add({
+          let imageUrl = null;
+          if (annSelectedFile) {
+            if (annSelectedFile._templateUrl) {
+              imageUrl = annSelectedFile._templateUrl;
+            } else {
+              imageUrl = await uploadImageToCloudinary(annSelectedFile);
+            }
+          }
+          const docData = {
             institutionId: currentAssignment.institutionId, courseId: currentAssignment.courseId, courseName: currentAssignment.courseName,
             level: "course", authorRole: "Lecturer",
             title: title, body: body,
             createdBy: auth.currentUser.uid, createdByName: auth.currentUser.displayName || auth.currentUser.email,
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          });
+          };
+          if (imageUrl) docData.imageUrl = imageUrl;
+          await db.collection("announcements").add(docData);
           document.getElementById("annTitle").value = ""; document.getElementById("annBody").value = "";
+          annSelectedFile = null;
+          document.getElementById("annFileInput").value = "";
+          document.getElementById("annFilePreview").classList.remove("show");
+          document.getElementById("annFileZone").classList.remove("hasFile");
+          document.getElementById("annFileZone").querySelector(".uploadText").textContent = "Tap to attach a poster or image";
           showAnnMsg("Announcement posted.", "ok");
           loadAnnouncements();
         } catch (err) { showAnnMsg("Error: " + (err.message || ""), "err"); }
+        finally { btn.disabled = false; btn.textContent = "Post Announcement"; }
       });
 
       async function loadAnnouncements() {
@@ -401,6 +540,7 @@
             card.innerHTML =
               '<div class="ititle">' + escapeHtml(d.title) + '</div><div class="imeta">' + fmtDate(d.createdAt) + '</div>' +
               '<div class="ibody">' + escapeHtml(d.body) + '</div>' +
+              (d.imageUrl ? '<div class="annImage"><img src="' + escapeHtml(d.imageUrl) + '" alt="Attachment"/></div>' : '') +
               '<button class="toggleLink" data-toggle-reads>' + readsSnap.size + " student(s) have confirmed reading — view names</button>" +
               '<div class="readList" style="display:none;" data-reads-box>' +
                 (readsSnap.empty ? "<div>No one yet.</div>" : readsSnap.docs.map(function (r) { const rd = r.data(); return "<div>" + escapeHtml(rd.name || r.id) + " — " + escapeHtml(rd.registrationNumber || "—") + " — " + fmtDate(rd.confirmedAt) + "</div>"; }).join("")) +
