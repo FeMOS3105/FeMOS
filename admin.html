@@ -87,7 +87,6 @@
             <h1>FeMOS Admin</h1>
           </div>
           <div class="userchip">
-            <button class="themeToggle" id="themeToggle" title="Switch to Dark Mode"></button>
             <div class="av" id="adminAv">?</div>
             <span id="adminName">...</span>
             <button id="btnLogout">Log Out</button>
@@ -284,7 +283,6 @@
         await auth.signOut();
         window.location.href = "login.html";
       });
-      document.getElementById("themeToggle").addEventListener("click", function () { feMosToggleTheme(); });
 
       // ---------- Tabs ----------
       document.querySelectorAll(".tabbtn").forEach(function (btn) {

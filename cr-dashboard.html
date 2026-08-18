@@ -181,7 +181,6 @@
             <h1>CR Dashboard</h1>
           </div>
           <div class="userchip">
-            <button class="themeToggle" id="themeToggle" title="Switch to Dark Mode"></button>
             <button class="notifBell" id="crNotifBell" title="Notifications">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
               <span class="notifBadge" id="crNotifBadge" style="display:none;">0</span>
@@ -389,7 +388,6 @@
       });
 
       document.getElementById("btnLogout").addEventListener("click", async function () { await auth.signOut(); window.location.href = "login.html"; });
-      document.getElementById("themeToggle").addEventListener("click", function () { feMosToggleTheme(); });
 
       document.querySelectorAll(".tabbtn").forEach(function (btn) {
         btn.addEventListener("click", function () {

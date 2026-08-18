@@ -144,7 +144,6 @@
             <h1>Lecturer Dashboard</h1>
           </div>
           <div class="userchip">
-            <button class="themeToggle" id="themeToggle" title="Switch to Dark Mode"></button>
             <div class="av" id="lecAv">?</div>
             <span id="lecName">...</span>
             <button id="btnLogout">Log Out</button>
@@ -328,7 +327,6 @@
       });
 
       document.getElementById("btnLogout").addEventListener("click", async function () { await auth.signOut(); window.location.href = "login.html"; });
-      document.getElementById("themeToggle").addEventListener("click", function () { feMosToggleTheme(); });
 
       function renderCourseGrid() {
         const grid = document.getElementById("courseGrid");

@@ -10,29 +10,39 @@
     var next = current === "dark" ? "light" : "dark";
     document.documentElement.setAttribute("data-theme", next);
     localStorage.setItem("femos-theme", next);
-    updateThemeIcons();
+    updateDzToggle();
   };
 
   window.feMosApplyTheme = function (theme) {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("femos-theme", theme);
-    updateThemeIcons();
+    updateDzToggle();
   };
 
-  function updateThemeIcons() {
+  function updateDzToggle() {
     var isDark = document.documentElement.getAttribute("data-theme") === "dark";
-    document.querySelectorAll(".themeToggle").forEach(function (btn) {
-      var sunIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="' + (isDark ? "#fbbf24" : "#5c6b9a") + '" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>';
-      var moonIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="' + (isDark ? "#fbbf24" : "#5c6b9a") + '" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
-      btn.innerHTML = isDark ? sunIcon : moonIcon;
-      btn.title = isDark ? "Switch to Light Mode" : "Switch to Dark Mode";
-    });
+    var toggle = document.getElementById("dzThemeToggle");
+    var knob = document.getElementById("dzThemeKnob");
+    var desc = document.getElementById("dzThemeDesc");
+    if (toggle && knob) {
+      // Toggle ON (blue) = Light, Toggle OFF (gray) = Dark
+      if (!isDark) {
+        toggle.style.background = "var(--water-mid)";
+        knob.style.left = "22px";
+      } else {
+        toggle.style.background = "#e0e4ec";
+        knob.style.left = "2px";
+      }
+    }
+    if (desc) {
+      desc.textContent = isDark ? "Dark mode is on" : "Light mode is on";
+    }
   }
 
-  /* Run on DOM ready for initial icons */
+  /* Run on DOM ready */
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", updateThemeIcons);
+    document.addEventListener("DOMContentLoaded", updateDzToggle);
   } else {
-    updateThemeIcons();
+    updateDzToggle();
   }
 })();
