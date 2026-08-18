@@ -807,6 +807,34 @@
         const escaped = escapeHtml(message || "Unknown error");
         return escaped.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color:var(--water-deep);font-weight:600;">Click here to create the missing index</a>');
       }
+      function friendlyError(err) {
+        const c = err && err.code;
+        const map = {
+          "permission-denied": "You don't have permission to do this.",
+          "not-found": "The requested data was not found.",
+          "unauthenticated": "Please log in again to continue.",
+          "unavailable": "Service is temporarily unavailable. Try again later.",
+          "deadline-exceeded": "Request timed out. Check your connection and try again.",
+          "resource-exhausted": "Too many requests. Please wait a moment and try again.",
+          "failed-precondition": "This action cannot be completed right now.",
+          "aborted": "The operation was interrupted. Please try again.",
+          "data-loss": "An unexpected error occurred. Please try again.",
+          "already-exists": "This data already exists.",
+          "invalid-argument": "Invalid input. Please check your data and try again.",
+          "internal": "Something went wrong on our end. Please try again later.",
+          "auth/user-not-found": "No account found with this email.",
+          "auth/wrong-password": "Incorrect password.",
+          "auth/invalid-credential": "Invalid email or password.",
+          "auth/too-many-requests": "Too many attempts. Please wait a few minutes.",
+          "auth/network-request-failed": "Network error. Check your internet connection.",
+          "storage/unauthorized": "You don't have permission to upload files.",
+          "storage/canceled": "Upload was cancelled.",
+          "storage/unknown": "Upload failed. Please try again.",
+        };
+        if (c && map[c]) return map[c];
+        if (err && err.message && err.message.includes("index")) return "This query needs a database index. Please contact support to set it up.";
+        return "Something went wrong. Please try again.";
+      }
 
       // ---------- Navigation between card grid and detail views ----------
       document.querySelectorAll("[data-open]").forEach(function (card) {
@@ -885,6 +913,8 @@
           document.getElementById("rCourse").textContent = myCourseName || "—";
 
           const status = data.registrationStatus || (data.confirmedByCR ? "confirmed" : "pending");
+          document.getElementById("statReg").textContent = status === "confirmed" ? "✓ Verified" : "⏳ Pending";
+          document.getElementById("statReg").style.color = status === "confirmed" ? "var(--success)" : "var(--warn)";
           const rStatus = document.getElementById("rStatus");
           rStatus.textContent = status === "confirmed" ? "✓ Confirmed" : "⏳ Pending Confirmation";
           rStatus.className = "statusPill " + (status === "confirmed" ? "confirmed" : "pending");
@@ -901,7 +931,7 @@
           loadCarousel();
           initApp();
         } catch (err) {
-          gate.innerHTML = "Error loading your dashboard: " + (err.message || "");
+          gate.innerHTML = "Could not load your dashboard. Please try refreshing the page.";
         }
       });
 
@@ -965,7 +995,7 @@
           if (unread > 0 && !myRegNumber) showRegWarning();
           renderAnnTab(annActiveTab);
         } catch (err) {
-          listEl.innerHTML = '<div class="empty">Could not load announcements: ' + linkifyError(err.message) + "</div>";
+          listEl.innerHTML = '<div class="empty">Could not load announcements. Please try again later.</div>';
           document.getElementById("statAnn").textContent = "Error loading";
         }
       }
@@ -1089,14 +1119,14 @@
                   const inc = {}; inc["voteCounts." + idx] = firebase.firestore.FieldValue.increment(1);
                   await db.collection("polls").doc(doc.id).update(inc);
                   loadPolls();
-                } catch (err) { alert("Could not vote: " + (err.message || "")); }
+                } catch (err) { alert("Could not cast your vote. Please try again."); }
               });
             });
             listEl.appendChild(card);
           }
           document.getElementById("statPolls").textContent = openCount > 0 ? openCount + " awaiting your vote" : "All voted";
         } catch (err) {
-          listEl.innerHTML = '<div class="empty">Could not load polls: ' + linkifyError(err.message) + "</div>";
+          listEl.innerHTML = '<div class="empty">Could not load polls. Please try again later.</div>';
           document.getElementById("statPolls").textContent = "Error loading";
         }
       }
@@ -1124,7 +1154,7 @@
           }
           document.getElementById("statCollect").textContent = pendingCount > 0 ? pendingCount + " to fill" : "All submitted";
         } catch (err) {
-          listEl.innerHTML = '<div class="empty">Could not load forms: ' + linkifyError(err.message) + "</div>";
+          listEl.innerHTML = '<div class="empty">Could not load forms. Please try again later.</div>';
           document.getElementById("statCollect").textContent = "Error loading";
         }
       }
@@ -1163,7 +1193,7 @@
           function () { /* ignore per-frame scan misses */ }
         ).catch(function (err) {
           msgEl.style.color = "var(--danger)";
-          msgEl.textContent = "Could not access your camera: " + (err.message || err) + ". Please type the code instead.";
+          msgEl.textContent = "Could not access your camera. Please type the code instead.";
         });
       }
       function closeQrScanner() {
@@ -1245,14 +1275,14 @@
                   loadAttendanceScan();
                 } catch (err) {
                   btn.disabled = false; btn.textContent = "Check In";
-                  msgEl.style.color = "var(--danger)"; msgEl.textContent = "Error: " + (err.message || "");
+                  msgEl.style.color = "var(--danger)"; msgEl.textContent = friendlyError(err);
                 }
               });
             }
             listEl.appendChild(card);
           }
         } catch (err) {
-          listEl.innerHTML = '<div class="empty">Could not load sessions: ' + linkifyError(err.message) + "</div>";
+          listEl.innerHTML = '<div class="empty">Could not load sessions. Please try again later.</div>';
         }
       }
 
@@ -1285,7 +1315,7 @@
           document.getElementById("attRate").textContent = pct + "%";
           document.getElementById("statAttendance").textContent = attended + "/" + closed.length + " attended";
         } catch (err) {
-          listEl.innerHTML = '<div class="empty">Could not load attendance: ' + linkifyError(err.message) + "</div>";
+          listEl.innerHTML = '<div class="empty">Could not load attendance records. Please try again later.</div>';
           document.getElementById("statAttendance").textContent = "Error loading";
         }
       }
@@ -1423,7 +1453,7 @@
               showDzStep("editStep3", "editDot3", "editDot2");
               setTimeout(function () { location.reload(); }, 2500);
             }
-          } catch (err) { dzMsg("dzEditMsg", "Error: " + (err.message || ""), "err"); }
+          } catch (err) { dzMsg("dzEditMsg", friendlyError(err), "err"); }
           finally { btn.disabled = false; btn.textContent = "Confirm Change"; }
         };
       });
@@ -1444,7 +1474,7 @@
           document.getElementById("pRegNum").textContent = val;
           dzMsg("dzRegNumMsg", "Registration number saved.", "ok");
           setTimeout(function () { closeDzOverlay("dzRegNumOverlay"); }, 1200);
-        } catch (err) { dzMsg("dzRegNumMsg", "Error: " + (err.message || ""), "err"); }
+        } catch (err) { dzMsg("dzRegNumMsg", friendlyError(err), "err"); }
       });
 
       // ---------- 3. PROFILE PHOTO ----------
@@ -1496,7 +1526,7 @@
           document.getElementById("pAv").innerHTML = '<img src="' + photoURL + '" alt=""/>';
           dzMsg("dzPhotoMsg", "Profile picture updated.", "ok");
           setTimeout(function () { closeDzOverlay("dzPhotoOverlay"); }, 1200);
-        } catch (err) { dzMsg("dzPhotoMsg", "Error: " + (err.message || ""), "err"); }
+        } catch (err) { dzMsg("dzPhotoMsg", friendlyError(err), "err"); }
         finally { btn.disabled = false; btn.textContent = "Upload New Photo"; }
       });
       document.getElementById("dzPhotoRemove").addEventListener("click", async function () {
@@ -1509,7 +1539,7 @@
           document.getElementById("pAv").innerHTML = initials;
           dzMsg("dzPhotoMsg", "Photo removed.", "ok");
           setTimeout(function () { closeDzOverlay("dzPhotoOverlay"); }, 1200);
-        } catch (err) { dzMsg("dzPhotoMsg", "Error: " + (err.message || ""), "err"); }
+        } catch (err) { dzMsg("dzPhotoMsg", friendlyError(err), "err"); }
         finally { btn.disabled = false; btn.textContent = "Remove Photo"; }
       });
 
@@ -1554,7 +1584,7 @@
           if (err.code === "auth/requires-recent-login") {
             dzMsg("dzPassMsg", "For security, please log out and log back in, then try again.", "err");
           } else {
-            dzMsg("dzPassMsg", "Error: " + (err.message || ""), "err");
+            dzMsg("dzPassMsg", friendlyError(err), "err");
           }
         }
         finally { btn.disabled = false; btn.textContent = "Set Password"; }
@@ -1584,7 +1614,7 @@
           if (err.code === "auth/requires-recent-login") {
             dzMsg("dzDeleteMsg", "For security, please log out and log back in, then try again.", "err");
           } else {
-            dzMsg("dzDeleteMsg", "Error: " + (err.message || ""), "err");
+            dzMsg("dzDeleteMsg", friendlyError(err), "err");
           }
           btn.disabled = false; btn.textContent = "Delete Forever";
         }
@@ -1751,7 +1781,7 @@
           closeDzOverlay("dzPinSetupOverlay");
           showAppLockToast("App Lock has been enabled. You'll need your PIN to open FeMOS.");
         } catch (err) {
-          dzMsg("dzPinMsg2", "Error: " + (err.message || ""), "err");
+          dzMsg("dzPinMsg2", friendlyError(err), "err");
         }
         finally { btn.disabled = false; btn.textContent = "Set PIN"; }
       });
@@ -1780,7 +1810,7 @@
           closeDzOverlay("dzPinChangeOverlay");
           showAppLockToast("PIN updated successfully.");
         } catch (err) {
-          dzMsg("dzPinChangeMsg", "Error: " + (err.message || ""), "err");
+          dzMsg("dzPinChangeMsg", friendlyError(err), "err");
         }
         finally { btn.disabled = false; btn.textContent = "Update PIN"; }
       });
@@ -1889,7 +1919,7 @@
             '</div>';
           setTimeout(function () { closeFp(); setTimeout(resetFp, 400); }, 2500);
         } catch (err) {
-          document.getElementById("fpMsg").textContent = "Error: " + (err.message || "");
+          document.getElementById("fpMsg").textContent = friendlyError(err);
           document.getElementById("fpMsg").className = "msg show err";
           btn.disabled = false; btn.textContent = "Send Feedback";
         }

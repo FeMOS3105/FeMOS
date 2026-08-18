@@ -289,6 +289,26 @@
         const escaped = escapeHtml(message || "Unknown error");
         return escaped.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color:var(--water-deep);font-weight:600;">Click here to create the missing index</a>');
       }
+      function friendlyError(err) {
+        const c = err && err.code;
+        const map = {
+          "permission-denied": "You don't have permission to do this.",
+          "not-found": "The requested data was not found.",
+          "unauthenticated": "Please log in again to continue.",
+          "unavailable": "Service is temporarily unavailable. Try again later.",
+          "deadline-exceeded": "Request timed out. Check your connection and try again.",
+          "resource-exhausted": "Too many requests. Please wait a moment and try again.",
+          "failed-precondition": "This action cannot be completed right now.",
+          "aborted": "The operation was interrupted. Please try again.",
+          "data-loss": "An unexpected error occurred. Please try again.",
+          "already-exists": "This data already exists.",
+          "invalid-argument": "Invalid input. Please check your data and try again.",
+          "internal": "Something went wrong on our end. Please try again later.",
+        };
+        if (c && map[c]) return map[c];
+        if (err && err.message && err.message.includes("index")) return "This query needs a database index. Please contact support to set it up.";
+        return "Something went wrong. Please try again.";
+      }
       function showConfirm(message, onConfirm) {
         const overlay = document.getElementById("confirmOverlay");
         document.getElementById("confirmMsg").textContent = message;
@@ -322,7 +342,7 @@
           else { document.getElementById("lecAv").textContent = (user.email || "?")[0].toUpperCase(); }
           renderCourseGrid();
         } catch (err) {
-          gate.innerHTML = "Error checking access: " + (err.message || "");
+          gate.innerHTML = "Could not verify your access. Please try refreshing the page.";
         }
       });
 
@@ -413,7 +433,7 @@
           document.getElementById("attLabel").value = ""; document.getElementById("attRoom").value = "";
           if (!loc) showMsg("msgAtt", "Note: location wasn't available, so distance-based checks are off for this session.", "err");
           openActiveSessionView(ref.id, label);
-        } catch (err) { showMsg("msgAtt", "Error: " + (err.message || ""), "err"); }
+        } catch (err) { showMsg("msgAtt", friendlyError(err), "err"); }
       });
 
       function showMsg(id, text, type) {
@@ -489,7 +509,7 @@
             listEl.appendChild(row);
           }
         } catch (err) {
-          listEl.innerHTML = '<div class="empty">Could not load history: ' + linkifyError(err.message) + "</div>";
+          listEl.innerHTML = '<div class="empty">Could not load history. Please try again later.</div>';
         }
       }
 
@@ -616,7 +636,7 @@
           document.getElementById("annFileZone").querySelector(".uploadText").textContent = "Tap to attach a poster or image";
           showAnnMsg("Announcement posted.", "ok");
           loadAnnouncements();
-        } catch (err) { showAnnMsg("Error: " + (err.message || ""), "err"); }
+        } catch (err) { showAnnMsg(friendlyError(err), "err"); }
         finally { btn.disabled = false; btn.textContent = "Post Announcement"; }
       });
 
@@ -657,7 +677,7 @@
             listEl.appendChild(card);
           }
         } catch (err) {
-          listEl.innerHTML = '<div class="empty">Could not load announcements: ' + linkifyError(err.message) + "</div>";
+          listEl.innerHTML = '<div class="empty">Could not load announcements. Please try again later.</div>';
         }
       }
     </script>

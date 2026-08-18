@@ -243,6 +243,25 @@
         return email;
       }
 
+      function friendlyError(err) {
+        const c = err && err.code;
+        const map = {
+          "auth/user-not-found": "No account found with this email.",
+          "auth/wrong-password": "Incorrect password. Please try again.",
+          "auth/invalid-email": "The email address is not valid.",
+          "auth/invalid-credential": "Invalid email or password. Please try again.",
+          "auth/too-many-requests": "Too many attempts. Please wait a few minutes and try again.",
+          "auth/user-disabled": "This account has been disabled. Contact support.",
+          "auth/network-request-failed": "Network error. Check your internet connection and try again.",
+          "auth/configuration-not-found": "Authentication is not set up yet. Contact support.",
+          "auth/popup-closed-by-user": "Sign-in popup was closed. Try again when ready.",
+          "auth/popup-blocked": "Popup was blocked by your browser. Allow popups and try again.",
+          "auth/unauthorized-domain": "This domain is not authorized. Contact support.",
+        };
+        if (c && map[c]) return map[c];
+        return "Something went wrong. Please try again.";
+      }
+
       document.getElementById("btnGoogleFill").addEventListener("click", async function () {
         const btn = this;
         btn.disabled = true; btn.textContent = "Connecting to Google...";
@@ -253,7 +272,7 @@
             showMsg("msgStep1", "Email filled from Google. Enter your FeMOS password to continue.", "ok");
           }
         } catch (err) {
-          showMsg("msgStep1", "Could not read your Google email: " + (err.message || "Please try again"), "err");
+          showMsg("msgStep1", "Could not read your Google email. Please try again.", "err");
         } finally {
           btn.disabled = false;
           btn.innerHTML =
@@ -299,7 +318,7 @@
           const message =
             err && err.code === "auth/user-not-found"
               ? "No FeMOS account uses that email address."
-              : "Could not send reset email: " + (err.message || "Please try again");
+              : friendlyError(err);
           showMsg("msgReset", message, "err");
         } finally {
           btn.disabled = false; btn.textContent = "Send Password Reset Link";
@@ -369,10 +388,7 @@
           }
           await routeAfterAuth(cred.user);
         } catch (err) {
-          const message =
-            err && err.code === "auth/configuration-not-found"
-              ? "Firebase Authentication is not configured for this project. Please enable Email/Password sign-in in Firebase Console > Authentication > Sign-in method."
-              : "Login failed: " + (err.message || "Check your email and password");
+          const message = friendlyError(err);
           showMsg("msgBox", message, "err");
         } finally {
           btnLogin.disabled = false;

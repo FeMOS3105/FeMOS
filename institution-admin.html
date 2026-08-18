@@ -366,6 +366,26 @@
         const escaped = escapeHtml(message || "Unknown error");
         return escaped.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color:var(--water-deep);font-weight:600;">Click here to create the missing index</a>');
       }
+      function friendlyError(err) {
+        const c = err && err.code;
+        const map = {
+          "permission-denied": "You don't have permission to do this.",
+          "not-found": "The requested data was not found.",
+          "unauthenticated": "Please log in again to continue.",
+          "unavailable": "Service is temporarily unavailable. Try again later.",
+          "deadline-exceeded": "Request timed out. Check your connection and try again.",
+          "resource-exhausted": "Too many requests. Please wait a moment and try again.",
+          "failed-precondition": "This action cannot be completed right now.",
+          "aborted": "The operation was interrupted. Please try again.",
+          "data-loss": "An unexpected error occurred. Please try again.",
+          "already-exists": "This data already exists.",
+          "invalid-argument": "Invalid input. Please check your data and try again.",
+          "internal": "Something went wrong on our end. Please try again later.",
+        };
+        if (c && map[c]) return map[c];
+        if (err && err.message && err.message.includes("index")) return "This query needs a database index. Please contact support to set it up.";
+        return "Something went wrong. Please try again.";
+      }
       function slugify(text) {
         return text.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       }
@@ -430,7 +450,7 @@
           else { document.getElementById("adminAv").textContent = (user.email || "?")[0].toUpperCase(); }
           initApp();
         } catch (err) {
-          gate.innerHTML = "Error checking access: " + (err.message || "");
+          gate.innerHTML = "Could not verify your access. Please try refreshing the page.";
         }
       });
 
@@ -499,7 +519,7 @@
           });
         } catch (err) {
           countEl.textContent = "";
-          listEl.innerHTML = '<div class="empty">Could not load pending list: ' + linkifyError(err.message) + "</div>";
+          listEl.innerHTML = '<div class="empty">Could not load pending list. Please try again later.</div>';
         }
       }
       async function generateStudentId(uid, institutionId) {
@@ -520,7 +540,7 @@
           await db.collection("users").doc(studentUid).set({ registrationStatus: "confirmed", confirmedByCR: true }, { merge: true });
           if (!alreadyHasId) { await generateStudentId(studentUid, myInstitutionId); }
           loadPending();
-        } catch (err) { alert("Could not approve: " + (err.message || "")); }
+        } catch (err) { alert("Could not approve. Please try again."); }
       }
       function rejectStudent(studentUid) {
         showConfirm("Reject this registration? The student will need to register again.", async function () {
@@ -530,7 +550,7 @@
               { merge: true }
             );
             loadPending();
-          } catch (err) { alert("Could not reject: " + (err.message || "")); }
+          } catch (err) { alert("Could not reject. Please try again."); }
         });
       }
 
@@ -553,7 +573,7 @@
             await db.collection("institutions").doc(myInstitutionId).collection("campuses").doc(slugify(name)).set({ name: name, color: "blue" });
             loadColleges();
             loadCrCollegeSelect();
-          } catch (err) { alert("Error adding college: " + (err.message || "")); }
+          } catch (err) { alert("Could not add college. Please try again."); }
         });
       });
 
@@ -684,7 +704,7 @@
             card.querySelector("[data-bulk-input]").value = "";
             loadColleges();
           } catch (err) {
-            alert("Could not add courses: " + (err.message || ""));
+            alert("Could not add courses. Please try again.");
           } finally {
             btn.disabled = false; btn.textContent = "Add All";
           }
@@ -729,7 +749,7 @@
           });
           alert(email + " is now CR for " + courseName + ".");
           loadCrList();
-        } catch (err) { alert("Error: " + (err.message || "")); }
+        } catch (err) { alert(friendlyError(err)); }
       }
 
       // ================= CLASS REPRESENTATIVES TAB =================
@@ -766,7 +786,7 @@
           showMsg("msgCr", email + " is now CR for " + courseName + ".", "ok");
           loadCrList();
         } catch (err) {
-          showMsg("msgCr", "Error: " + (err.message || ""), "err");
+          showMsg("msgCr", friendlyError(err), "err");
         }
       });
 
@@ -797,7 +817,7 @@
             });
           });
         } catch (err) {
-          listEl.innerHTML = '<div class="empty">Could not load list: ' + linkifyError(err.message) + "</div>";
+          listEl.innerHTML = '<div class="empty">Could not load list. Please try again later.</div>';
         }
       }
 
@@ -839,7 +859,7 @@
           showMsg("msgLec", email + " is now the lecturer for " + courseName + ".", "ok");
           loadLecList();
         } catch (err) {
-          showMsg("msgLec", "Error: " + (err.message || ""), "err");
+          showMsg("msgLec", friendlyError(err), "err");
         }
       });
 
@@ -865,7 +885,7 @@
             });
           });
         } catch (err) {
-          listEl.innerHTML = '<div class="empty">Could not load list: ' + linkifyError(err.message) + "</div>";
+          listEl.innerHTML = '<div class="empty">Could not load list. Please try again later.</div>';
         }
       }
 
@@ -990,7 +1010,7 @@
           document.getElementById("instAnnFileZone").querySelector(".uploadText").textContent = "Tap to attach a poster or image";
           showMsg("msgInstAnn", "Announcement posted institution-wide.", "ok");
           loadInstAnnouncements();
-        } catch (err) { showMsg("msgInstAnn", "Error: " + (err.message || ""), "err"); }
+        } catch (err) { showMsg("msgInstAnn", friendlyError(err), "err"); }
         finally { btn.disabled = false; btn.textContent = "Post Announcement"; }
       });
 
@@ -1037,7 +1057,7 @@
             listEl.appendChild(card);
           }
         } catch (err) {
-          listEl.innerHTML = '<div class="empty">Could not load announcements: ' + linkifyError(err.message) + "</div>";
+          listEl.innerHTML = '<div class="empty">Could not load announcements. Please try again later.</div>';
         }
       }
 

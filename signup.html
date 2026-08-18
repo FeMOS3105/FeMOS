@@ -381,7 +381,7 @@
           }
           saveSessionState();
         } catch (err) {
-          showMsg("msgStep1", "Could not fetch your Google profile: " + (err.message || "Please try again"), "err");
+          showMsg("msgStep1", "Could not fetch your Google profile. Please try again.", "err");
         } finally {
           btn.disabled = false;
           btn.innerHTML = originalHtml;
@@ -575,7 +575,7 @@
           document.getElementById("otpEmailLabel").textContent = email;
           goToStep(3);
         } catch (err) {
-          showMsg("msgStep2", "Failed to send OTP: " + (err.text || err.message || "Please try again"), "err");
+          showMsg("msgStep2", "Failed to send OTP. Please try again.", "err");
         } finally {
           btn.disabled = false; btn.textContent = "Get Verified";
         }
@@ -595,7 +595,7 @@
           saveSessionState();
           showMsg("msgStep3", "A new OTP has been sent.", "ok");
         } catch (err) {
-          showMsg("msgStep3", "Failed to resend OTP: " + (err.text || err.message || ""), "err");
+          showMsg("msgStep3", "Failed to resend OTP. Please try again.", "err");
         } finally {
           btn.disabled = false; btn.textContent = "Resend OTP";
         }
@@ -659,16 +659,37 @@
           showMsg("msgStep3", "Verified! Taking you to institution and course registration...", "ok");
           setTimeout(function () { window.location.href = "registration.html"; }, 900);
         } catch (err) {
-          let message = "Error: " + (err.message || "Could not complete registration");
-          if (err && err.code === "auth/email-already-in-use") message = "This email is already registered. Try logging in instead.";
-          else if (err && err.code === "auth/operation-not-allowed") message = "Email/Password sign-in is not enabled for this project yet. Enable it in Firebase Console > Authentication > Sign-in method.";
-          else if (err && err.code === "auth/network-request-failed") message = "Network error while creating your account. Check your internet connection and try again.";
-          else if (err && err.code === "auth/configuration-not-found") message = "Firebase Authentication is not configured for this project. Enable Email/Password sign-in in Firebase Console > Authentication > Sign-in method.";
+          let message = friendlyError(err);
           showMsg("msgStep3", message, "err");
         } finally {
           btn.disabled = false; btn.textContent = "Verify OTP";
         }
       });
+
+      function friendlyError(err) {
+        const c = err && err.code;
+        const map = {
+          "auth/email-already-in-use": "This email is already registered. Try logging in instead.",
+          "auth/invalid-email": "The email address is not valid.",
+          "auth/operation-not-allowed": "This sign-in method is not enabled. Contact support.",
+          "auth/network-request-failed": "Network error. Check your internet connection and try again.",
+          "auth/configuration-not-found": "Authentication is not set up yet. Contact support.",
+          "auth/too-many-requests": "Too many attempts. Please wait a few minutes and try again.",
+          "auth/user-disabled": "This account has been disabled. Contact support.",
+          "auth/weak-password": "Your password is too weak. Use at least 8 characters with a mix of letters and numbers.",
+          "auth/wrong-password": "Incorrect password. Please try again.",
+          "auth/user-not-found": "No account found with this email.",
+          "auth/invalid-credential": "Invalid email or password. Please try again.",
+          "auth/popup-closed-by-user": "Sign-in popup was closed. Try again when ready.",
+          "auth/popup-blocked": "Popup was blocked by your browser. Allow popups and try again.",
+          "auth/cancelled-popup-request": "Sign-in was cancelled. Try again when ready.",
+          "auth/unauthorized-domain": "This domain is not authorized. Contact support.",
+        };
+        if (c && map[c]) return map[c];
+        if (err && err.text && err.text.includes("service")) return "Could not send verification email. Please try again later.";
+        if (err && err.text && err.text.includes("template")) return "Email service is temporarily unavailable. Please try again later.";
+        return "Something went wrong. Please try again.";
+      }
 
       (function restoreSession() {
         const saved = loadSessionState();

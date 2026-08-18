@@ -275,7 +275,7 @@
           }
           initAdminApp();
         } catch (err) {
-          gate.innerHTML = "Error checking admin access: " + (err.message || "");
+          gate.innerHTML = "Could not verify admin access. Please try refreshing the page.";
         }
       });
 
@@ -343,7 +343,7 @@
           });
         } catch (err) {
           countEl.textContent = "";
-          listEl.innerHTML = '<div class="empty">Could not load pending list: ' + escapeHtml(err.message || "") + "</div>";
+          listEl.innerHTML = '<div class="empty">Could not load pending list. Please try again later.</div>';
         }
       }
 
@@ -370,7 +370,7 @@
           if (!alreadyHasId && institutionId) { await generateStudentId(studentUid, institutionId); }
           loadPending();
         } catch (err) {
-          alert("Could not approve: " + (err.message || ""));
+          alert("Could not approve. Please try again.");
         }
       }
       async function rejectStudent(studentUid) {
@@ -382,7 +382,7 @@
           );
           loadPending();
         } catch (err) {
-          alert("Could not reject: " + (err.message || ""));
+          alert("Could not reject. Please try again.");
         }
       }
 
@@ -392,6 +392,26 @@
       }
       function escapeHtml(s) {
         return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; });
+      }
+      function friendlyError(err) {
+        const c = err && err.code;
+        const map = {
+          "permission-denied": "You don't have permission to do this.",
+          "not-found": "The requested data was not found.",
+          "unauthenticated": "Please log in again to continue.",
+          "unavailable": "Service is temporarily unavailable. Try again later.",
+          "deadline-exceeded": "Request timed out. Check your connection and try again.",
+          "resource-exhausted": "Too many requests. Please wait a moment and try again.",
+          "failed-precondition": "This action cannot be completed right now.",
+          "aborted": "The operation was interrupted. Please try again.",
+          "data-loss": "An unexpected error occurred. Please try again.",
+          "already-exists": "This data already exists.",
+          "invalid-argument": "Invalid input. Please check your data and try again.",
+          "internal": "Something went wrong on our end. Please try again later.",
+        };
+        if (c && map[c]) return map[c];
+        if (err && err.message && err.message.includes("index")) return "This query needs a database index. Please contact support to set it up.";
+        return "Something went wrong. Please try again.";
       }
 
       async function loadInstitutionSelects() {
@@ -421,7 +441,7 @@
           showMsg("msgInst", "Institution added.", "ok");
           loadInstitutionSelects();
           loadCatalogTree();
-        } catch (err) { showMsg("msgInst", "Error: " + (err.message || ""), "err"); }
+        } catch (err) { showMsg("msgInst", friendlyError(err), "err"); }
       });
 
       document.getElementById("btnAddCampus").addEventListener("click", async function () {
@@ -435,7 +455,7 @@
           showMsg("msgCampus", "Campus added.", "ok");
           loadCatalogTree();
           if (document.getElementById("courseInstSelect").value === instId) loadCourseCampusOptions(instId);
-        } catch (err) { showMsg("msgCampus", "Error: " + (err.message || ""), "err"); }
+        } catch (err) { showMsg("msgCampus", friendlyError(err), "err"); }
       });
 
       document.getElementById("btnAddCourse").addEventListener("click", async function () {
@@ -449,7 +469,7 @@
           document.getElementById("newCourseName").value = "";
           showMsg("msgCourse", "Course added.", "ok");
           loadCatalogTree();
-        } catch (err) { showMsg("msgCourse", "Error: " + (err.message || ""), "err"); }
+        } catch (err) { showMsg("msgCourse", friendlyError(err), "err"); }
       });
 
       async function loadCatalogTree() {
@@ -546,7 +566,7 @@
             } catch (mailErr) { console.warn("Grant email failed to send:", mailErr); }
           }
         } catch (err) {
-          showMsg("msgGrant", "Error: " + (err.message || ""), "err");
+          showMsg("msgGrant", friendlyError(err), "err");
         }
       });
 
@@ -577,7 +597,7 @@
             });
           });
         } catch (err) {
-          listEl.innerHTML = '<div class="empty">Could not load list: ' + escapeHtml(err.message || "") + "</div>";
+          listEl.innerHTML = '<div class="empty">Could not load list. Please try again later.</div>';
         }
       }
 
@@ -600,7 +620,7 @@
           images.forEach(function (url, i) { if (i < 5) document.getElementById("bannerUrl" + (i + 1)).value = url || ""; });
           renderBannerPreview(images);
         } catch (err) {
-          preview.innerHTML = '<div class="empty">Could not load: ' + escapeHtml(err.message || "") + "</div>";
+          preview.innerHTML = '<div class="empty">Could not load data. Please try again later.</div>';
         }
       }
       function renderBannerPreview(images) {
@@ -620,7 +640,7 @@
           await db.collection("instBanners").doc(institutionId).set({ images: images, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
           showMsg("msgBanner", "Slider saved for this institution.", "ok");
           renderBannerPreview(images);
-        } catch (err) { showMsg("msgBanner", "Error: " + (err.message || ""), "err"); }
+        } catch (err) { showMsg("msgBanner", friendlyError(err), "err"); }
       });
 
       // ================= POSTER TEMPLATES =================
@@ -664,7 +684,7 @@
           document.getElementById("tplImagePreview").style.display = "none";
           showMsg("msgTemplate", "Template saved.", "ok");
           loadTemplates(institutionId);
-        } catch (err) { showMsg("msgTemplate", "Error: " + (err.message || ""), "err"); }
+        } catch (err) { showMsg("msgTemplate", friendlyError(err), "err"); }
       });
 
       async function loadTemplates(institutionId) {
@@ -697,7 +717,7 @@
             listEl.appendChild(card);
           }
         } catch (err) {
-          listEl.innerHTML = '<div class="empty">Could not load templates: ' + escapeHtml(err.message || "") + "</div>";
+          listEl.innerHTML = '<div class="empty">Could not load templates. Please try again later.</div>';
         }
       }
       function fmtDate(ts) { return ts && ts.toDate ? ts.toDate().toLocaleString() : ""; }

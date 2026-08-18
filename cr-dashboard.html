@@ -353,6 +353,26 @@
         const escaped = escapeHtml(message || "Unknown error");
         return escaped.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color:var(--water-deep);font-weight:600;">Click here to create the missing index</a>');
       }
+      function friendlyError(err) {
+        const c = err && err.code;
+        const map = {
+          "permission-denied": "You don't have permission to do this.",
+          "not-found": "The requested data was not found.",
+          "unauthenticated": "Please log in again to continue.",
+          "unavailable": "Service is temporarily unavailable. Try again later.",
+          "deadline-exceeded": "Request timed out. Check your connection and try again.",
+          "resource-exhausted": "Too many requests. Please wait a moment and try again.",
+          "failed-precondition": "This action cannot be completed right now.",
+          "aborted": "The operation was interrupted. Please try again.",
+          "data-loss": "An unexpected error occurred. Please try again.",
+          "already-exists": "This data already exists.",
+          "invalid-argument": "Invalid input. Please check your data and try again.",
+          "internal": "Something went wrong on our end. Please try again later.",
+        };
+        if (c && map[c]) return map[c];
+        if (err && err.message && err.message.includes("index")) return "This query needs a database index. Please contact support to set it up.";
+        return "Something went wrong. Please try again.";
+      }
       function showConfirm(message, onConfirm) {
         const overlay = document.getElementById("confirmOverlay");
         document.getElementById("confirmMsg").textContent = message;
@@ -384,7 +404,7 @@
           if (user.photoURL) { document.getElementById("crAv").innerHTML = '<img src="' + user.photoURL + '" alt=""/>'; }
           else { document.getElementById("crAv").textContent = (user.email || "?")[0].toUpperCase(); }
           initApp();
-        } catch (err) { gate.innerHTML = "Error checking access: " + (err.message || ""); }
+        } catch (err) { gate.innerHTML = "Could not verify your access. Please try refreshing the page."; }
       });
 
       document.getElementById("btnLogout").addEventListener("click", async function () { await auth.signOut(); window.location.href = "login.html"; });
@@ -534,7 +554,7 @@
           document.getElementById("annFileZone").querySelector(".uploadText").textContent = "Tap to attach a poster or image";
           showMsg("msgAnn", "Announcement posted.", "ok");
           loadAnnouncements();
-        } catch (err) { showMsg("msgAnn", "Error: " + (err.message || ""), "err"); }
+        } catch (err) { showMsg("msgAnn", friendlyError(err), "err"); }
         finally { btn.disabled = false; btn.textContent = "Post Announcement"; }
       });
 
@@ -587,7 +607,7 @@
             listEl.appendChild(card);
           }
         } catch (err) {
-          listEl.innerHTML = '<div class="empty">Could not load announcements: ' + linkifyError(err.message) + "</div>";
+          listEl.innerHTML = '<div class="empty">Could not load announcements. Please try again later. + "</div>";
         }
       }
 
@@ -622,7 +642,7 @@
           document.querySelectorAll("#pollOptions input").forEach(function (i) { i.value = ""; });
           showMsg("msgPoll", "Poll created.", "ok");
           loadPolls();
-        } catch (err) { showMsg("msgPoll", "Error: " + (err.message || ""), "err"); }
+        } catch (err) { showMsg("msgPoll", friendlyError(err), "err"); }
       });
 
       async function loadPolls() {
@@ -669,7 +689,7 @@
             listEl.appendChild(card);
           }
         } catch (err) {
-          listEl.innerHTML = '<div class="empty">Could not load polls: ' + linkifyError(err.message) + "</div>";
+          listEl.innerHTML = '<div class="empty">Could not load polls. Please try again later. + "</div>";
         }
       }
 
@@ -688,7 +708,7 @@
           document.getElementById("collectTitle").value = ""; document.getElementById("collectInstructions").value = "";
           showMsg("msgCollect", "Form created.", "ok");
           loadCollectForms();
-        } catch (err) { showMsg("msgCollect", "Error: " + (err.message || ""), "err"); }
+        } catch (err) { showMsg("msgCollect", friendlyError(err), "err"); }
       });
 
       function collectFormUrl(formId) {
@@ -768,7 +788,7 @@
           listEl.appendChild(card);
           }
         } catch (err) {
-          listEl.innerHTML = '<div class="empty">Could not load forms: ' + linkifyError(err.message) + "</div>";
+          listEl.innerHTML = '<div class="empty">Could not load forms. Please try again later. + "</div>";
         }
       }
       // ================= APPROVE STUDENTS (scoped to my course only) =================
@@ -820,7 +840,7 @@
                 await db.collection("users").doc(doc.id).set({ registrationStatus: "confirmed", confirmedByCR: true }, { merge: true });
                 if (!d.studentId) { await generateStudentId(doc.id, myInstitutionId); }
                 loadApprove(); loadRoster();
-              } catch (err) { alert("Could not approve: " + (err.message || "")); }
+              } catch (err) { alert("Could not approve. Please try again."); }
             });
             row.querySelector(".btn-reject").addEventListener("click", function () {
               showConfirm("Reject " + (d.fullName || "this student") + "? They will need to register again.", async function () {
@@ -830,14 +850,14 @@
                     { merge: true }
                   );
                   loadApprove();
-                } catch (err) { alert("Could not reject: " + (err.message || "")); }
+                } catch (err) { alert("Could not reject. Please try again."); }
               });
             });
             listEl.appendChild(row);
           });
         } catch (err) {
           countEl.textContent = "";
-          listEl.innerHTML = '<div class="empty">Could not load list: ' + linkifyError(err.message) + "</div>";
+          listEl.innerHTML = '<div class="empty">Could not load list. Please try again later. + "</div>";
         }
       }
 
@@ -868,7 +888,7 @@
         } catch (err) {
           countEl.textContent = "";
           csvBtn.style.display = "none";
-          listEl.innerHTML = '<div class="empty">Could not load roster: ' + linkifyError(err.message) + "</div>";
+          listEl.innerHTML = '<div class="empty">Could not load roster. Please try again later. + "</div>";
         }
       }
       document.getElementById("btnRosterCsv").addEventListener("click", function () {
@@ -969,7 +989,7 @@
             listEl.appendChild(card);
           }
         } catch (err) {
-          listEl.innerHTML = '<div class="empty">Could not load requests: ' + linkifyError(err.message) + "</div>";
+          listEl.innerHTML = '<div class="empty">Could not load requests. Please try again later. + "</div>";
         }
       }
 

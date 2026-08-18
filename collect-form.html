@@ -59,6 +59,26 @@
         return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; });
       }
 
+      function friendlyError(err) {
+        const c = err && err.code;
+        const map = {
+          "permission-denied": "You don't have permission to do this.",
+          "not-found": "The requested data was not found.",
+          "unauthenticated": "Please log in again to continue.",
+          "unavailable": "Service is temporarily unavailable. Try again later.",
+          "deadline-exceeded": "Request timed out. Check your connection and try again.",
+          "resource-exhausted": "Too many requests. Please wait a moment and try again.",
+          "failed-precondition": "This action cannot be completed right now.",
+          "aborted": "The operation was interrupted. Please try again.",
+          "data-loss": "An unexpected error occurred. Please try again.",
+          "already-exists": "This data already exists.",
+          "invalid-argument": "Invalid input. Please check your data and try again.",
+          "internal": "Something went wrong on our end. Please try again later.",
+        };
+        if (c && map[c]) return map[c];
+        return "Something went wrong. Please try again.";
+      }
+
       if (!formId) {
         contentEl.innerHTML = '<p class="instr">No form ID was provided in the link.</p>';
       } else {
@@ -109,14 +129,14 @@
                 msgBox.textContent = "Submitted! Thank you.";
                 msgBox.className = "msg show ok";
               } catch (err) {
-                msgBox.textContent = "Error: " + (err.message || "Could not submit");
+                msgBox.textContent = friendlyError(err);
                 msgBox.className = "msg show err";
               } finally {
                 btn.disabled = false; btn.textContent = "Submit";
               }
             });
           } catch (err) {
-            contentEl.innerHTML = '<p class="instr">Could not load this form: ' + escapeHtml(err.message || "") + "</p>";
+            contentEl.innerHTML = '<p class="instr">Could not load this form. Please try again later.</p>';
           }
         });
       }
