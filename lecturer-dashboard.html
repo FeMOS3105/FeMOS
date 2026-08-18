@@ -103,6 +103,31 @@
         width: 100%; max-height: 300px; object-fit: cover; border-radius: 12px;
         box-shadow: 0 4px 14px rgba(13,27,75,0.1);
       }
+      .lecTabs { display: flex; gap: 8px; margin: 18px 0 20px; }
+      .lecTab {
+        flex: 1; padding: 14px 16px; border: 1.5px solid var(--line); border-radius: 14px;
+        background: #fff; font-size: 0.85rem; font-weight: 700; color: var(--muted);
+        cursor: pointer; text-align: center; transition: all 0.25s;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        box-shadow: 0 4px 12px rgba(13,27,75,0.04);
+      }
+      .lecTab:hover { border-color: var(--water-mid); color: var(--ink); }
+      .lecTab.active {
+        background: linear-gradient(135deg, var(--water-mid), var(--water-deep));
+        color: #fff; border-color: transparent;
+        box-shadow: 0 6px 20px rgba(21,95,209,0.3);
+        transform: translateY(-1px);
+      }
+      .lecTab svg { width: 18px; height: 18px; flex-shrink: 0; }
+      .lecTab.active svg { stroke: #fff; }
+      .lecTabPanel { display: none; }
+      .lecTabPanel.active { display: block; animation: tabFadeIn 0.3s ease; }
+      @keyframes tabFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+      .lecSectionTitle {
+        font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+        color: var(--water-deep); margin-bottom: 12px; padding-bottom: 8px;
+        border-bottom: 2px solid var(--line);
+      }
     </style>
   </head>
   <body>
@@ -129,65 +154,90 @@
 
         <div id="courseDetail" style="display:none;">
           <button class="backBtn" id="btnBackToCourses">← All My Courses</button>
+          <h2 id="detailCourseTitle" style="font-size:1.1rem;margin-bottom:4px;">Course</h2>
+          <div id="detailCourseSub" style="font-size:0.78rem;color:var(--muted);margin-bottom:14px;"></div>
 
-          <div class="card" id="openSessionCard">
-            <h2 id="detailCourseTitle">Course</h2>
-            <div class="field"><label>Session Label</label><input id="attLabel" placeholder="e.g. Monday Lecture, Week 5"/></div>
-            <div class="field"><label>Room (optional)</label><input id="attRoom" placeholder="e.g. LT2"/></div>
-            <div class="hint" id="gpsHint">We'll ask for your location once you open the session, so students more than 100m away can't check in.</div>
-            <button class="btn" id="btnOpenSession">Open Session</button>
-            <div class="msg" id="msgAtt"></div>
+          <div class="lecTabs">
+            <button class="lecTab active" data-lec-tab="attendance">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/><path d="M8 3v4M16 3v4"/><path d="m9 15 2 2 4-4"/></svg>
+              Attendance
+            </button>
+            <button class="lecTab" data-lec-tab="announcements">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 0 0 1 1h2l4 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15 8a4 4 0 0 1 0 8"/><path d="M18 5a8 8 0 0 1 0 14"/></svg>
+              Announcements
+            </button>
           </div>
 
-          <div class="card" id="activeSessionCard" style="display:none;">
-            <h2 id="activeSessionTitle">Active Session</h2>
-            <div class="hint" id="activeSessionMeta"></div>
-            <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;background:var(--ink);border-radius:14px;padding:18px;margin-bottom:16px;">
-              <div id="qrHolder" style="background:#fff;padding:10px;border-radius:10px;"></div>
-              <div>
-                <div style="font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.55);margin-bottom:6px;">Or type this code</div>
-                <div id="attCode" style="font-family:'Consolas',monospace;font-weight:700;font-size:1.8rem;letter-spacing:6px;color:#fff;"></div>
-                <div style="font-size:0.76rem;color:rgba(255,255,255,0.5);margin-top:6px;">Changes every 1 minute</div>
+          <!-- ===== ATTENDANCE TAB ===== -->
+          <div class="lecTabPanel active" data-lec-panel="attendance">
+            <div class="lecSectionTitle">Open a Session</div>
+            <div class="card" id="openSessionCard">
+              <div class="field"><label>Session Label</label><input id="attLabel" placeholder="e.g. Monday Lecture, Week 5"/></div>
+              <div class="field"><label>Room (optional)</label><input id="attRoom" placeholder="e.g. LT2"/></div>
+              <div class="hint" id="gpsHint">We'll ask for your location once you open the session, so students more than 100m away can't check in.</div>
+              <button class="btn" id="btnOpenSession">Open Session</button>
+              <div class="msg" id="msgAtt"></div>
+            </div>
+
+            <div id="activeSessionCard" style="display:none;">
+              <div class="lecSectionTitle">Active Session</div>
+              <div class="card">
+                <h2 id="activeSessionTitle">Active Session</h2>
+                <div class="hint" id="activeSessionMeta"></div>
+                <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;background:var(--ink);border-radius:14px;padding:18px;margin-bottom:16px;">
+                  <div id="qrHolder" style="background:#fff;padding:10px;border-radius:10px;"></div>
+                  <div>
+                    <div style="font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.55);margin-bottom:6px;">Or type this code</div>
+                    <div id="attCode" style="font-family:'Consolas',monospace;font-weight:700;font-size:1.8rem;letter-spacing:6px;color:#fff;"></div>
+                    <div style="font-size:0.76rem;color:rgba(255,255,255,0.5);margin-top:6px;">Changes every 1 minute</div>
+                  </div>
+                </div>
+                <div class="hint" id="checkinCount">0 students checked in</div>
+                <div id="checkinList"></div>
+                <button class="btn" style="background:transparent;border:1.5px solid var(--danger);color:var(--danger);margin-top:12px;" id="btnCloseSession">Close Session</button>
               </div>
             </div>
-            <div class="hint" id="checkinCount">0 students checked in</div>
-            <div id="checkinList"></div>
-            <button class="btn" style="background:transparent;border:1.5px solid var(--danger);color:var(--danger);margin-top:12px;" id="btnCloseSession">Close Session</button>
+
+            <div class="lecSectionTitle" style="margin-top:8px;">Past Sessions</div>
+            <div class="card">
+              <div id="attHistoryList"><div class="empty">Loading...</div></div>
+            </div>
           </div>
 
-          <div class="card">
-            <h2>Past Sessions for This Course</h2>
-            <div id="attHistoryList"><div class="empty">Loading...</div></div>
+          <!-- ===== ANNOUNCEMENTS TAB ===== -->
+          <div class="lecTabPanel" data-lec-panel="announcements">
+            <div class="lecSectionTitle">Post an Announcement</div>
+            <div class="card">
+              <div class="hint">Reaches every student registered in this course. You'll see exactly who has read it.</div>
+              <div class="field">
+                <label>Use a Template? (optional)</label>
+                <select id="annTemplateSelect" style="width:100%;padding:10px 12px;border-radius:9px;border:1.5px solid var(--line);font-size:0.9rem;background:#fbfdff;">
+                  <option value="">— Write from scratch —</option>
+                </select>
+              </div>
+              <div class="field"><label>Title</label><input id="annTitle" placeholder="e.g. Assignment 2 deadline moved"/></div>
+              <div class="field"><label>Message</label><textarea id="annBody" style="width:100%;padding:11px 13px;border-radius:10px;border:1.5px solid var(--line);font-size:0.92rem;background:#fbfdff;min-height:90px;resize:vertical;font-family:inherit;" placeholder="Write the full announcement..."></textarea></div>
+              <div class="field">
+                <label>Attach Image (optional)</label>
+                <div class="fileUploadZone" id="annFileZone">
+                  <div class="uploadIcon">+</div>
+                  <div class="uploadText">Tap to attach a poster or image</div>
+                  <div class="uploadHint">PNG, JPG, GIF up to 5MB</div>
+                  <input type="file" id="annFileInput" accept="image/png,image/jpeg,image/gif,image/webp"/>
+                </div>
+                <div class="filePreview" id="annFilePreview">
+                  <img id="annFileImg" src="" alt="Preview"/>
+                  <button class="removeFile" id="annRemoveFile">✕</button>
+                </div>
+              </div>
+              <button class="btn" id="btnPostAnn">Post Announcement</button>
+              <div class="msg" id="msgAnn"></div>
+            </div>
+
+            <div class="lecSectionTitle">Sent Announcements</div>
+            <div id="annList"><div class="empty">Loading...</div></div>
           </div>
 
-          <div class="card">
-            <h2>Post an Announcement to This Course</h2>
-            <div class="hint">Reaches every student registered in this course. You'll see exactly who has read it.</div>
-            <div class="field">
-              <label>Use a Template? (optional)</label>
-              <select id="annTemplateSelect" style="width:100%;padding:10px 12px;border-radius:9px;border:1.5px solid var(--line);font-size:0.9rem;background:#fbfdff;">
-                <option value="">— Write from scratch —</option>
-              </select>
-            </div>
-            <div class="field"><label>Title</label><input id="annTitle" placeholder="e.g. Assignment 2 deadline moved"/></div>
-            <div class="field"><label>Message</label><textarea id="annBody" style="width:100%;padding:11px 13px;border-radius:10px;border:1.5px solid var(--line);font-size:0.92rem;background:#fbfdff;min-height:90px;resize:vertical;font-family:inherit;" placeholder="Write the full announcement..."></textarea></div>
-            <div class="field">
-              <label>Attach Image (optional)</label>
-              <div class="fileUploadZone" id="annFileZone">
-                <div class="uploadIcon">+</div>
-                <div class="uploadText">Tap to attach a poster or image</div>
-                <div class="uploadHint">PNG, JPG, GIF up to 5MB</div>
-                <input type="file" id="annFileInput" accept="image/png,image/jpeg,image/gif,image/webp"/>
-              </div>
-              <div class="filePreview" id="annFilePreview">
-                <img id="annFileImg" src="" alt="Preview"/>
-                <button class="removeFile" id="annRemoveFile">✕</button>
-              </div>
-            </div>
-            <button class="btn" id="btnPostAnn">Post Announcement</button>
-            <div class="msg" id="msgAnn"></div>
-          </div>
-          <div id="annList"><div class="empty">Loading...</div></div>
         </div>
       </div>
     </div>
@@ -287,13 +337,23 @@
         document.getElementById("homeView").style.display = "none";
         document.getElementById("courseDetail").style.display = "block";
         document.getElementById("detailCourseTitle").textContent = assignment.courseName;
+        document.getElementById("detailCourseSub").textContent = (assignment.collegeName || "") + " · " + (assignment.institutionName || "");
         document.getElementById("openSessionCard").style.display = "block";
         document.getElementById("activeSessionCard").style.display = "none";
         activeSessionId = null;
+        switchLecTab("attendance");
         loadAttendanceHistory();
         loadAnnouncements();
         loadAnnTemplates();
       }
+
+      function switchLecTab(tab) {
+        document.querySelectorAll(".lecTab").forEach(function (t) { t.classList.toggle("active", t.getAttribute("data-lec-tab") === tab); });
+        document.querySelectorAll(".lecTabPanel").forEach(function (p) { p.classList.toggle("active", p.getAttribute("data-lec-panel") === tab); });
+      }
+      document.querySelectorAll(".lecTab").forEach(function (t) {
+        t.addEventListener("click", function () { switchLecTab(t.getAttribute("data-lec-tab")); });
+      });
 
       // ================= ATTENDANCE =================
       let activeSessionId = null;
