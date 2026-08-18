@@ -807,9 +807,12 @@
         listEl.innerHTML = "Loading...";
         try {
           const snap = await db.collection("announcements").where("institutionId", "==", myInstitutionId).get();
+          const now = Date.now();
           const relevant = snap.docs.filter(function (d) {
             const data = d.data();
-            return data.level === "institution" || data.courseId === myCourseId;
+            if (data.level !== "institution" && data.courseId !== myCourseId) return false;
+            if (data.expiresAt && data.expiresAt.toMillis() < now) return false;
+            return true;
           });
           if (relevant.length === 0) {
             listEl.innerHTML = '<div class="empty">No announcements yet for your course.</div>';

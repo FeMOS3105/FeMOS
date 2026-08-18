@@ -45,6 +45,7 @@
       .msg.ok { background: #e9f9f1; color: var(--success); }
       .hint { font-size: 0.8rem; color: var(--muted); margin-bottom: 14px; }
       .itemCard { border: 1.5px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 12px; background: #fff; }
+      .itemCard.expired { opacity: 0.55; border-color: var(--danger); }
       .itemCard .ititle { font-weight: 700; font-size: 0.96rem; }
       .itemCard .imeta { font-size: 0.74rem; color: var(--muted); margin-top: 3px; }
       .itemCard .ibody { font-size: 0.88rem; color: var(--ink); line-height: 1.5; margin: 10px 0; }
@@ -229,6 +230,16 @@
                   <img id="annFileImg" src="" alt="Preview"/>
                   <button class="removeFile" id="annRemoveFile">✕</button>
                 </div>
+              </div>
+              <div class="expiryBar" style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                <label style="font-size:0.82rem;font-weight:600;color:var(--muted);">Auto-Expire:</label>
+                <select id="annExpiry" style="padding:6px 10px;border:1.5px solid var(--line);border-radius:8px;font-size:0.82rem;">
+                  <option value="none">Never</option>
+                  <option value="24h">24 Hours</option>
+                  <option value="7d" selected>7 Days</option>
+                  <option value="custom">Custom</option>
+                </select>
+                <input type="datetime-local" id="annExpiryCustom" style="display:none;padding:6px 10px;border:1.5px solid var(--line);border-radius:8px;font-size:0.82rem;"/>
               </div>
               <button class="btn" id="btnPostAnn">Post Announcement</button>
               <div class="msg" id="msgAnn"></div>
@@ -551,6 +562,22 @@
         document.getElementById("annFileZone").querySelector(".uploadText").textContent = "Tap to attach a poster or image";
       });
 
+      document.getElementById("annExpiry").addEventListener("change", function () {
+        document.getElementById("annExpiryCustom").style.display = this.value === "custom" ? "inline-block" : "none";
+      });
+      function computeLecAnnExpiry() {
+        const sel = document.getElementById("annExpiry").value;
+        if (sel === "none") return null;
+        const now = Date.now();
+        if (sel === "24h") return new Date(now + 24 * 60 * 60 * 1000);
+        if (sel === "7d") return new Date(now + 7 * 24 * 60 * 60 * 1000);
+        if (sel === "custom") {
+          const v = document.getElementById("annExpiryCustom").value;
+          if (!v) return null;
+          return new Date(v);
+        }
+        return null;
+      }
       document.getElementById("btnPostAnn").addEventListener("click", async function () {
         const title = document.getElementById("annTitle").value.trim();
         const body = document.getElementById("annBody").value.trim();
@@ -576,6 +603,8 @@
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           };
           if (imageUrl) docData.imageUrl = imageUrl;
+          const expiresAt = computeLecAnnExpiry();
+          if (expiresAt) docData.expiresAt = firebase.firestore.Timestamp.fromDate(expiresAt);
           await db.collection("announcements").add(docData);
           document.getElementById("annTitle").value = ""; document.getElementById("annBody").value = "";
           annSelectedFile = null;
@@ -601,10 +630,12 @@
           for (const doc of docs) {
             const d = doc.data();
             const readsSnap = await db.collection("announcements").doc(doc.id).collection("reads").get();
+            const isExpired = d.expiresAt && d.expiresAt.toMillis() < Date.now();
+            const expiryInfo = d.expiresAt ? (isExpired ? ' <span class="statusBadge" style="background:var(--danger);color:#fff;">Expired</span>' : ' <span style="font-size:0.72rem;color:var(--muted);">Expires ' + fmtDate(d.expiresAt) + '</span>') : '';
             const card = document.createElement("div");
-            card.className = "itemCard";
+            card.className = "itemCard" + (isExpired ? " expired" : "");
             card.innerHTML =
-              '<div class="ititle">' + escapeHtml(d.title) + '</div><div class="imeta">' + fmtDate(d.createdAt) + '</div>' +
+              '<div class="ititle">' + escapeHtml(d.title) + (isExpired ? ' <span style="font-size:0.7rem;color:var(--danger);">(Expired)</span>' : '') + '</div><div class="imeta">' + fmtDate(d.createdAt) + expiryInfo + '</div>' +
               '<div class="ibody">' + escapeHtml(d.body) + '</div>' +
               (d.imageUrl ? '<div class="annImage"><img src="' + escapeHtml(d.imageUrl) + '" alt="Attachment"/></div>' : '') +
               '<button class="toggleLink" data-toggle-reads>' + readsSnap.size + " student(s) have viewed this announcement</button>" +

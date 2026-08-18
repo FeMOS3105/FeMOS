@@ -24,6 +24,22 @@
       .userchip .av { width: 26px; height: 26px; border-radius: 50%; background: var(--water-mid); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; overflow: hidden; }
       .userchip .av img { width: 100%; height: 100%; object-fit: cover; }
       .userchip button { background: none; border: none; color: var(--danger); font-weight: 600; cursor: pointer; font-size: 0.78rem; margin-left: 6px; }
+      .notifBell { position: relative; color: var(--muted) !important; margin-left: 0 !important; padding: 6px; }
+      .notifBell:hover { color: var(--water-deep) !important; }
+      .notifBadge {
+        position: absolute; top: 0; right: 0; min-width: 16px; height: 16px; padding: 0 4px;
+        background: var(--danger); color: #fff; border-radius: 999px;
+        font-size: 0.6rem; font-weight: 800; display: flex; align-items: center; justify-content: center;
+        border: 2px solid #fff;
+      }
+      .feedbackItem { padding: 12px; border: 1.5px solid var(--line); border-radius: 12px; margin-bottom: 10px; background: #fff; transition: border-color 0.2s; }
+      .feedbackItem.unread { border-left: 3px solid var(--water-mid); background: #f8fbff; }
+      .feedbackItem .fbName { font-weight: 700; font-size: 0.88rem; }
+      .feedbackItem .fbMeta { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+      .feedbackItem .fbMsg { font-size: 0.84rem; color: var(--ink); margin-top: 6px; line-height: 1.5; }
+      .feedbackItem .fbActions { margin-top: 8px; display: flex; gap: 8px; }
+      .itemCard.expired { opacity: 0.55; border-color: var(--danger); }
+      .expiryBar { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
       .instTag { font-size: 0.8rem; color: var(--muted); margin-bottom: 18px; }
       .instTag b { color: var(--water-deep); }
 
@@ -171,6 +187,10 @@
             <h1>Institution Admin</h1>
           </div>
           <div class="userchip">
+            <button class="notifBell" id="adminNotifBell" title="Notifications">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span class="notifBadge" id="adminNotifBadge" style="display:none;">0</span>
+            </button>
             <div class="av" id="adminAv">?</div>
             <span id="adminName">...</span>
             <button id="btnLogout">Log Out</button>
@@ -192,6 +212,11 @@
             <h2>Pending Registrations</h2>
             <div class="hint" id="pendingCount">Loading...</div>
             <div id="pendingList"></div>
+          </div>
+          <div class="card">
+            <h2>Student Feedback</h2>
+            <div class="hint">Messages from students about the system.</div>
+            <div id="feedbackList"><div class="empty">Loading...</div></div>
           </div>
         </div>
 
@@ -264,6 +289,16 @@
                 <img id="instAnnFileImg" src="" alt="Preview"/>
                 <button class="removeFile" id="instAnnRemoveFile">✕</button>
               </div>
+            </div>
+            <div class="expiryBar">
+              <label style="font-size:0.82rem;font-weight:600;color:var(--muted);">Auto-Expire:</label>
+              <select id="instAnnExpiry" style="padding:6px 10px;border:1.5px solid var(--line);border-radius:8px;font-size:0.82rem;">
+                <option value="none">Never</option>
+                <option value="24h">24 Hours</option>
+                <option value="7d" selected>7 Days</option>
+                <option value="custom">Custom</option>
+              </select>
+              <input type="datetime-local" id="instAnnExpiryCustom" style="display:none;padding:6px 10px;border:1.5px solid var(--line);border-radius:8px;font-size:0.82rem;"/>
             </div>
             <button class="btn" id="btnPostInstAnn">Post Announcement</button>
             <div class="msg" id="msgInstAnn"></div>
@@ -423,6 +458,8 @@
         loadLecList();
         loadInstAnnouncements();
         loadInstAnnTemplates();
+        loadFeedback();
+        loadNotifBadge();
       }
 
       // ================= PENDING REGISTRATIONS =================
@@ -901,6 +938,22 @@
         document.getElementById("instAnnFileZone").querySelector(".uploadText").textContent = "Tap to attach a poster or image";
       });
 
+      document.getElementById("instAnnExpiry").addEventListener("change", function () {
+        document.getElementById("instAnnExpiryCustom").style.display = this.value === "custom" ? "inline-block" : "none";
+      });
+      function computeInstAnnExpiry() {
+        const sel = document.getElementById("instAnnExpiry").value;
+        if (sel === "none") return null;
+        const now = Date.now();
+        if (sel === "24h") return new Date(now + 24 * 60 * 60 * 1000);
+        if (sel === "7d") return new Date(now + 7 * 24 * 60 * 60 * 1000);
+        if (sel === "custom") {
+          const v = document.getElementById("instAnnExpiryCustom").value;
+          if (!v) return null;
+          return new Date(v);
+        }
+        return null;
+      }
       document.getElementById("btnPostInstAnn").addEventListener("click", async function () {
         const title = document.getElementById("instAnnTitle").value.trim();
         const body = document.getElementById("instAnnBody").value.trim();
@@ -924,6 +977,8 @@
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           };
           if (imageUrl) docData.imageUrl = imageUrl;
+          const expiresAt = computeInstAnnExpiry();
+          if (expiresAt) docData.expiresAt = firebase.firestore.Timestamp.fromDate(expiresAt);
           await db.collection("announcements").add(docData);
           document.getElementById("instAnnTitle").value = ""; document.getElementById("instAnnBody").value = "";
           instAnnSelectedFile = null;
@@ -948,10 +1003,12 @@
           for (const doc of docs) {
             const d = doc.data();
             const readsSnap = await db.collection("announcements").doc(doc.id).collection("reads").get();
+            const isExpired = d.expiresAt && d.expiresAt.toMillis() < Date.now();
+            const expiryInfo = d.expiresAt ? (isExpired ? ' <span class="statusBadge" style="background:var(--danger);color:#fff;">Expired</span>' : ' <span style="font-size:0.72rem;color:var(--muted);">Expires ' + fmtDate(d.expiresAt) + '</span>') : '';
             const card = document.createElement("div");
-            card.className = "itemCard";
+            card.className = "itemCard" + (isExpired ? " expired" : "");
             card.innerHTML =
-              '<div class="ititle">' + escapeHtml(d.title) + '</div><div class="imeta">Sent institution-wide · ' + fmtDate(d.createdAt) + '</div>' +
+              '<div class="ititle">' + escapeHtml(d.title) + (isExpired ? ' <span style="font-size:0.7rem;color:var(--danger);">(Expired)</span>' : '') + '</div><div class="imeta">Sent institution-wide · ' + fmtDate(d.createdAt) + expiryInfo + '</div>' +
               '<div class="ibody">' + escapeHtml(d.body) + '</div>' +
               (d.imageUrl ? '<div class="annImage"><img src="' + escapeHtml(d.imageUrl) + '" alt="Attachment"/></div>' : '') +
               '<button class="toggleLink" data-toggle-reads>' + readsSnap.size + " student(s) have viewed this announcement</button>" +
@@ -981,6 +1038,65 @@
           listEl.innerHTML = '<div class="empty">Could not load announcements: ' + linkifyError(err.message) + "</div>";
         }
       }
+
+      // ================= FEEDBACK =================
+      async function loadFeedback() {
+        const listEl = document.getElementById("feedbackList");
+        listEl.innerHTML = "Loading...";
+        try {
+          const snap = await db.collection("feedback")
+            .where("recipientId", "==", auth.currentUser.uid)
+            .where("recipientType", "==", "admin").get();
+          if (snap.empty) { listEl.innerHTML = '<div class="empty">No feedback yet.</div>'; return; }
+          const docs = snap.docs.slice().sort(function (a, b) {
+            const at = a.data().createdAt ? a.data().createdAt.toMillis() : 0;
+            const bt = b.data().createdAt ? b.data().createdAt.toMillis() : 0;
+            return bt - at;
+          });
+          let unreadCount = 0;
+          listEl.innerHTML = "";
+          for (const doc of docs) {
+            const d = doc.data();
+            if (!d.read) unreadCount++;
+            const item = document.createElement("div");
+            item.className = "feedbackItem" + (d.read ? "" : " unread");
+            item.innerHTML =
+              '<div class="fbName">' + escapeHtml(d.userName || d.userEmail) + '</div>' +
+              '<div class="fbMeta">' + escapeHtml(d.registrationNumber || "—") + " · " + fmtDate(d.createdAt) + '</div>' +
+              '<div class="fbMsg">' + escapeHtml(d.message) + '</div>' +
+              '<div class="fbActions">' +
+                (d.read ? '<span style="font-size:0.72rem;color:var(--success);font-weight:600;">✓ Read</span>' :
+                  '<button class="btn-sm" style="background:var(--water-mid);color:#fff;border:none;" data-mark-read="' + doc.id + '">Mark as Read</button>') +
+              '</div>';
+            if (!d.read) {
+              item.querySelector("[data-mark-read]").addEventListener("click", async function () {
+                await db.collection("feedback").doc(doc.id).set({ read: true }, { merge: true });
+                loadFeedback();
+                loadNotifBadge();
+              });
+            }
+            listEl.appendChild(item);
+          }
+          document.getElementById("adminNotifBadge").textContent = unreadCount;
+          document.getElementById("adminNotifBadge").style.display = unreadCount > 0 ? "flex" : "none";
+        } catch (err) {
+          listEl.innerHTML = '<div class="empty">Could not load feedback.</div>';
+        }
+      }
+
+      async function loadNotifBadge() {
+        try {
+          const fbSnap = await db.collection("feedback").where("recipientId", "==", auth.currentUser.uid).where("recipientType", "==", "admin").where("read", "==", false).get();
+          const pendingSnap = await db.collection("users").where("institutionId", "==", myInstitutionId).where("registrationStatus", "==", "pending").get();
+          const total = fbSnap.size + pendingSnap.size;
+          document.getElementById("adminNotifBadge").textContent = total;
+          document.getElementById("adminNotifBadge").style.display = total > 0 ? "flex" : "none";
+        } catch (e) { /* silent */ }
+      }
+
+      document.getElementById("adminNotifBell").addEventListener("click", function () {
+        document.querySelector('[data-tab="pending"]').click();
+      });
 
       function fmtDate(ts) { return ts && ts.toDate ? ts.toDate().toLocaleString() : ""; }
     </script>
