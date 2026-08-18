@@ -128,6 +128,33 @@
         width: 100%; max-height: 300px; object-fit: cover; border-radius: 12px;
         box-shadow: 0 4px 14px rgba(13,27,75,0.1); cursor: pointer;
       }
+      .annTabs { display: flex; gap: 6px; margin-bottom: 16px; }
+      .annTab {
+        flex: 1; padding: 10px 14px; border: 1.5px solid var(--line); border-radius: 10px;
+        background: #fff; font-size: 0.82rem; font-weight: 700; color: var(--muted);
+        cursor: pointer; text-align: center; transition: all 0.2s;
+      }
+      .annTab.active {
+        background: linear-gradient(135deg, var(--water-light), var(--water-deep));
+        color: #fff; border-color: transparent; box-shadow: 0 4px 14px rgba(21,95,209,0.25);
+      }
+      .annTab .tabCount {
+        display: inline-flex; align-items: center; justify-content: center;
+        min-width: 20px; height: 18px; padding: 0 5px; border-radius: 999px;
+        font-size: 0.68rem; font-weight: 800; margin-left: 5px;
+        background: rgba(255,255,255,0.25); color: #fff;
+      }
+      .annTab:not(.active) .tabCount { background: var(--line); color: var(--muted); }
+      .itemCard.annTruncated .ibody {
+        display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;
+        overflow: hidden; margin-bottom: 6px;
+      }
+      .readMoreBtn {
+        display: inline-flex; align-items: center; gap: 4px;
+        background: none; border: none; color: var(--water-deep);
+        font-weight: 700; font-size: 0.8rem; cursor: pointer; padding: 0;
+      }
+      .readMoreBtn:hover { text-decoration: underline; }
 
       .optBtn {
         display: flex; align-items: center; width: 100%; text-align: left;
@@ -309,6 +336,10 @@
         <!-- ============ DETAIL VIEWS ============ -->
         <div class="detailArea" id="detail-ann">
           <button class="backBtn" data-back>← Back</button>
+          <div class="annTabs">
+            <button class="annTab active" data-ann-tab="unread">Unread <span class="tabCount" id="annUnreadCount">0</span></button>
+            <button class="annTab" data-ann-tab="read">Read <span class="tabCount" id="annReadCount">0</span></button>
+          </div>
           <div id="annList"><div class="empty">Loading...</div></div>
         </div>
 
@@ -645,6 +676,9 @@
         return '<span style="font-size:0.68rem;font-weight:700;padding:3px 9px;border-radius:20px;background:#eaf6ff;color:var(--water-deep);margin-left:6px;">' + escapeHtml(d.authorRole || "Course") + "</span>";
       }
 
+      let annCache = [];
+      let annActiveTab = "unread";
+
       async function loadAnnouncements() {
         const listEl = document.getElementById("annList");
         listEl.innerHTML = "Loading...";
@@ -654,57 +688,106 @@
             const data = d.data();
             return data.level === "institution" || data.courseId === myCourseId;
           });
-          if (relevant.length === 0) { listEl.innerHTML = '<div class="empty">No announcements yet for your course.</div>'; document.getElementById("statAnn").textContent = "Nothing new"; return; }
-          const docs = relevant.slice().sort(function (a, b) { const at = a.data().createdAt ? a.data().createdAt.toMillis() : 0; const bt = b.data().createdAt ? b.data().createdAt.toMillis() : 0; return bt - at; });
-          let unread = 0;
-          listEl.innerHTML = "";
+          if (relevant.length === 0) {
+            listEl.innerHTML = '<div class="empty">No announcements yet for your course.</div>';
+            document.getElementById("statAnn").textContent = "Nothing new";
+            updateAnnBadge(0);
+            return;
+          }
+          const docs = relevant.slice().sort(function (a, b) {
+            const at = a.data().createdAt ? a.data().createdAt.toMillis() : 0;
+            const bt = b.data().createdAt ? b.data().createdAt.toMillis() : 0;
+            return bt - at;
+          });
+          annCache = [];
           for (const doc of docs) {
             const d = doc.data();
             const myRead = await db.collection("announcements").doc(doc.id).collection("reads").doc(auth.currentUser.uid).get();
-            if (!myRead.exists) unread++;
-            const card = document.createElement("div");
-            card.className = "itemCard";
-            if (!myRead.exists) card.setAttribute("data-ann-click", doc.id);
-            card.innerHTML =
-              '<div class="ititle">' + escapeHtml(d.title) + levelBadge(d) + '</div>' +
-              '<div class="imeta">From ' + escapeHtml(d.createdByName || "") + " · Sent " + fmtDate(d.createdAt) + '</div>' +
-              '<div class="ibody">' + escapeHtml(d.body) + '</div>' +
-              (d.imageUrl ? '<div class="annImage"><img src="' + escapeHtml(d.imageUrl) + '" alt="Attachment"/></div>' : '') +
-              (myRead.exists ? '<div class="readConfirmed">Viewed on ' + fmtDate(myRead.data().confirmedAt) + '</div>' : '');
-            if (!myRead.exists) {
-              card.addEventListener("click", async function () {
-                if (!myRegNumber) { showRegWarning(); return; }
-                try {
-                  await db.collection("announcements").doc(doc.id).collection("reads").doc(auth.currentUser.uid).set({
-                    name: auth.currentUser.displayName || auth.currentUser.email,
-                    registrationNumber: myRegNumber,
-                    confirmedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                  });
-                  loadAnnouncements();
-                } catch (err) { /* silent */ }
-              });
-            }
-            listEl.appendChild(card);
+            annCache.push({ doc: doc, data: d, read: myRead.exists ? myRead.data() : null });
           }
+          const unread = annCache.filter(function (a) { return !a.read; }).length;
           document.getElementById("statAnn").textContent = unread > 0 ? unread + " unread" : "All caught up";
-          var annCard = document.querySelector('[data-open="ann"]');
-          var oldBadge = annCard.querySelector(".unreadBadge");
-          if (oldBadge) oldBadge.remove();
-          if (unread > 0) {
-            annCard.classList.add("unread");
-            var badge = document.createElement("div");
-            badge.className = "unreadBadge";
-            badge.textContent = unread;
-            annCard.querySelector(".iconBadge").appendChild(badge);
-          } else {
-            annCard.classList.remove("unread");
-          }
+          document.getElementById("annUnreadCount").textContent = unread;
+          document.getElementById("annReadCount").textContent = annCache.length - unread;
+          updateAnnBadge(unread);
           if (unread > 0 && !myRegNumber) showRegWarning();
+          renderAnnTab(annActiveTab);
         } catch (err) {
           listEl.innerHTML = '<div class="empty">Could not load announcements: ' + linkifyError(err.message) + "</div>";
           document.getElementById("statAnn").textContent = "Error loading";
         }
       }
+
+      function updateAnnBadge(count) {
+        var annCard = document.querySelector('[data-open="ann"]');
+        var oldBadge = annCard.querySelector(".unreadBadge");
+        if (oldBadge) oldBadge.remove();
+        if (count > 0) {
+          annCard.classList.add("unread");
+          var badge = document.createElement("div");
+          badge.className = "unreadBadge";
+          badge.textContent = count;
+          annCard.querySelector(".iconBadge").appendChild(badge);
+        } else {
+          annCard.classList.remove("unread");
+        }
+      }
+
+      function renderAnnTab(tab) {
+        annActiveTab = tab;
+        document.querySelectorAll(".annTab").forEach(function (t) {
+          t.classList.toggle("active", t.getAttribute("data-ann-tab") === tab);
+        });
+        const listEl = document.getElementById("annList");
+        const items = tab === "unread"
+          ? annCache.filter(function (a) { return !a.read; })
+          : annCache.filter(function (a) { return !!a.read; });
+        if (items.length === 0) {
+          listEl.innerHTML = '<div class="empty">' + (tab === "unread" ? "All caught up! No unread announcements." : "No read announcements yet.") + '</div>';
+          return;
+        }
+        listEl.innerHTML = "";
+        for (const item of items) {
+          const card = document.createElement("div");
+          if (tab === "unread") {
+            card.className = "itemCard annTruncated";
+            card.innerHTML =
+              '<div class="ititle">' + escapeHtml(item.data.title) + levelBadge(item.data) + '</div>' +
+              '<div class="imeta">From ' + escapeHtml(item.data.createdByName || "") + " · Sent " + fmtDate(item.data.createdAt) + '</div>' +
+              '<div class="ibody">' + escapeHtml(item.data.body) + '</div>' +
+              (item.data.imageUrl ? '<div class="annImage"><img src="' + escapeHtml(item.data.imageUrl) + '" alt="Attachment"/></div>' : '') +
+              '<button class="readMoreBtn" data-read-more>Read more →</button>';
+            card.querySelector("[data-read-more]").addEventListener("click", async function (e) {
+              e.stopPropagation();
+              if (!myRegNumber) { showRegWarning(); return; }
+              try {
+                await db.collection("announcements").doc(item.doc.id).collection("reads").doc(auth.currentUser.uid).set({
+                  name: auth.currentUser.displayName || auth.currentUser.email,
+                  registrationNumber: myRegNumber,
+                  confirmedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                });
+                annActiveTab = "read";
+                loadAnnouncements();
+              } catch (err) { /* silent */ }
+            });
+          } else {
+            card.className = "itemCard";
+            card.innerHTML =
+              '<div class="ititle">' + escapeHtml(item.data.title) + levelBadge(item.data) + '</div>' +
+              '<div class="imeta">From ' + escapeHtml(item.data.createdByName || "") + " · Sent " + fmtDate(item.data.createdAt) + '</div>' +
+              '<div class="ibody">' + escapeHtml(item.data.body) + '</div>' +
+              (item.data.imageUrl ? '<div class="annImage"><img src="' + escapeHtml(item.data.imageUrl) + '" alt="Attachment"/></div>' : '') +
+              '<div class="readConfirmed">Viewed on ' + fmtDate(item.read.confirmedAt) + '</div>';
+          }
+          listEl.appendChild(card);
+        }
+      }
+
+      document.querySelectorAll(".annTab").forEach(function (tabBtn) {
+        tabBtn.addEventListener("click", function () {
+          renderAnnTab(tabBtn.getAttribute("data-ann-tab"));
+        });
+      });
 
       function showRegWarning() {
         var t = document.getElementById("regWarnToast");
