@@ -93,9 +93,15 @@
 
       .linkBox { display: flex; gap: 8px; align-items: center; background: #f5f9ff; border-radius: 10px; padding: 10px 12px; margin: 10px 0; }
       .linkBox code { flex: 1; font-size: 0.78rem; word-break: break-all; color: var(--water-deep); }
-      table.subTable { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.84rem; }
-      table.subTable th { text-align: left; font-size: 0.7rem; text-transform: uppercase; color: var(--muted); padding: 6px 8px; border-bottom: 1.5px solid var(--line); }
-      table.subTable td { padding: 7px 8px; border-bottom: 1px solid var(--line); }
+      table.subTable { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 12px; font-size: 0.84rem; background: #fff; border-radius: 12px; overflow: hidden; border: 1.5px solid var(--line); }
+      table.subTable thead { background: linear-gradient(135deg, #f0f5ff 0%, #e8f0fe 100%); }
+      table.subTable th { text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--water-deep); font-weight: 700; padding: 10px 14px; border-bottom: 2px solid var(--line); }
+      table.subTable td { padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+      table.subTable tr:last-child td { border-bottom: none; }
+      table.subTable tr:hover td { background: #f8fbff; }
+      .statusBadge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; background: #e9f9f1; color: var(--success); }
+      .statusBadge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--success); }
+      .regNotSet { color: var(--muted); font-style: italic; font-size: 0.78rem; }
 
       .msg { margin-top: 12px; padding: 10px 13px; border-radius: 9px; font-size: 0.82rem; display: none; }
       .msg.show { display: block; }
@@ -241,6 +247,11 @@
             <div class="hint" id="approveCount">Loading...</div>
             <div id="approveList"></div>
           </div>
+          <div class="card">
+            <h2>Course Change Requests</h2>
+            <div class="hint">Students confirmed under your course who want to switch — you need to approve or reject.</div>
+            <div id="courseChangeList"><div class="empty">Loading...</div></div>
+          </div>
         </div>
 
         <!-- ============ CLASS ROSTER ============ -->
@@ -268,6 +279,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
     <script>
       const firebaseConfig = {
@@ -358,6 +370,7 @@
         loadPolls();
         loadCollectForms();
         loadApprove();
+        loadCourseChangeRequests();
         loadRoster();
       }
 
@@ -491,12 +504,14 @@
               '<div class="itop"><div><div class="ititle">' + escapeHtml(d.title) + '</div><div class="imeta">Sent ' + fmtDate(d.createdAt) + '</div></div></div>' +
               '<div class="ibody">' + escapeHtml(d.body) + '</div>' +
               (d.imageUrl ? '<div class="annImage"><img src="' + escapeHtml(d.imageUrl) + '" alt="Attachment"/></div>' : '') +
-              '<button class="toggleLink" data-toggle-reads>' + readsSnap.size + " student(s) have confirmed reading — view names</button>" +
+              '<button class="toggleLink" data-toggle-reads>' + readsSnap.size + " student(s) have viewed this announcement</button>" +
               '<div class="readList" style="display:none;" data-reads-box>' +
-                (readsSnap.empty ? '<div>No one yet.</div>' : '<table class="subTable"><thead><tr><th>Name</th><th>Reg. Number</th><th>Seen At</th></tr></thead><tbody>' +
+                (readsSnap.empty ? '<div class="empty" style="margin-top:8px;">No one has viewed this announcement yet.</div>' : '<table class="subTable"><thead><tr><th>Full Name</th><th>Reg. Number</th><th>Time Seen</th><th>Status</th></tr></thead><tbody>' +
                   readsSnap.docs.map(function (r) {
                     const rd = r.data();
-                    return "<tr><td>" + escapeHtml(rd.name || r.id) + "</td><td>" + escapeHtml(rd.registrationNumber || "—") + "</td><td>" + fmtDate(rd.confirmedAt) + "</td></tr>";
+                    const rn = rd.registrationNumber;
+                    const regCell = rn ? escapeHtml(rn) : '<span class="regNotSet">Not set up</span>';
+                    return "<tr><td>" + escapeHtml(rd.name || r.id) + "</td><td>" + regCell + "</td><td>" + fmtDate(rd.confirmedAt) + '</td><td><span class="statusBadge">Seen</span></td></tr>';
                   }).join("") + "</tbody></table>") +
               '</div>' +
               '<div class="itemActions"><button class="btn-sm" style="background:transparent;border:1.5px solid var(--danger);color:var(--danger);" data-delete-ann>Delete</button></div>';
@@ -807,6 +822,97 @@
         a.click();
         URL.revokeObjectURL(url);
       });
+
+      // ================= COURSE CHANGE REQUESTS =================
+      const EMAILJS_PUBLIC_KEY = "n1q50LOlnNH_wWusx";
+      const EMAILJS_SERVICE_ID = "service_lx1zlxc";
+      const EMAILJS_COURSE_CHANGE_DECISION_TEMPLATE_ID = "template_course_change_decision";
+      if (typeof emailjs !== "undefined") { emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY }); }
+
+      async function loadCourseChangeRequests() {
+        const listEl = document.getElementById("courseChangeList");
+        listEl.innerHTML = "Loading...";
+        try {
+          const snap = await db.collection("courseChangeRequests")
+            .where("institutionId", "==", myInstitutionId)
+            .where("oldCourseId", "==", myCourseId)
+            .where("status", "==", "pending").get();
+          if (snap.empty) { listEl.innerHTML = '<div class="empty">No pending course change requests.</div>'; return; }
+          listEl.innerHTML = "";
+          for (const doc of snap.docs) {
+            const d = doc.data();
+            const card = document.createElement("div");
+            card.className = "itemCard";
+            card.innerHTML =
+              '<div class="itop"><div><div class="ititle">' + escapeHtml(d.userName || d.userEmail) + '</div>' +
+              '<div class="imeta">Requested ' + fmtDate(d.requestedAt) + '</div></div></div>' +
+              '<div class="ibody" style="font-size:0.85rem;">' +
+                '<b>From:</b> ' + escapeHtml(d.oldCourseName) + '<br/>' +
+                '<b>To:</b> ' + escapeHtml(d.newCourseName) + (d.newCampusName ? ' (' + escapeHtml(d.newCampusName) + ')' : '') +
+              '</div>' +
+              '<div class="itemActions">' +
+                '<button class="btn-sm btn-approve" data-approve-change="' + doc.id + '">Approve</button>' +
+                '<button class="btn-sm" style="background:transparent;border:1.5px solid var(--danger);color:var(--danger);" data-reject-change="' + doc.id + '">Reject</button>' +
+              '</div>';
+            card.querySelector("[data-approve-change]").addEventListener("click", async function () {
+              const btn = this; btn.disabled = true; btn.textContent = "Approving...";
+              try {
+                await db.collection("courseChangeRequests").doc(doc.id).set({
+                  status: "approved", decidedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                  decidedBy: auth.currentUser.uid,
+                }, { merge: true });
+                await db.collection("users").doc(d.userId).set({
+                  courseId: d.newCourseId, courseName: d.newCourseName,
+                  campusId: d.newCampusId, campusName: d.newCampusName,
+                  registrationStatus: "pending", confirmedByCR: false,
+                }, { merge: true });
+                await db.collection("notifications").add({
+                  userId: d.userId, type: "courseChangeApproved",
+                  message: "Your course change to " + d.newCourseName + " has been approved by your CR. Please wait for your new CR to confirm you.",
+                  createdAt: firebase.firestore.FieldValue.serverTimestamp(), read: false,
+                });
+                if (typeof emailjs !== "undefined" && !EMAILJS_COURSE_CHANGE_DECISION_TEMPLATE_ID.startsWith("PUT_")) {
+                  try {
+                    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_COURSE_CHANGE_DECISION_TEMPLATE_ID, {
+                      to_email: d.userEmail, to_name: d.userName || d.userEmail,
+                      decision: "approved", new_course: d.newCourseName,
+                      cr_name: auth.currentUser.displayName || auth.currentUser.email,
+                    });
+                  } catch (mailErr) { console.warn("Decision email failed:", mailErr); }
+                }
+                loadCourseChangeRequests();
+              } catch (err) { console.error(err); btn.disabled = false; btn.textContent = "Approve"; }
+            });
+            card.querySelector("[data-reject-change]").addEventListener("click", async function () {
+              const btn = this; btn.disabled = true; btn.textContent = "Rejecting...";
+              try {
+                await db.collection("courseChangeRequests").doc(doc.id).set({
+                  status: "rejected", decidedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                  decidedBy: auth.currentUser.uid,
+                }, { merge: true });
+                await db.collection("notifications").add({
+                  userId: d.userId, type: "courseChangeRejected",
+                  message: "Your course change request to " + d.newCourseName + " was not approved by your CR.",
+                  createdAt: firebase.firestore.FieldValue.serverTimestamp(), read: false,
+                });
+                if (typeof emailjs !== "undefined" && !EMAILJS_COURSE_CHANGE_DECISION_TEMPLATE_ID.startsWith("PUT_")) {
+                  try {
+                    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_COURSE_CHANGE_DECISION_TEMPLATE_ID, {
+                      to_email: d.userEmail, to_name: d.userName || d.userEmail,
+                      decision: "rejected", new_course: d.newCourseName,
+                      cr_name: auth.currentUser.displayName || auth.currentUser.email,
+                    });
+                  } catch (mailErr) { console.warn("Decision email failed:", mailErr); }
+                }
+                loadCourseChangeRequests();
+              } catch (err) { console.error(err); btn.disabled = false; btn.textContent = "Reject"; }
+            });
+            listEl.appendChild(card);
+          }
+        } catch (err) {
+          listEl.innerHTML = '<div class="empty">Could not load requests: ' + linkifyError(err.message) + "</div>";
+        }
+      }
 
     </script>
   </body>

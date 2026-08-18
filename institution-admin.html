@@ -57,9 +57,15 @@
       .itemCard .ibody { font-size: 0.88rem; color: var(--ink); line-height: 1.5; margin: 10px 0; }
       .toggleLink { background: none; border: none; color: var(--water-deep); font-weight: 600; font-size: 0.8rem; cursor: pointer; padding: 0; }
       .readList { margin-top: 10px; font-size: 0.8rem; color: var(--muted); }
-      table.subTable { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.84rem; }
-      table.subTable th { text-align: left; font-size: 0.7rem; text-transform: uppercase; color: var(--muted); padding: 6px 8px; border-bottom: 1.5px solid var(--line); }
-      table.subTable td { padding: 7px 8px; border-bottom: 1px solid var(--line); }
+      table.subTable { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 12px; font-size: 0.84rem; background: #fff; border-radius: 12px; overflow: hidden; border: 1.5px solid var(--line); }
+      table.subTable thead { background: linear-gradient(135deg, #f0f5ff 0%, #e8f0fe 100%); }
+      table.subTable th { text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--water-deep); font-weight: 700; padding: 10px 14px; border-bottom: 2px solid var(--line); }
+      table.subTable td { padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+      table.subTable tr:last-child td { border-bottom: none; }
+      table.subTable tr:hover td { background: #f8fbff; }
+      .statusBadge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; background: #e9f9f1; color: var(--success); }
+      .statusBadge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--success); }
+      .regNotSet { color: var(--muted); font-style: italic; font-size: 0.78rem; }
       .btn { padding: 11px 18px; border: none; border-radius: 10px; font-weight: 700; font-size: 0.86rem; cursor: pointer; background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); color: #fff; }
 
       .msg { margin-top: 12px; padding: 10px 13px; border-radius: 9px; font-size: 0.82rem; display: none; }
@@ -948,10 +954,15 @@
               '<div class="ititle">' + escapeHtml(d.title) + '</div><div class="imeta">Sent institution-wide · ' + fmtDate(d.createdAt) + '</div>' +
               '<div class="ibody">' + escapeHtml(d.body) + '</div>' +
               (d.imageUrl ? '<div class="annImage"><img src="' + escapeHtml(d.imageUrl) + '" alt="Attachment"/></div>' : '') +
-              '<button class="toggleLink" data-toggle-reads>' + readsSnap.size + " student(s) have confirmed reading — view names</button>" +
+              '<button class="toggleLink" data-toggle-reads>' + readsSnap.size + " student(s) have viewed this announcement</button>" +
               '<div class="readList" style="display:none;" data-reads-box>' +
-                (readsSnap.empty ? "<div>No one yet.</div>" : '<table class="subTable"><thead><tr><th>Name</th><th>Reg. Number</th><th>Seen At</th></tr></thead><tbody>' +
-                  readsSnap.docs.map(function (r) { const rd = r.data(); return "<tr><td>" + escapeHtml(rd.name || r.id) + "</td><td>" + escapeHtml(rd.registrationNumber || "—") + "</td><td>" + fmtDate(rd.confirmedAt) + "</td></tr>"; }).join("") + "</tbody></table>") +
+                (readsSnap.empty ? '<div class="empty" style="margin-top:8px;">No one has viewed this announcement yet.</div>' : '<table class="subTable"><thead><tr><th>Full Name</th><th>Reg. Number</th><th>Time Seen</th><th>Status</th></tr></thead><tbody>' +
+                  readsSnap.docs.map(function (r) {
+                    const rd = r.data();
+                    const rn = rd.registrationNumber;
+                    const regCell = rn ? escapeHtml(rn) : '<span class="regNotSet">Not set up</span>';
+                    return "<tr><td>" + escapeHtml(rd.name || r.id) + "</td><td>" + regCell + "</td><td>" + fmtDate(rd.confirmedAt) + '</td><td><span class="statusBadge">Seen</span></td></tr>';
+                  }).join("") + "</tbody></table>") +
               "</div>" +
               '<div style="margin-top:10px;"><button class="btn-sm" style="background:transparent;border:1.5px solid var(--danger);color:var(--danger);" data-delete-ann>Delete</button></div>';
             card.querySelector("[data-toggle-reads]").addEventListener("click", function () {

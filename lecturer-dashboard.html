@@ -54,9 +54,15 @@
       .prow .info b { display: block; font-size: 0.92rem; }
       .prow .info span { font-size: 0.78rem; color: var(--muted); display: block; margin-top: 2px; }
       .empty { text-align: center; padding: 26px; color: var(--muted); font-size: 0.88rem; border: 1.5px dashed var(--line); border-radius: 12px; }
-      table.subTable { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.84rem; }
-      table.subTable th { text-align: left; font-size: 0.7rem; text-transform: uppercase; color: var(--muted); padding: 6px 8px; border-bottom: 1.5px solid var(--line); }
-      table.subTable td { padding: 7px 8px; border-bottom: 1px solid var(--line); }
+      table.subTable { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 12px; font-size: 0.84rem; background: #fff; border-radius: 12px; overflow: hidden; border: 1.5px solid var(--line); }
+      table.subTable thead { background: linear-gradient(135deg, #f0f5ff 0%, #e8f0fe 100%); }
+      table.subTable th { text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--water-deep); font-weight: 700; padding: 10px 14px; border-bottom: 2px solid var(--line); }
+      table.subTable td { padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+      table.subTable tr:last-child td { border-bottom: none; }
+      table.subTable tr:hover td { background: #f8fbff; }
+      .statusBadge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; background: #e9f9f1; color: var(--success); }
+      .statusBadge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--success); }
+      .regNotSet { color: var(--muted); font-style: italic; font-size: 0.78rem; }
       .gate-card { max-width: 460px; margin: 60px auto; text-align: center; background: #fff; border-radius: 18px; padding: 34px 26px; box-shadow: 0 14px 40px rgba(13,27,75,0.1); }
       .overlay { position: fixed; inset: 0; background: rgba(13,27,75,0.55); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
       .overlay.show { display: flex; }
@@ -541,9 +547,15 @@
               '<div class="ititle">' + escapeHtml(d.title) + '</div><div class="imeta">' + fmtDate(d.createdAt) + '</div>' +
               '<div class="ibody">' + escapeHtml(d.body) + '</div>' +
               (d.imageUrl ? '<div class="annImage"><img src="' + escapeHtml(d.imageUrl) + '" alt="Attachment"/></div>' : '') +
-              '<button class="toggleLink" data-toggle-reads>' + readsSnap.size + " student(s) have confirmed reading — view names</button>" +
+              '<button class="toggleLink" data-toggle-reads>' + readsSnap.size + " student(s) have viewed this announcement</button>" +
               '<div class="readList" style="display:none;" data-reads-box>' +
-                (readsSnap.empty ? "<div>No one yet.</div>" : readsSnap.docs.map(function (r) { const rd = r.data(); return "<div>" + escapeHtml(rd.name || r.id) + " — " + escapeHtml(rd.registrationNumber || "—") + " — " + fmtDate(rd.confirmedAt) + "</div>"; }).join("")) +
+                (readsSnap.empty ? '<div class="empty" style="margin-top:8px;">No one has viewed this announcement yet.</div>' : '<table class="subTable"><thead><tr><th>Full Name</th><th>Reg. Number</th><th>Time Seen</th><th>Status</th></tr></thead><tbody>' +
+                  readsSnap.docs.map(function (r) {
+                    const rd = r.data();
+                    const rn = rd.registrationNumber;
+                    const regCell = rn ? escapeHtml(rn) : '<span class="regNotSet">Not set up</span>';
+                    return "<tr><td>" + escapeHtml(rd.name || r.id) + "</td><td>" + regCell + "</td><td>" + fmtDate(rd.confirmedAt) + '</td><td><span class="statusBadge">Seen</span></td></tr>';
+                  }).join("") + "</tbody></table>") +
               "</div>";
             card.querySelector("[data-toggle-reads]").addEventListener("click", function () {
               const box = card.querySelector("[data-reads-box]");
