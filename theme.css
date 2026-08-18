@@ -1,0 +1,154 @@
+/* FeMOS Dark Theme — applied via [data-theme="dark"] on <html> */
+html[data-theme="dark"] {
+  --ink: #e2e8f0;
+  --muted: #94a3b8;
+  --line: #334155;
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-card: #1e293b;
+  --bg-card-hover: #253349;
+  --bg-input: #1e293b;
+  --bg-surface: #162032;
+  --text-on-dark: #e2e8f0;
+}
+
+html[data-theme="dark"] body {
+  background: linear-gradient(180deg, #0f172a 0%, #162032 100%);
+  color: var(--ink);
+}
+
+html[data-theme="dark"] .shell { color: var(--ink); }
+
+/* Topbar */
+html[data-theme="dark"] .topbar { background: rgba(30,41,59,0.85); border-bottom-color: var(--line); }
+html[data-theme="dark"] .userchip { background: var(--bg-card); color: var(--ink); }
+html[data-theme="dark"] .userchip .av { background: var(--water-deep); color: #fff; }
+html[data-theme="dark"] .userchip span { color: var(--ink); }
+html[data-theme="dark"] .brand h1 { color: var(--water-light); -webkit-text-fill-color: var(--water-light); }
+
+/* Cards */
+html[data-theme="dark"] .dashCard,
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .itemCard,
+html[data-theme="dark"] .detailArea,
+html[data-theme="dark"] .annExpanded {
+  background: var(--bg-card);
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+html[data-theme="dark"] .dashCard:hover { background: var(--bg-card-hover); border-color: var(--water-mid); }
+html[data-theme="dark"] .dashCard .stat { color: var(--muted); }
+html[data-theme="dark"] .dashCard .label { color: var(--ink); }
+
+/* Text colors */
+html[data-theme="dark"] h1, html[data-theme="dark"] h2, html[data-theme="dark"] h3,
+html[data-theme="dark"] h4, html[data-theme="dark"] .ititle, html[data-theme="dark"] .dzTitle {
+  color: var(--ink);
+}
+html[data-theme="dark"] .imeta, html[data-theme="dark"] .dzDesc, html[data-theme="dark"] .hint,
+html[data-theme="dark"] p { color: var(--muted); }
+html[data-theme="dark"] .ibody { color: var(--text-on-dark); }
+
+/* Carousel */
+html[data-theme="dark"] .carousel { background: var(--bg-card); border-color: var(--line); }
+html[data-theme="dark"] .carousel-empty { color: var(--muted); }
+
+/* Tabs */
+html[data-theme="dark"] .tabbar { background: var(--bg-secondary); }
+html[data-theme="dark"] .tabbtn { color: var(--muted); }
+html[data-theme="dark"] .tabbtn.active { color: #fff; }
+
+/* Forms & Inputs */
+html[data-theme="dark"] input, html[data-theme="dark"] select, html[data-theme="dark"] textarea {
+  background: var(--bg-input);
+  border-color: var(--line);
+  color: var(--ink);
+}
+html[data-theme="dark"] input::placeholder, html[data-theme="dark"] textarea::placeholder { color: #64748b; }
+html[data-theme="dark"] label { color: var(--muted); }
+
+/* Buttons */
+html[data-theme="dark"] .btn { color: #fff; }
+html[data-theme="dark"] .btn-outline, html[data-theme="dark"] .btn-sm { color: var(--ink); background: var(--bg-secondary); border-color: var(--line); }
+html[data-theme="dark"] .dzCancel { background: var(--bg-secondary); color: var(--ink); }
+html[data-theme="dark"] .dzConfirm { color: #fff; }
+html[data-theme="dark"] .optBtn { background: var(--bg-secondary); color: var(--ink); border-color: var(--line); }
+html[data-theme="dark"] .optBtn:hover { border-color: var(--water-mid); }
+
+/* Danger Zone */
+html[data-theme="dark"] .dzOpt { background: var(--bg-card); border-color: var(--line); color: var(--ink); }
+html[data-theme="dark"] .dzDanger { background: rgba(225,75,75,0.1); border-color: rgba(225,75,75,0.3); }
+html[data-theme="dark"] .dzDanger:hover { background: rgba(225,75,75,0.15); }
+html[data-theme="dark"] .dangerCard { border-color: rgba(225,75,75,0.25) !important; }
+html[data-theme="dark"] .dangerBadge { background: linear-gradient(135deg, #e14b4b, #c62828) !important; }
+
+/* Modals */
+html[data-theme="dark"] .dzOverlay { background: rgba(0,0,0,0.7); }
+html[data-theme="dark"] .dzBox { background: var(--bg-card); color: var(--ink); }
+html[data-theme="dark"] .pinGateBox { background: var(--bg-card); color: var(--ink); }
+html[data-theme="dark"] .pinInput { background: var(--bg-input); border-color: var(--line); color: var(--ink); }
+
+/* Profile card */
+html[data-theme="dark"] .profileCard { background: var(--bg-card); }
+html[data-theme="dark"] .profileCard .label { color: var(--muted); }
+html[data-theme="dark"] .profileCard .val { color: var(--ink); }
+html[data-theme="dark"] .statusPill { border-color: var(--line); }
+
+/* Announcements tabs */
+html[data-theme="dark"] .annTab { color: var(--muted); border-color: var(--line); }
+html[data-theme="dark"] .annTab.active { color: #fff; border-color: var(--water-mid); background: var(--water-deep); }
+
+/* Poll options */
+html[data-theme="dark"] .optBtn { background: var(--bg-secondary); color: var(--ink); border-color: var(--line); }
+html[data-theme="dark"] .optVoted { background: rgba(46,168,238,0.1); border-color: var(--water-mid); }
+
+/* Feedback panel */
+html[data-theme="dark"] .feedbackPanel { background: var(--bg-card); color: var(--ink); }
+html[data-theme="dark"] .feedbackFab { background: var(--water-deep); }
+html[data-theme="dark"] .feedbackItem { background: var(--bg-card); border-color: var(--line); }
+html[data-theme="dark"] .feedbackItem.unread { background: var(--bg-card-hover); border-left-color: var(--water-mid); }
+html[data-theme="dark"] .fpWarning { background: rgba(224,160,32,0.1); color: var(--warn); }
+
+/* Toast */
+html[data-theme="dark"] .toast { background: var(--bg-card); color: var(--ink); border-color: var(--line); }
+
+/* Attendance */
+html[data-theme="dark"] .attCard { background: var(--bg-card); border-color: var(--line); }
+
+/* Gate card */
+html[data-theme="dark"] .gate-card { background: var(--bg-card); color: var(--ink); border-color: var(--line); }
+
+/* Empty states */
+html[data-theme="dark"] .empty { color: var(--muted); }
+
+/* Overlay/backdrop */
+html[data-theme="dark"] .overlay { background: rgba(0,0,0,0.6); }
+
+/* Strength meter */
+html[data-theme="dark"] .strengthMeter { background: var(--line); }
+
+/* Theme toggle button */
+.themeToggle {
+  width: 38px; height: 38px; border-radius: 50%; border: none; cursor: pointer;
+  background: var(--bg-secondary); display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, transform 0.2s; flex-shrink: 0;
+}
+.themeToggle:hover { background: var(--bg-card-hover); transform: scale(1.08); }
+.themeToggle svg { width: 18px; height: 18px; }
+
+/* Scrollbar */
+html[data-theme="dark"] ::-webkit-scrollbar { width: 6px; }
+html[data-theme="dark"] ::-webkit-scrollbar-track { background: var(--bg-primary); }
+html[data-theme="dark"] ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+
+/* Collect form */
+html[data-theme="dark"] .collectFormCard { background: var(--bg-card); border-color: var(--line); }
+
+/* Reg number table */
+html[data-theme="dark"] table { border-color: var(--line); }
+html[data-theme="dark"] th { background: var(--bg-secondary); color: var(--ink); border-color: var(--line); }
+html[data-theme="dark"] td { border-color: var(--line); color: var(--ink); }
+
+/* Reg warning toast */
+html[data-theme="dark"] .regWarnToast { background: var(--bg-card); color: var(--ink); }

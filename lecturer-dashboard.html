@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FeMOS — Lecturer Dashboard</title>
     <link rel="icon" type="image/png" href="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png"/>
+    <link rel="stylesheet" href="theme.css"/>
+    <script src="theme.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
       :root {
@@ -142,6 +144,7 @@
             <h1>Lecturer Dashboard</h1>
           </div>
           <div class="userchip">
+            <button class="themeToggle" id="themeToggle" title="Switch to Dark Mode"></button>
             <div class="av" id="lecAv">?</div>
             <span id="lecName">...</span>
             <button id="btnLogout">Log Out</button>
@@ -325,6 +328,7 @@
       });
 
       document.getElementById("btnLogout").addEventListener("click", async function () { await auth.signOut(); window.location.href = "login.html"; });
+      document.getElementById("themeToggle").addEventListener("click", function () { feMosToggleTheme(); });
 
       function renderCourseGrid() {
         const grid = document.getElementById("courseGrid");

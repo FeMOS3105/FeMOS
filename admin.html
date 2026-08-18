@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FeMOS — Admin</title>
     <link rel="icon" type="image/png" href="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png"/>
+    <link rel="stylesheet" href="theme.css"/>
+    <script src="theme.js"></script>
     <style>
       :root {
         --water-light: #5fd4f0; --water-mid: #2ea8ee; --water-deep: #155fd1;
@@ -85,6 +87,7 @@
             <h1>FeMOS Admin</h1>
           </div>
           <div class="userchip">
+            <button class="themeToggle" id="themeToggle" title="Switch to Dark Mode"></button>
             <div class="av" id="adminAv">?</div>
             <span id="adminName">...</span>
             <button id="btnLogout">Log Out</button>
@@ -281,6 +284,7 @@
         await auth.signOut();
         window.location.href = "login.html";
       });
+      document.getElementById("themeToggle").addEventListener("click", function () { feMosToggleTheme(); });
 
       // ---------- Tabs ----------
       document.querySelectorAll(".tabbtn").forEach(function (btn) {

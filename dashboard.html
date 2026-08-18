@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FeMOS — Dashboard</title>
     <link rel="icon" type="image/png" href="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png"/>
+    <link rel="stylesheet" href="theme.css"/>
+    <script src="theme.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <style>
@@ -243,6 +245,34 @@
       .dzDanger { background: #fff5f5; border: 1.5px solid rgba(225,75,75,0.3); }
       .dzDanger:hover { border-color: var(--danger); background: #fff0f0; }
 
+      /* ---------- App Lock PIN Input ---------- */
+      .pinInputRow { display: flex; gap: 10px; justify-content: center; margin: 18px 0; }
+      .pinInput {
+        width: 52px; height: 60px; text-align: center; font-size: 1.5rem; font-weight: 700;
+        border: 2px solid var(--line); border-radius: 14px; background: #fbfdff;
+        color: var(--ink); outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+        -webkit-text-security: disc;
+      }
+      .pinInput:focus { border-color: var(--water-mid); box-shadow: 0 0 0 3px rgba(46,168,238,0.15); }
+      .pinInput.error { border-color: var(--danger); animation: pinShake 0.4s ease; }
+      @keyframes pinShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+      .pinGateOverlay {
+        position: fixed; inset: 0; background: rgba(13,27,75,0.65); display: none;
+        align-items: center; justify-content: center; z-index: 300; padding: 20px;
+        backdrop-filter: blur(4px);
+      }
+      .pinGateOverlay.show { display: flex; }
+      .pinGateBox {
+        background: #fff; border-radius: 22px; padding: 36px 28px; max-width: 380px; width: 100%;
+        box-shadow: 0 24px 60px rgba(13,27,75,0.3); text-align: center; animation: dzSlideUp 0.3s ease;
+      }
+      .pinGateBox .pinIcon { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, var(--water-light), var(--water-deep)); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+      .pinGateBox .pinIcon svg { width: 30px; height: 30px; stroke: #fff; fill: none; }
+      .pinGateBox h3 { font-size: 1.1rem; margin-bottom: 6px; text-align: center; }
+      .pinGateBox .pinSub { font-size: 0.82rem; color: var(--muted); margin-bottom: 18px; line-height: 1.5; }
+      .pinGateBox .pinError { font-size: 0.8rem; color: var(--danger); margin-top: 10px; display: none; font-weight: 600; }
+      .pinGateBox .pinError.show { display: block; }
+
       /* ---------- Danger Zone Modals ---------- */
       .dzOverlay {
         position: fixed; inset: 0; background: rgba(13,27,75,0.55); display: none;
@@ -393,6 +423,7 @@
             <h1>FeMOS</h1>
           </div>
           <div class="userchip">
+            <button class="themeToggle" id="themeToggle" title="Switch to Dark Mode"></button>
             <div class="av" id="uAv">?</div>
             <span id="uName">...</span>
             <button id="btnLogout">Log Out</button>
@@ -499,6 +530,13 @@
             <div class="dzOpt" id="dzPassword">
               <div class="dzIcon blue"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
               <div class="dzInfo"><div class="dzTitle">Add / Change Password</div><div class="dzDesc">Set a password for email login</div></div>
+            </div>
+            <div class="dzOpt" id="dzAppLock">
+              <div class="dzIcon blue"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg></div>
+              <div class="dzInfo"><div class="dzTitle">App Lock</div><div class="dzDesc" id="dzAppLockDesc">Set a 4-digit PIN to lock your app</div></div>
+              <div class="dzToggle" id="dzAppLockToggle" style="margin-left:auto;width:44px;height:24px;border-radius:12px;background:#e0e4ec;position:relative;cursor:pointer;transition:background 0.3s;flex-shrink:0;">
+                <div id="dzAppLockKnob" style="width:20px;height:20px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:left 0.3s;box-shadow:0 2px 4px rgba(0,0,0,0.15);"></div>
+              </div>
             </div>
             <div class="dzOpt dzDanger" id="dzDelete">
               <div class="dzIcon red"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></div>
@@ -617,6 +655,76 @@
           </div>
         </div>
         <div class="msg" id="dzDeleteMsg"></div>
+      </div>
+    </div>
+
+    <!-- ============ MODAL: SET APP LOCK PIN ============ -->
+    <div class="dzOverlay" id="dzPinSetupOverlay">
+      <div class="dzBox" style="text-align:center;">
+        <div class="dzStepIndicator"><div class="dzStepDot active" id="pinDot1"></div><div class="dzStepDot" id="pinDot2"></div></div>
+        <div class="dzStep active" id="pinStep1">
+          <h3 style="justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--water-deep)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg> Set App Lock PIN</h3>
+          <div class="dzSub" style="text-align:center;">Enter a 4-digit PIN to secure your app. You'll need this PIN every time you open FeMOS.</div>
+          <div class="pinInputRow">
+            <input type="tel" maxlength="1" class="pinInput" data-pin="0" inputmode="numeric" pattern="[0-9]" autocomplete="off"/>
+            <input type="tel" maxlength="1" class="pinInput" data-pin="1" inputmode="numeric" pattern="[0-9]" autocomplete="off"/>
+            <input type="tel" maxlength="1" class="pinInput" data-pin="2" inputmode="numeric" pattern="[0-9]" autocomplete="off"/>
+            <input type="tel" maxlength="1" class="pinInput" data-pin="3" inputmode="numeric" pattern="[0-9]" autocomplete="off"/>
+          </div>
+          <div class="dzActions" style="justify-content:center;">
+            <button class="dzCancel" onclick="closeDzOverlay('dzPinSetupOverlay')">Cancel</button>
+            <button class="dzConfirm" id="dzPinNext" disabled>Continue</button>
+          </div>
+          <div class="msg" id="dzPinMsg1"></div>
+        </div>
+        <div class="dzStep" id="pinStep2">
+          <h3 style="justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--water-deep)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Confirm PIN</h3>
+          <div class="dzSub" style="text-align:center;">Re-enter your 4-digit PIN to confirm.</div>
+          <div class="pinInputRow" id="pinConfirmRow">
+            <input type="tel" maxlength="1" class="pinInput" data-pin="0" inputmode="numeric" pattern="[0-9]" autocomplete="off"/>
+            <input type="tel" maxlength="1" class="pinInput" data-pin="1" inputmode="numeric" pattern="[0-9]" autocomplete="off"/>
+            <input type="tel" maxlength="1" class="pinInput" data-pin="2" inputmode="numeric" pattern="[0-9]" autocomplete="off"/>
+            <input type="tel" maxlength="1" class="pinInput" data-pin="3" inputmode="numeric" pattern="[0-9]" autocomplete="off"/>
+          </div>
+          <div class="dzActions" style="justify-content:center;">
+            <button class="dzCancel" onclick="showDzStep('pinStep1','pinDot1','pinDot2')">Back</button>
+            <button class="dzConfirm" id="dzPinConfirm" disabled>Set PIN</button>
+          </div>
+          <div class="msg" id="dzPinMsg2"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ MODAL: CHANGE PIN ============ -->
+    <div class="dzOverlay" id="dzPinChangeOverlay">
+      <div class="dzBox" style="text-align:center;">
+        <h3 style="justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--water-deep)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg> Change PIN</h3>
+        <div class="dzSub" style="text-align:center;">Enter your current PIN, then set a new one.</div>
+        <div class="field"><label>Current PIN</label><input id="dzPinOld" type="password" maxlength="4" placeholder="Enter current 4-digit PIN" inputmode="numeric" pattern="[0-9]{4}" style="text-align:center;font-size:1.2rem;letter-spacing:12px;" autocomplete="off"/></div>
+        <div class="field"><label>New PIN</label><input id="dzPinNew" type="password" maxlength="4" placeholder="New 4-digit PIN" inputmode="numeric" pattern="[0-9]{4}" style="text-align:center;font-size:1.2rem;letter-spacing:12px;" autocomplete="off"/></div>
+        <div class="field"><label>Confirm New PIN</label><input id="dzPinNewConfirm" type="password" maxlength="4" placeholder="Re-enter new PIN" inputmode="numeric" pattern="[0-9]{4}" style="text-align:center;font-size:1.2rem;letter-spacing:12px;" autocomplete="off"/></div>
+        <div class="dzActions" style="justify-content:center;">
+          <button class="dzCancel" onclick="closeDzOverlay('dzPinChangeOverlay')">Cancel</button>
+          <button class="dzConfirm" id="dzPinChangeSave">Update PIN</button>
+        </div>
+        <div class="msg" id="dzPinChangeMsg"></div>
+      </div>
+    </div>
+
+    <!-- ============ PIN GATE OVERLAY ============ -->
+    <div class="pinGateOverlay" id="pinGateOverlay">
+      <div class="pinGateBox">
+        <div class="pinIcon"><svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg></div>
+        <h3>App Locked</h3>
+        <div class="pinSub">Enter your 4-digit PIN to unlock FeMOS.</div>
+        <div class="pinInputRow" id="pinGateRow">
+          <input type="tel" maxlength="1" class="pinInput" data-pin="0" inputmode="numeric" pattern="[0-9]" autocomplete="off"/>
+          <input type="tel" maxlength="1" class="pinInput" data-pin="1" inputmode="numeric" pattern="[0-9]" autocomplete="off"/>
+          <input type="tel" maxlength="1" class="pinInput" data-pin="2" inputmode="numeric" pattern="[0-9]" autocomplete="off"/>
+          <input type="tel" maxlength="1" class="pinInput" data-pin="3" inputmode="numeric" pattern="[0-9]" autocomplete="off"/>
+        </div>
+        <div class="pinError" id="pinGateError">Incorrect PIN. Try again.</div>
+        <button class="btn-outline" id="pinGateLogout" style="width:100%;margin-top:16px;padding:11px;border-radius:10px;border:1.5px solid var(--line);background:#f2f4f8;color:var(--ink);font-weight:700;cursor:pointer;font-size:0.85rem;">Log Out Instead</button>
       </div>
     </div>
 
@@ -745,6 +853,17 @@
           myConfirmedByCR = data.confirmedByCR || false;
           myRegistrationStatus = data.registrationStatus || "";
 
+          // Check app lock
+          if (data.appLockPin && sessionStorage.getItem("femosUnlocked_" + user.uid) !== "1") {
+            appLockEnabled = true;
+            appLockPinHash = data.appLockPin;
+            updateAppLockUI();
+            gate.style.display = "none";
+            document.getElementById("app").style.display = "block";
+            showPinGate();
+            return;
+          }
+
           gate.style.display = "none";
           document.getElementById("app").style.display = "block";
           document.getElementById("uName").textContent = user.displayName || user.email;
@@ -781,6 +900,7 @@
       });
 
       document.getElementById("btnLogout").addEventListener("click", async function () { await auth.signOut(); window.location.href = "login.html"; });
+      document.getElementById("themeToggle").addEventListener("click", function () { feMosToggleTheme(); });
 
       let initialized = false;
       function initApp() {
@@ -791,6 +911,7 @@
         loadCollectForms();
         loadAttendanceHistory();
         loadAttendanceScan();
+        updateAppLockUI();
       }
 
       // ================= ANNOUNCEMENTS =================
@@ -1462,6 +1583,240 @@
           }
           btn.disabled = false; btn.textContent = "Delete Forever";
         }
+      });
+
+      // ================= APP LOCK =================
+      var appLockEnabled = false;
+      var appLockPinHash = "";
+
+      function simpleHash(str) {
+        var hash = 0;
+        for (var i = 0; i < str.length; i++) {
+          var ch = str.charCodeAt(i);
+          hash = ((hash << 5) - hash) + ch;
+          hash = hash & hash;
+        }
+        return "h" + Math.abs(hash).toString(36);
+      }
+
+      function getPinFromInputs(container) {
+        var inputs = container.querySelectorAll(".pinInput");
+        var pin = "";
+        inputs.forEach(function (inp) { pin += inp.value; });
+        return pin;
+      }
+
+      function clearPinInputs(container) {
+        container.querySelectorAll(".pinInput").forEach(function (inp) { inp.value = ""; });
+        container.querySelector(".pinInput").focus();
+      }
+
+      function setupPinAutoAdvance(container) {
+        var inputs = container.querySelectorAll(".pinInput");
+        inputs.forEach(function (inp, idx) {
+          inp.addEventListener("input", function () {
+            this.value = this.value.replace(/[^0-9]/g, "").slice(0, 1);
+            if (this.value && idx < inputs.length - 1) inputs[idx + 1].focus();
+            var pin = getPinFromInputs(container);
+            var btn = container.closest(".dzBox, .pinGateBox") ? container.closest(".dzBox, .pinGateBox").querySelector(".dzConfirm, #pinGateError") : null;
+            var enableBtn = container.closest(".dzBox") ? container.closest(".dzBox").querySelector(".dzConfirm[disabled]") : null;
+          });
+          inp.addEventListener("keydown", function (e) {
+            if (e.key === "Backspace" && !this.value && idx > 0) { inputs[idx - 1].focus(); inputs[idx - 1].value = ""; }
+          });
+          inp.addEventListener("focus", function () { this.select(); });
+        });
+      }
+
+      function updateAppLockUI() {
+        var toggle = document.getElementById("dzAppLockToggle");
+        var knob = document.getElementById("dzAppLockKnob");
+        var desc = document.getElementById("dzAppLockDesc");
+        if (appLockEnabled) {
+          toggle.style.background = "var(--water-mid)";
+          knob.style.left = "22px";
+          desc.textContent = "Change or disable your PIN";
+        } else {
+          toggle.style.background = "#e0e4ec";
+          knob.style.left = "2px";
+          desc.textContent = "Set a 4-digit PIN to lock your app";
+        }
+      }
+
+      async function loadAppLockState() {
+        if (!auth.currentUser) return;
+        try {
+          var doc = await db.collection("users").doc(auth.currentUser.uid).get();
+          var data = doc.exists ? doc.data() : null;
+          if (data && data.appLockPin) {
+            appLockEnabled = true;
+            appLockPinHash = data.appLockPin;
+          } else {
+            appLockEnabled = false;
+            appLockPinHash = "";
+          }
+          updateAppLockUI();
+        } catch (e) { /* silent */ }
+      }
+
+      // --- App Lock toggle click ---
+      document.getElementById("dzAppLockToggle").addEventListener("click", function (e) {
+        e.stopPropagation();
+        if (appLockEnabled) {
+          openDzOverlay("dzPinChangeOverlay");
+          document.getElementById("dzPinOld").value = "";
+          document.getElementById("dzPinNew").value = "";
+          document.getElementById("dzPinNewConfirm").value = "";
+          document.getElementById("dzPinChangeMsg").className = "msg";
+        } else {
+          openDzOverlay("dzPinSetupOverlay");
+          showDzStep("pinStep1", "pinDot1", "pinDot2");
+          document.getElementById("dzPinMsg1").className = "msg";
+          var container = document.getElementById("dzPinSetupOverlay");
+          clearPinInputs(container);
+          setTimeout(function () { container.querySelector(".pinInput").focus(); }, 100);
+        }
+      });
+
+      // Also allow clicking the row itself
+      document.getElementById("dzAppLock").addEventListener("click", function (e) {
+        if (e.target.closest("#dzAppLockToggle")) return;
+        document.getElementById("dzAppLockToggle").click();
+      });
+
+      // --- PIN Setup Step 1: auto-advance + enable Continue ---
+      setupPinAutoAdvance(document.getElementById("pinStep1"));
+      (function () {
+        var step1Inputs = document.getElementById("pinStep1").querySelectorAll(".pinInput");
+        function checkStep1() {
+          var pin = getPinFromInputs(document.getElementById("pinStep1"));
+          document.getElementById("dzPinNext").disabled = pin.length !== 4;
+        }
+        step1Inputs.forEach(function (inp) { inp.addEventListener("input", checkStep1); });
+      })();
+
+      document.getElementById("dzPinNext").addEventListener("click", function () {
+        var pin = getPinFromInputs(document.getElementById("pinStep1"));
+        if (pin.length !== 4) { dzMsg("dzPinMsg1", "Please enter all 4 digits.", "err"); return; }
+        showDzStep("pinStep2", "pinDot2", "pinDot1");
+        setTimeout(function () { document.querySelector("#pinStep2 .pinInput").focus(); }, 100);
+      });
+
+      // --- PIN Setup Step 2: confirm ---
+      setupPinAutoAdvance(document.getElementById("pinStep2"));
+      (function () {
+        var step2Inputs = document.getElementById("pinStep2").querySelectorAll(".pinInput");
+        function checkStep2() {
+          var pin = getPinFromInputs(document.getElementById("pinStep2"));
+          document.getElementById("dzPinConfirm").disabled = pin.length !== 4;
+        }
+        step2Inputs.forEach(function (inp) { inp.addEventListener("input", checkStep2); });
+      })();
+
+      document.getElementById("dzPinConfirm").addEventListener("click", async function () {
+        var firstPin = getPinFromInputs(document.getElementById("pinStep1"));
+        var confirmPin = getPinFromInputs(document.getElementById("pinStep2"));
+        if (firstPin !== confirmPin) {
+          dzMsg("dzPinMsg2", "PINs don't match. Try again.", "err");
+          var inputs = document.getElementById("pinStep2").querySelectorAll(".pinInput");
+          inputs.forEach(function (inp) { inp.classList.add("error"); });
+          setTimeout(function () { inputs.forEach(function (inp) { inp.classList.remove("error"); }); }, 500);
+          clearPinInputs(document.getElementById("pinStep2"));
+          return;
+        }
+        var btn = this; btn.disabled = true; btn.textContent = "Saving...";
+        try {
+          await db.collection("users").doc(auth.currentUser.uid).set({ appLockPin: simpleHash(firstPin) }, { merge: true });
+          appLockEnabled = true;
+          appLockPinHash = simpleHash(firstPin);
+          updateAppLockUI();
+          closeDzOverlay("dzPinSetupOverlay");
+          showAppLockToast("App Lock has been enabled. You'll need your PIN to open FeMOS.");
+        } catch (err) {
+          dzMsg("dzPinMsg2", "Error: " + (err.message || ""), "err");
+        }
+        finally { btn.disabled = false; btn.textContent = "Set PIN"; }
+      });
+
+      // --- Change PIN ---
+      document.getElementById("dzPinChangeSave").addEventListener("click", async function () {
+        var oldPin = document.getElementById("dzPinOld").value.trim();
+        var newPin = document.getElementById("dzPinNew").value.trim();
+        var newConfirm = document.getElementById("dzPinNewConfirm").value.trim();
+        if (oldPin.length !== 4 || newPin.length !== 4 || newConfirm.length !== 4) {
+          dzMsg("dzPinChangeMsg", "All fields must be 4 digits.", "err"); return;
+        }
+        if (simpleHash(oldPin) !== appLockPinHash) {
+          dzMsg("dzPinChangeMsg", "Current PIN is incorrect.", "err"); return;
+        }
+        if (newPin !== newConfirm) {
+          dzMsg("dzPinChangeMsg", "New PINs don't match.", "err"); return;
+        }
+        if (oldPin === newPin) {
+          dzMsg("dzPinChangeMsg", "New PIN must be different from current.", "err"); return;
+        }
+        var btn = this; btn.disabled = true; btn.textContent = "Updating...";
+        try {
+          await db.collection("users").doc(auth.currentUser.uid).set({ appLockPin: simpleHash(newPin) }, { merge: true });
+          appLockPinHash = simpleHash(newPin);
+          closeDzOverlay("dzPinChangeOverlay");
+          showAppLockToast("PIN updated successfully.");
+        } catch (err) {
+          dzMsg("dzPinChangeMsg", "Error: " + (err.message || ""), "err");
+        }
+        finally { btn.disabled = false; btn.textContent = "Update PIN"; }
+      });
+
+      function showAppLockToast(text) {
+        var t = document.createElement("div");
+        t.className = "toast show";
+        t.innerHTML = '<svg width="18" height="18" fill="none" stroke="var(--success)" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span>' + text + '</span>';
+        document.body.appendChild(t);
+        setTimeout(function () { t.remove(); }, 4000);
+      }
+
+      // --- PIN Gate: check on auth ---
+      function showPinGate() {
+        var gate = document.getElementById("pinGateOverlay");
+        gate.classList.add("show");
+        clearPinInputs(document.getElementById("pinGateRow"));
+        document.getElementById("pinGateError").classList.remove("show");
+        setTimeout(function () { document.querySelector("#pinGateRow .pinInput").focus(); }, 200);
+      }
+
+      function hidePinGate() {
+        document.getElementById("pinGateOverlay").classList.remove("show");
+      }
+
+      setupPinAutoAdvance(document.getElementById("pinGateRow"));
+
+      (function () {
+        var gateInputs = document.querySelectorAll("#pinGateRow .pinInput");
+        function tryUnlock() {
+          var pin = getPinFromInputs(document.getElementById("pinGateRow"));
+          if (pin.length !== 4) return;
+          if (simpleHash(pin) === appLockPinHash) {
+            sessionStorage.setItem("femosUnlocked_" + auth.currentUser.uid, "1");
+            hidePinGate();
+          } else {
+            document.getElementById("pinGateError").classList.add("show");
+            var inputs = document.querySelectorAll("#pinGateRow .pinInput");
+            inputs.forEach(function (inp) { inp.classList.add("error"); });
+            setTimeout(function () {
+              inputs.forEach(function (inp) { inp.classList.remove("error"); inp.value = ""; });
+              inputs[0].focus();
+            }, 500);
+          }
+        }
+        gateInputs.forEach(function (inp) {
+          inp.addEventListener("input", function () { this.value = this.value.replace(/[^0-9]/g, "").slice(0, 1); if (this.value) { var next = this.getAttribute("data-pin"); var n = parseInt(next) + 1; if (n < 4) { var ni = document.querySelector('#pinGateRow .pinInput[data-pin="' + n + '"]'); if (ni) ni.focus(); } } tryUnlock(); });
+          inp.addEventListener("keydown", function (e) { if (e.key === "Backspace" && !this.value) { var prev = parseInt(this.getAttribute("data-pin")) - 1; if (prev >= 0) { var pi = document.querySelector('#pinGateRow .pinInput[data-pin="' + prev + '"]'); if (pi) { pi.focus(); pi.value = ""; } } } });
+        });
+      })();
+
+      document.getElementById("pinGateLogout").addEventListener("click", async function () {
+        await auth.signOut();
+        window.location.href = "login.html";
       });
 
       // ================= FEEDBACK PANEL =================
