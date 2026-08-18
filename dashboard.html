@@ -298,6 +298,88 @@
       .dzStepDot { width: 8px; height: 8px; border-radius: 50%; background: #e0e4ec; transition: background 0.2s; }
       .dzStepDot.active { background: var(--water-deep); }
       .dzStepDot.done { background: var(--success); }
+
+      /* ============ FEEDBACK FLOATING BUTTON ============ */
+      .feedbackFab {
+        position: fixed; bottom: 28px; right: 28px; z-index: 1500;
+        width: 56px; height: 56px; border-radius: 50%; border: none; cursor: pointer;
+        background: linear-gradient(135deg, var(--water-mid), var(--water-deep));
+        box-shadow: 0 6px 20px rgba(21,95,209,0.35);
+        display: flex; align-items: center; justify-content: center;
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
+      }
+      .feedbackFab:hover { transform: scale(1.08); box-shadow: 0 8px 28px rgba(21,95,209,0.45); }
+      .feedbackFab svg { width: 24px; height: 24px; stroke: #fff; fill: none; }
+      .feedbackFab::after {
+        content: ''; position: absolute; inset: -4px; border-radius: 50%;
+        border: 2.5px solid var(--water-mid); opacity: 0;
+        animation: fabPulse 2.5s ease-in-out infinite;
+      }
+      @keyframes fabPulse {
+        0%, 100% { opacity: 0; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(1.15); }
+      }
+      .feedbackPanel {
+        position: fixed; bottom: 0; right: 0; z-index: 1600;
+        width: 100%; max-width: 420px; height: 70vh;
+        background: #fff; border-radius: 20px 20px 0 0;
+        box-shadow: 0 -8px 40px rgba(13,27,75,0.18);
+        display: flex; flex-direction: column;
+        transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.34, 1.2, 0.64, 1);
+        overflow: hidden;
+      }
+      .feedbackPanel.open { transform: translateY(0); }
+      .feedbackBackdrop {
+        position: fixed; inset: 0; z-index: 1550;
+        background: rgba(13,27,75,0.4); opacity: 0; pointer-events: none;
+        transition: opacity 0.3s;
+      }
+      .feedbackBackdrop.open { opacity: 1; pointer-events: auto; }
+      .fpHeader {
+        padding: 18px 20px 14px; border-bottom: 1.5px solid var(--line);
+        background: linear-gradient(135deg, #f8fbff, #eef5ff);
+      }
+      .fpHeaderTop { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+      .fpHeaderTop h3 { font-size: 1rem; margin: 0; color: var(--ink); }
+      .fpClose { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 1.2rem; padding: 4px; }
+      .fpTabs { display: flex; gap: 6px; }
+      .fpTab {
+        flex: 1; padding: 9px 10px; border: 1.5px solid var(--line); border-radius: 10px;
+        background: #fff; font-size: 0.78rem; font-weight: 700; color: var(--muted);
+        cursor: pointer; text-align: center; transition: all 0.2s;
+      }
+      .fpTab.active {
+        background: linear-gradient(135deg, var(--water-mid), var(--water-deep));
+        color: #fff; border-color: transparent;
+      }
+      .fpBody { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; }
+      .fpBody textarea {
+        flex: 1; min-height: 100px; padding: 12px; border-radius: 12px;
+        border: 1.5px solid var(--line); font-size: 0.88rem; font-family: inherit;
+        resize: none; background: #fbfdff; color: var(--ink);
+      }
+      .fpBody textarea:focus { outline: none; border-color: var(--water-mid); }
+      .fpWarning {
+        display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px;
+        background: #fff8e1; border: 1px solid #f5c518; border-radius: 10px;
+        font-size: 0.76rem; color: #6d5a00; margin-top: 10px; line-height: 1.5;
+      }
+      .fpWarning svg { flex-shrink: 0; margin-top: 1px; }
+      .fpFooter { padding: 12px 20px 16px; border-top: 1.5px solid var(--line); }
+      .fpSend {
+        width: 100%; padding: 12px; border: none; border-radius: 12px; font-weight: 700;
+        font-size: 0.88rem; cursor: pointer; color: #fff;
+        background: linear-gradient(90deg, var(--water-mid), var(--water-deep));
+        transition: opacity 0.2s;
+      }
+      .fpSend:disabled { opacity: 0.5; cursor: not-allowed; }
+      .fpSuccess {
+        text-align: center; padding: 30px 20px; flex: 1; display: flex;
+        flex-direction: column; align-items: center; justify-content: center;
+      }
+      .fpSuccess svg { margin-bottom: 12px; }
+      .fpSuccess h4 { font-size: 1rem; color: var(--ink); margin-bottom: 6px; }
+      .fpSuccess p { font-size: 0.82rem; color: var(--muted); }
     </style>
   </head>
   <body>
@@ -551,6 +633,35 @@
         <div id="qrReader" style="width:100%;border-radius:12px;overflow:hidden;"></div>
         <div class="msg" id="qrScanMsg" style="margin-top:10px;"></div>
         <button class="btn-outline" id="btnCancelScan" style="width:100%;margin-top:14px;padding:11px;border-radius:10px;border:1.5px solid var(--line);background:#f2f4f8;color:var(--ink);font-weight:700;cursor:pointer;">Cancel</button>
+      </div>
+    </div>
+
+    <!-- ============ FEEDBACK FLOATING BUTTON + PANEL ============ -->
+    <div class="feedbackBackdrop" id="fpBackdrop"></div>
+    <button class="feedbackFab" id="feedbackFab" title="Send Feedback">
+      <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </button>
+    <div class="feedbackPanel" id="feedbackPanel">
+      <div class="fpHeader">
+        <div class="fpHeaderTop">
+          <h3>Send Feedback</h3>
+          <button class="fpClose" id="fpClose">✕</button>
+        </div>
+        <div class="fpTabs">
+          <button class="fpTab active" data-fp-tab="cr">Class Rep</button>
+          <button class="fpTab" data-fp-tab="admin">Institution Admin</button>
+        </div>
+      </div>
+      <div class="fpBody" id="fpBody">
+        <textarea id="fpMessage" placeholder="Write your feedback or suggestion about the system..."></textarea>
+        <div class="fpWarning">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span>Your <strong>name</strong> and <strong>registration number</strong> will be visible to the recipient. Please keep your feedback professional.</span>
+        </div>
+      </div>
+      <div class="fpFooter">
+        <button class="fpSend" id="fpSend">Send Feedback</button>
+        <div class="msg" id="fpMsg"></div>
       </div>
     </div>
 
@@ -1349,6 +1460,78 @@
           btn.disabled = false; btn.textContent = "Delete Forever";
         }
       });
+
+      // ================= FEEDBACK PANEL =================
+      var fpActiveTab = "cr";
+      var fpBackdrop = document.getElementById("fpBackdrop");
+      var fpPanel = document.getElementById("feedbackPanel");
+
+      function openFp() { fpPanel.classList.add("open"); fpBackdrop.classList.add("open"); }
+      function closeFp() { fpPanel.classList.remove("open"); fpBackdrop.classList.remove("open"); }
+
+      document.getElementById("feedbackFab").addEventListener("click", openFp);
+      document.getElementById("fpClose").addEventListener("click", closeFp);
+      fpBackdrop.addEventListener("click", closeFp);
+
+      document.querySelectorAll("[data-fp-tab]").forEach(function (t) {
+        t.addEventListener("click", function () {
+          fpActiveTab = t.getAttribute("data-fp-tab");
+          document.querySelectorAll("[data-fp-tab]").forEach(function (b) { b.classList.toggle("active", b.getAttribute("data-fp-tab") === fpActiveTab); });
+        });
+      });
+
+      document.getElementById("fpSend").addEventListener("click", async function () {
+        var msg = document.getElementById("fpMessage").value.trim();
+        if (!msg) { document.getElementById("fpMsg").textContent = "Please write something first."; document.getElementById("fpMsg").className = "msg show err"; return; }
+        var btn = this; btn.disabled = true; btn.textContent = "Sending...";
+        try {
+          var recipientId = null;
+          var recipientName = "";
+          if (fpActiveTab === "cr") {
+            var crSnap = await db.collection("userRoles").where("role", "==", "cr").where("institutionId", "==", myInstitutionId).where("courseId", "==", myCourseId).get();
+            if (!crSnap.empty) { var crDoc = crSnap.docs[0]; recipientId = crDoc.id; recipientName = crDoc.data().fullName || crDoc.data().name || "CR"; }
+          } else {
+            var adminSnap = await db.collection("userRoles").where("role", "==", "institutionAdmin").where("institutionId", "==", myInstitutionId).get();
+            if (!adminSnap.empty) { var adminDoc = adminSnap.docs[0]; recipientId = adminDoc.id; recipientName = adminDoc.data().fullName || adminDoc.data().name || "Institution Admin"; }
+          }
+          await db.collection("feedback").add({
+            userId: auth.currentUser.uid,
+            userName: auth.currentUser.displayName || auth.currentUser.email,
+            userEmail: auth.currentUser.email,
+            registrationNumber: myRegNumber || "Not set",
+            recipientId: recipientId,
+            recipientType: fpActiveTab,
+            message: msg,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            read: false,
+          });
+          document.getElementById("fpBody").innerHTML =
+            '<div class="fpSuccess">' +
+              '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>' +
+              '<h4>Feedback Sent!</h4>' +
+              '<p>Your feedback has been delivered to <strong>' + escapeHtml(recipientName) + '</strong>.</p>' +
+            '</div>';
+          setTimeout(function () { closeFp(); setTimeout(resetFp, 400); }, 2500);
+        } catch (err) {
+          document.getElementById("fpMsg").textContent = "Error: " + (err.message || "");
+          document.getElementById("fpMsg").className = "msg show err";
+          btn.disabled = false; btn.textContent = "Send Feedback";
+        }
+      });
+
+      function resetFp() {
+        fpActiveTab = "cr";
+        document.querySelectorAll("[data-fp-tab]").forEach(function (b) { b.classList.toggle("active", b.getAttribute("data-fp-tab") === "cr"); });
+        document.getElementById("fpBody").innerHTML =
+          '<textarea id="fpMessage" placeholder="Write your feedback or suggestion about the system..."></textarea>' +
+          '<div class="fpWarning">' +
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' +
+            '<span>Your <strong>name</strong> and <strong>registration number</strong> will be visible to the recipient. Please keep your feedback professional.</span>' +
+          '</div>';
+        document.getElementById("fpMsg").className = "msg";
+        document.getElementById("fpSend").disabled = false;
+        document.getElementById("fpSend").textContent = "Send Feedback";
+      }
     </script>
   </body>
 </html>
