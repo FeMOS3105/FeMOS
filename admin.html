@@ -698,6 +698,7 @@
           listEl.innerHTML = '<div class="empty">Could not load templates: ' + escapeHtml(err.message || "") + "</div>";
         }
       }
+      function fmtDate(ts) { return ts && ts.toDate ? ts.toDate().toLocaleString() : ""; }
     </script>
   </body>
 </html>
