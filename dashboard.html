@@ -1232,15 +1232,52 @@
           listEl.innerHTML = "";
           for (const doc of snap.docs) {
             const d = doc.data();
+            const geoRange = d.geoRange || 100;
+            const allowSignOut = d.allowSignOut || false;
             const myCheckin = await db.collection("attendanceSessions").doc(doc.id).collection("checkins").doc(auth.currentUser.uid).get();
             const card = document.createElement("div");
             card.className = "itemCard";
             if (myCheckin.exists) {
-              card.innerHTML = '<div class="ititle">' + escapeHtml(d.label) + '</div><div class="readConfirmed">✓ Checked in at ' + fmtDate(myCheckin.data().checkedInAt) + "</div>";
+              const cd = myCheckin.data();
+              const signedOut = cd.signedOutAt ? true : false;
+              let statusHtml = '<div class="readConfirmed">✓ Checked in at ' + fmtDate(cd.checkedInAt) + '</div>';
+              if (allowSignOut && !signedOut) {
+                statusHtml += '<button class="btn" data-signout style="margin-top:10px;background:transparent;border:1.5px solid var(--warn);color:var(--warn);">Sign Out (Leave Class)</button>';
+                statusHtml += '<div class="hint" style="margin-top:6px;">Tap when you\'re leaving. This is optional.</div>';
+              } else if (signedOut) {
+                statusHtml += '<div class="readConfirmed" style="margin-top:6px;">✓ Signed out at ' + fmtDate(cd.signedOutAt) + '</div>';
+              }
+              card.innerHTML = '<div class="ititle">' + escapeHtml(d.label) + '</div>' + statusHtml;
+              if (allowSignOut && !signedOut) {
+                card.querySelector("[data-signout]").addEventListener("click", async function () {
+                  const btn = this;
+                  btn.disabled = true; btn.textContent = "Signing out...";
+                  const myLoc = await getMyLocation();
+                  let distance = null;
+                  if (d.location && myLoc) {
+                    distance = haversineMeters(d.location.lat, d.location.lng, myLoc.lat, myLoc.lng);
+                    if (distance > geoRange) {
+                      btn.disabled = false; btn.textContent = "Sign Out (Leave Class)";
+                      alert("You appear to be about " + Math.round(distance) + "m from class. You must be within " + geoRange + "m to sign out.");
+                      return;
+                    }
+                  }
+                  try {
+                    await db.collection("attendanceSessions").doc(doc.id).collection("checkins").doc(auth.currentUser.uid).set({
+                      signedOutAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    }, { merge: true });
+                    loadAttendanceScan();
+                  } catch (err) {
+                    btn.disabled = false; btn.textContent = "Sign Out (Leave Class)";
+                    alert(friendlyError(err));
+                  }
+                });
+              }
             } else {
+              const deviceFP = getDeviceFingerprint();
               card.innerHTML =
-                '<div class="ititle">' + escapeHtml(d.label) + '</div><div class="imeta">Scan the QR your lecturer is showing, or type the code</div>' +
-                '<button class="btn" data-scan-qr style="margin-top:10px;">📷 Scan QR Code</button>' +
+                '<div class="ititle">' + escapeHtml(d.label) + '</div><div class="imeta">Scan the QR your lecturer is showing, or type the code (within ' + geoRange + 'm)</div>' +
+                '<button class="btn" data-scan-qr style="margin-top:10px;">Scan QR Code</button>' +
                 '<div class="field" style="margin-top:10px;"><input type="text" data-code-input placeholder="e.g. B7X9K2" style="text-transform:uppercase;letter-spacing:4px;font-weight:700;"/></div>' +
                 '<button class="btn-outline-sm" data-submit-code style="width:100%;padding:11px;text-align:center;">Check In</button><div class="msg" data-msg style="margin-top:10px;font-size:0.82rem;"></div>';
               card.querySelector("[data-scan-qr]").addEventListener("click", function () {
@@ -1260,17 +1297,17 @@
                 let distance = null;
                 if (d.location && myLoc) {
                   distance = haversineMeters(d.location.lat, d.location.lng, myLoc.lat, myLoc.lng);
-                  if (distance > 100) {
+                  if (distance > geoRange) {
                     btn.disabled = false; btn.textContent = "Check In";
                     msgEl.style.color = "var(--danger)";
-                    msgEl.textContent = "You appear to be about " + Math.round(distance) + "m from class — you must be within 100m to check in.";
+                    msgEl.textContent = "You appear to be about " + Math.round(distance) + "m from class — you must be within " + geoRange + "m to check in.";
                     return;
                   }
                 }
                 try {
                   await db.collection("attendanceSessions").doc(doc.id).collection("checkins").doc(auth.currentUser.uid).set({
                     name: auth.currentUser.displayName || auth.currentUser.email, checkedInAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    distanceMeters: distance,
+                    distanceMeters: distance, deviceFingerprint: deviceFP, gpsLat: myLoc ? myLoc.lat : null, gpsLng: myLoc ? myLoc.lng : null,
                   });
                   loadAttendanceScan();
                 } catch (err) {
@@ -1284,6 +1321,14 @@
         } catch (err) {
           listEl.innerHTML = '<div class="empty">Could not load sessions. Please try again later.</div>';
         }
+      }
+
+      function getDeviceFingerprint() {
+        var parts = [navigator.userAgent, navigator.language, screen.width + "x" + screen.height, Intl.DateTimeFormat().resolvedOptions().timeZone];
+        var h = 0;
+        var str = parts.join("|");
+        for (var i = 0; i < str.length; i++) { h = ((h << 5) - h + str.charCodeAt(i)) | 0; }
+        return "dev_" + Math.abs(h).toString(36);
       }
 
       // ================= ATTENDANCE: HISTORY =================
