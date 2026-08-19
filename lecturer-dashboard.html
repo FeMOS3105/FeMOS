@@ -426,7 +426,9 @@
         }
       });
 
-      document.getElementById("btnLogout").addEventListener("click", async function () { await auth.signOut(); window.location.href = "login.html"; });
+      document.getElementById("btnLogout").addEventListener("click", function () {
+        showConfirm("Do you really want to logout?", async function () { await auth.signOut(); window.location.href = "login.html"; });
+      });
 
       function renderCourseGrid() {
         const grid = document.getElementById("courseGrid");

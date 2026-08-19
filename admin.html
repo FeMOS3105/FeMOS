@@ -227,6 +227,16 @@
       </div>
     </div>
 
+    <div class="overlay" id="confirmOverlay">
+      <div class="promptBox" style="max-width:340px;">
+        <p id="confirmMsg" style="font-weight:600;margin-bottom:16px;text-align:center;">Are you sure?</p>
+        <div style="display:flex;gap:10px;">
+          <button class="btn-outline" id="confirmCancelBtn" style="flex:1;padding:11px;border-radius:10px;border:1.5px solid var(--line);background:#f2f4f8;color:var(--ink);font-weight:700;cursor:pointer;">Cancel</button>
+          <button class="btn" id="confirmOkBtn" style="flex:1;padding:11px;border-radius:10px;background:var(--danger);color:#fff;border:none;font-weight:700;cursor:pointer;">Confirm</button>
+        </div>
+      </div>
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -256,6 +266,18 @@
         const el = document.getElementById(id);
         el.textContent = text; el.className = "msg show " + type;
         setTimeout(function () { el.classList.remove("show"); }, 4000);
+      }
+      function showConfirm(message, onConfirm) {
+        const overlay = document.getElementById("confirmOverlay");
+        document.getElementById("confirmMsg").textContent = message;
+        overlay.classList.add("show");
+        const okBtn = document.getElementById("confirmOkBtn");
+        const cancelBtn = document.getElementById("confirmCancelBtn");
+        function cleanup() { overlay.classList.remove("show"); okBtn.removeEventListener("click", onOk); cancelBtn.removeEventListener("click", onCancel); }
+        function onOk() { cleanup(); onConfirm(); }
+        function onCancel() { cleanup(); }
+        okBtn.addEventListener("click", onOk);
+        cancelBtn.addEventListener("click", onCancel);
       }
 
       // ---------- Access gate ----------
@@ -291,9 +313,8 @@
         }
       });
 
-      document.getElementById("btnLogout").addEventListener("click", async function () {
-        await auth.signOut();
-        window.location.href = "login.html";
+      document.getElementById("btnLogout").addEventListener("click", function () {
+        showConfirm("Do you really want to logout?", async function () { await auth.signOut(); window.location.href = "login.html"; });
       });
 
       // ---------- Tabs ----------

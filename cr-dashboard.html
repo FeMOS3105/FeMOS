@@ -418,7 +418,9 @@
         } catch (err) { gate.innerHTML = "Could not verify your access. Please try refreshing the page."; }
       });
 
-      document.getElementById("btnLogout").addEventListener("click", async function () { await auth.signOut(); window.location.href = "login.html"; });
+      document.getElementById("btnLogout").addEventListener("click", function () {
+        showConfirm("Do you really want to logout?", async function () { await auth.signOut(); window.location.href = "login.html"; });
+      });
 
       document.querySelectorAll(".tabbtn").forEach(function (btn) {
         btn.addEventListener("click", function () {
