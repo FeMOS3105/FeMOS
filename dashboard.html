@@ -897,7 +897,7 @@
 
       auth.onAuthStateChanged(async function (user) {
         const gate = document.getElementById("gate");
-        if (!user) { gate.innerHTML = 'You must be signed in. <a href="login.html">Go to login</a>.'; return; }
+        if (!user) { window.location.href = "login.html"; return; }
         try {
           const doc = await db.collection("users").doc(user.uid).get();
           const data = doc.exists ? doc.data() : null;
@@ -971,6 +971,8 @@
         loadAttendanceHistory();
         loadAttendanceScan();
         updateAppLockUI();
+        requestNotifyPermission();
+        startAnnouncementListener();
       }
 
       // ================= ANNOUNCEMENTS =================
@@ -1037,6 +1039,23 @@
         } else {
           annCard.classList.remove("unread");
         }
+      }
+
+      var annSeenIds = {};
+      function startAnnouncementListener() {
+        db.collection("announcements").where("institutionId", "==", myInstitutionId)
+          .onSnapshot(function (snap) {
+            snap.docChanges().forEach(function (change) {
+              if (change.type !== "added") return;
+              var d = change.doc.data();
+              if (d.level !== "institution" && d.courseId !== myCourseId) return;
+              if (annSeenIds[change.doc.id]) return;
+              annSeenIds[change.doc.id] = true;
+              if (document.hidden) {
+                showLocalNotification("New Announcement: " + (d.title || "FeMOS"), d.body ? d.body.substring(0, 120) : "Tap to read", "/dashboard.html");
+              }
+            });
+          });
       }
 
       function renderAnnTab(tab) {

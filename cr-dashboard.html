@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FeMOS — CR Dashboard</title>
     <link rel="icon" type="image/png" href="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png"/>
+    <link rel="manifest" href="manifest.json"/>
+    <meta name="theme-color" content="#155fd1"/>
     <link rel="stylesheet" href="theme.css"/>
     <script src="theme.js"></script>
+    <script src="pwa.js"></script>
     <style>
       :root {
         --water-light: #5fd4f0; --water-mid: #2ea8ee; --water-deep: #155fd1;
@@ -399,7 +402,7 @@
 
       auth.onAuthStateChanged(async function (user) {
         const gate = document.getElementById("gate");
-        if (!user) { gate.innerHTML = 'You must be signed in. <a href="login.html">Go to login</a>.'; return; }
+        if (!user) { window.location.href = "login.html"; return; }
         try {
           const roleDoc = await db.collection("userRoles").doc(user.uid).get();
           if (!roleDoc.exists || roleDoc.data().role !== "cr") {
@@ -565,11 +568,26 @@
           document.getElementById("annFilePreview").classList.remove("show");
           document.getElementById("annFileZone").classList.remove("hasFile");
           document.getElementById("annFileZone").querySelector(".uploadText").textContent = "Tap to attach a poster or image";
-          showMsg("msgAnn", "Announcement posted.", "ok");
+          showMsg("msgAnn", "Announcement posted. Sending notifications...", "ok");
           loadAnnouncements();
+          notifyStudentsByEmail(myCourseId, title, body);
         } catch (err) { showMsg("msgAnn", friendlyError(err), "err"); }
         finally { btn.disabled = false; btn.textContent = "Post Announcement"; }
       });
+
+      async function notifyStudentsByEmail(courseId, title, body) {
+        if (typeof emailjs === "undefined") return;
+        try {
+          const usersSnap = await db.collection("users").where("courseId", "==", courseId).where("registrationStatus", "==", "confirmed").get();
+          var emails = usersSnap.docs.map(function (d) { return d.data().email; }).filter(function (e) { return !!e; });
+          for (var i = 0; i < emails.length; i++) {
+            emailjs.send(EMAILJS_SERVICE_ID, "template_announcement", {
+              to_email: emails[i], ann_title: title, ann_body: body.substring(0, 500),
+              course_name: myCourseName, from_name: auth.currentUser.displayName || "FeMOS",
+            }).catch(function () {});
+          }
+        } catch (e) {}
+      }
 
       async function loadAnnouncements() {
         const listEl = document.getElementById("annList");

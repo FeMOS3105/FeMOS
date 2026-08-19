@@ -202,3 +202,7 @@ html[data-theme="dark"] .annImage img { box-shadow: 0 4px 14px rgba(0,0,0,0.3); 
 
 /* ---- No-indexedDB warning ---- */
 html[data-theme="dark"] .warn-banner { background: rgba(224,160,32,0.15); color: var(--warn); border-color: var(--warn); }
+
+/* ---- PWA Install Button ---- */
+@keyframes pwaSlideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+html[data-theme="dark"] #pwaInstallBtn { background: linear-gradient(135deg, #1e40af, #155fd1); }

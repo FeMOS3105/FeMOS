@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FeMOS — Admin</title>
     <link rel="icon" type="image/png" href="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png"/>
+    <link rel="manifest" href="manifest.json"/>
+    <meta name="theme-color" content="#155fd1"/>
     <link rel="stylesheet" href="theme.css"/>
     <script src="theme.js"></script>
+    <script src="pwa.js"></script>
     <style>
       :root {
         --water-light: #5fd4f0; --water-mid: #2ea8ee; --water-deep: #155fd1;
@@ -283,9 +286,7 @@
       // ---------- Access gate ----------
       auth.onAuthStateChanged(async function (user) {
         const gate = document.getElementById("gate");
-        if (!user) {
-          gate.innerHTML = 'You must be signed in. <a href="login.html">Go to login</a>.';
-          return;
+        if (!user) { window.location.href = "login.html"; return; }
         }
         try {
           const roleDoc = await db.collection("userRoles").doc(user.uid).get();

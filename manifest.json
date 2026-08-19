@@ -1,0 +1,25 @@
+{
+  "name": "FeMOS — Student Management System",
+  "short_name": "FeMOS",
+  "description": "FastLine Enterprises Management Operating System for student registration, attendance, and announcements.",
+  "start_url": "/dashboard.html",
+  "display": "standalone",
+  "background_color": "#eef5ff",
+  "theme_color": "#155fd1",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "productivity"]
+}

@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FeMOS — Institution Admin</title>
     <link rel="icon" type="image/png" href="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png"/>
+    <link rel="manifest" href="manifest.json"/>
+    <meta name="theme-color" content="#155fd1"/>
     <link rel="stylesheet" href="theme.css"/>
     <script src="theme.js"></script>
+    <script src="pwa.js"></script>
     <style>
       :root {
         --water-light: #5fd4f0; --water-mid: #2ea8ee; --water-deep: #155fd1;
@@ -442,7 +445,7 @@
 
       auth.onAuthStateChanged(async function (user) {
         const gate = document.getElementById("gate");
-        if (!user) { gate.innerHTML = 'You must be signed in. <a href="login.html">Go to login</a>.'; return; }
+        if (!user) { window.location.href = "login.html"; return; }
         try {
           const roleDoc = await db.collection("userRoles").doc(user.uid).get();
           if (!roleDoc.exists || roleDoc.data().role !== "institutionAdmin") {
@@ -1019,11 +1022,26 @@
           document.getElementById("instAnnFilePreview").classList.remove("show");
           document.getElementById("instAnnFileZone").classList.remove("hasFile");
           document.getElementById("instAnnFileZone").querySelector(".uploadText").textContent = "Tap to attach a poster or image";
-          showMsg("msgInstAnn", "Announcement posted institution-wide.", "ok");
+          showMsg("msgInstAnn", "Announcement posted. Sending notifications...", "ok");
           loadInstAnnouncements();
+          notifyStudentsByEmailInstitution(myInstitutionId, title, body);
         } catch (err) { showMsg("msgInstAnn", friendlyError(err), "err"); }
         finally { btn.disabled = false; btn.textContent = "Post Announcement"; }
       });
+
+      async function notifyStudentsByEmailInstitution(instId, title, body) {
+        if (typeof emailjs === "undefined") return;
+        try {
+          const usersSnap = await db.collection("users").where("institutionId", "==", instId).where("registrationStatus", "==", "confirmed").get();
+          var emails = usersSnap.docs.map(function (d) { return d.data().email; }).filter(function (e) { return !!e; });
+          for (var i = 0; i < emails.length; i++) {
+            emailjs.send(EMAILJS_SERVICE_ID, "template_announcement", {
+              to_email: emails[i], ann_title: title, ann_body: body.substring(0, 500),
+              course_name: "Institution-wide", from_name: auth.currentUser.displayName || "FeMOS",
+            }).catch(function () {});
+          }
+        } catch (e) {}
+      }
 
       async function loadInstAnnouncements() {
         const listEl = document.getElementById("instAnnList");
