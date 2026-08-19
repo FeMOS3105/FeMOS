@@ -50,6 +50,14 @@
     return /Android/.test(navigator.userAgent) && /Chrome/.test(navigator.userAgent) && !/Edge/.test(navigator.userAgent);
   }
 
+  function isChromeLike() {
+    return /Chrome/.test(navigator.userAgent) && !/Edge/.test(navigator.userAgent) && !/OPR/.test(navigator.userAgent);
+  }
+
+  function isFirefoxAndroid() {
+    return /Android/.test(navigator.userAgent) && /Firefox/.test(navigator.userAgent);
+  }
+
   window._deferredPrompt = null;
   var installBtnCreated = false;
 
@@ -58,18 +66,17 @@
     if (installBtnCreated) return;
     installBtnCreated = true;
 
-    var btn = document.createElement("button");
-    btn.id = "pwaInstallBtn";
-    btn.style.cssText = "position:fixed;bottom:24px;right:24px;z-index:10000;display:flex;align-items:center;gap:8px;padding:14px 22px;border:none;border-radius:14px;background:linear-gradient(135deg,#2ea8ee,#155fd1);color:#fff;font-weight:700;font-size:0.88rem;font-family:'Segoe UI',system-ui,sans-serif;cursor:pointer;box-shadow:0 8px 28px rgba(21,95,209,0.4);transition:all 0.3s ease;animation:pwaSlideIn 0.4s ease;";
-
     var downloadIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+    var tipStyle = "position:fixed;bottom:24px;right:24px;z-index:10000;padding:14px 18px;border-radius:14px;background:linear-gradient(135deg,#2ea8ee,#155fd1);color:#fff;font-weight:600;font-size:0.82rem;font-family:'Segoe UI',system-ui,sans-serif;box-shadow:0 8px 28px rgba(21,95,209,0.4);animation:pwaSlideIn 0.4s ease;max-width:240px;line-height:1.4;cursor:pointer;";
 
-    btn.addEventListener("mouseenter", function () { btn.style.transform = "translateY(-2px)"; btn.style.boxShadow = "0 12px 36px rgba(21,95,209,0.5)"; });
-    btn.addEventListener("mouseleave", function () { btn.style.transform = "translateY(0)"; btn.style.boxShadow = "0 8px 28px rgba(21,95,209,0.4)"; });
-
-    /* ---- Chrome / Edge / Samsung ---- */
+    /* ---- Chrome / Edge / Samsung: native install prompt ---- */
     if (window._deferredPrompt) {
+      var btn = document.createElement("button");
+      btn.id = "pwaInstallBtn";
+      btn.style.cssText = "position:fixed;bottom:24px;right:24px;z-index:10000;display:flex;align-items:center;gap:8px;padding:14px 22px;border:none;border-radius:14px;background:linear-gradient(135deg,#2ea8ee,#155fd1);color:#fff;font-weight:700;font-size:0.88rem;font-family:'Segoe UI',system-ui,sans-serif;cursor:pointer;box-shadow:0 8px 28px rgba(21,95,209,0.4);transition:all 0.3s ease;animation:pwaSlideIn 0.4s ease;";
       btn.innerHTML = downloadIcon + '<span>Install FeMOS</span>';
+      btn.addEventListener("mouseenter", function () { btn.style.transform = "translateY(-2px)"; btn.style.boxShadow = "0 12px 36px rgba(21,95,209,0.5)"; });
+      btn.addEventListener("mouseleave", function () { btn.style.transform = "translateY(0)"; btn.style.boxShadow = "0 8px 28px rgba(21,95,209,0.4)"; });
       btn.addEventListener("click", function () {
         window._deferredPrompt.prompt();
         window._deferredPrompt.userChoice.then(function (choice) {
@@ -85,20 +92,31 @@
       return;
     }
 
-    /* ---- iPhone / Safari ---- */
+    /* ---- iPhone / Safari: Share → Add to Home Screen ---- */
     if (isIOS()) {
       var tip = document.createElement("div");
       tip.id = "pwaInstallBtn";
-      tip.style.cssText = "position:fixed;bottom:24px;right:24px;z-index:10000;padding:14px 18px;border-radius:14px;background:linear-gradient(135deg,#2ea8ee,#155fd1);color:#fff;font-weight:600;font-size:0.82rem;font-family:'Segoe UI',system-ui,sans-serif;box-shadow:0 8px 28px rgba(21,95,209,0.4);animation:pwaSlideIn 0.4s ease;max-width:220px;line-height:1.4;cursor:pointer;";
-      tip.innerHTML = 'Tap <b style="font-size:1.1rem;">⬆️</b> then <b>Add to Home Screen</b> to install FeMOS';
+      tip.style.cssText = tipStyle;
+      tip.innerHTML = 'Install FeMOS: Tap <b>⬆️</b> then <b>Add to Home Screen</b>';
       tip.addEventListener("click", function () { tip.remove(); });
       document.body.appendChild(tip);
-      setTimeout(function () { if (document.getElementById("pwaInstallBtn")) tip.remove(); }, 12000);
+      setTimeout(function () { var el = document.getElementById("pwaInstallBtn"); if (el) el.remove(); }, 12000);
       return;
     }
 
-    /* ---- Firefox / other non-supported ---- */
-    /* Don't show any button — it would just be confusing */
+    /* ---- Firefox Android: ⋮ menu → Install ---- */
+    if (isFirefoxAndroid()) {
+      var ffTip = document.createElement("div");
+      ffTip.id = "pwaInstallBtn";
+      ffTip.style.cssText = tipStyle;
+      ffTip.innerHTML = 'Install FeMOS: Tap <b>⋮</b> then <b>Install</b>';
+      ffTip.addEventListener("click", function () { ffTip.remove(); });
+      document.body.appendChild(ffTip);
+      setTimeout(function () { var el = document.getElementById("pwaInstallBtn"); if (el) el.remove(); }, 12000);
+      return;
+    }
+
+    /* ---- Other browsers: don't show anything ---- */
   }
 
   window.addEventListener("beforeinstallprompt", function (e) {
