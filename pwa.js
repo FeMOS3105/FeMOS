@@ -42,38 +42,63 @@
     return localStorage.getItem(INSTALL_KEY) === "true" || window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
   }
 
+  function isIOS() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  }
+
+  function isChromeAndroid() {
+    return /Android/.test(navigator.userAgent) && /Chrome/.test(navigator.userAgent) && !/Edge/.test(navigator.userAgent);
+  }
+
   window._deferredPrompt = null;
+  var installBtnCreated = false;
 
   function createInstallBtn() {
     if (isInstalled()) return;
-    if (document.getElementById("pwaInstallBtn")) return;
+    if (installBtnCreated) return;
+    installBtnCreated = true;
 
     var btn = document.createElement("button");
     btn.id = "pwaInstallBtn";
-    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Install FeMOS</span>';
     btn.style.cssText = "position:fixed;bottom:24px;right:24px;z-index:10000;display:flex;align-items:center;gap:8px;padding:14px 22px;border:none;border-radius:14px;background:linear-gradient(135deg,#2ea8ee,#155fd1);color:#fff;font-weight:700;font-size:0.88rem;font-family:'Segoe UI',system-ui,sans-serif;cursor:pointer;box-shadow:0 8px 28px rgba(21,95,209,0.4);transition:all 0.3s ease;animation:pwaSlideIn 0.4s ease;";
+
+    var downloadIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+
     btn.addEventListener("mouseenter", function () { btn.style.transform = "translateY(-2px)"; btn.style.boxShadow = "0 12px 36px rgba(21,95,209,0.5)"; });
     btn.addEventListener("mouseleave", function () { btn.style.transform = "translateY(0)"; btn.style.boxShadow = "0 8px 28px rgba(21,95,209,0.4)"; });
 
-    btn.addEventListener("click", function () {
-      if (!window._deferredPrompt) {
-        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Use your browser menu to install</span>';
-        setTimeout(function () { btn.remove(); }, 3000);
-        return;
-      }
-      window._deferredPrompt.prompt();
-      window._deferredPrompt.userChoice.then(function (choice) {
-        if (choice.outcome === "accepted") {
-          localStorage.setItem(INSTALL_KEY, "true");
-          btn.style.opacity = "0";
-          btn.style.transform = "translateY(20px)";
-          setTimeout(function () { btn.remove(); }, 300);
-        }
-        window._deferredPrompt = null;
+    /* ---- Chrome / Edge / Samsung ---- */
+    if (window._deferredPrompt) {
+      btn.innerHTML = downloadIcon + '<span>Install FeMOS</span>';
+      btn.addEventListener("click", function () {
+        window._deferredPrompt.prompt();
+        window._deferredPrompt.userChoice.then(function (choice) {
+          if (choice.outcome === "accepted") {
+            localStorage.setItem(INSTALL_KEY, "true");
+            btn.style.opacity = "0"; btn.style.transform = "translateY(20px)";
+            setTimeout(function () { btn.remove(); }, 300);
+          }
+          window._deferredPrompt = null;
+        });
       });
-    });
+      document.body.appendChild(btn);
+      return;
+    }
 
-    document.body.appendChild(btn);
+    /* ---- iPhone / Safari ---- */
+    if (isIOS()) {
+      var tip = document.createElement("div");
+      tip.id = "pwaInstallBtn";
+      tip.style.cssText = "position:fixed;bottom:24px;right:24px;z-index:10000;padding:14px 18px;border-radius:14px;background:linear-gradient(135deg,#2ea8ee,#155fd1);color:#fff;font-weight:600;font-size:0.82rem;font-family:'Segoe UI',system-ui,sans-serif;box-shadow:0 8px 28px rgba(21,95,209,0.4);animation:pwaSlideIn 0.4s ease;max-width:220px;line-height:1.4;cursor:pointer;";
+      tip.innerHTML = 'Tap <b style="font-size:1.1rem;">⬆️</b> then <b>Add to Home Screen</b> to install FeMOS';
+      tip.addEventListener("click", function () { tip.remove(); });
+      document.body.appendChild(tip);
+      setTimeout(function () { if (document.getElementById("pwaInstallBtn")) tip.remove(); }, 12000);
+      return;
+    }
+
+    /* ---- Firefox / other non-supported ---- */
+    /* Don't show any button — it would just be confusing */
   }
 
   window.addEventListener("beforeinstallprompt", function (e) {
@@ -90,9 +115,9 @@
 
   if (!isInstalled()) {
     if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", function () { setTimeout(createInstallBtn, 1500); });
+      document.addEventListener("DOMContentLoaded", function () { setTimeout(createInstallBtn, 2000); });
     } else {
-      setTimeout(createInstallBtn, 1500);
+      setTimeout(createInstallBtn, 2000);
     }
   }
 })();
