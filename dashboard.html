@@ -1959,7 +1959,7 @@
 
       document.getElementById("pinGateLogout").addEventListener("click", async function () {
         await auth.signOut();
-        window.location.href = "login.html";
+        window.location.replace("login.html");
       });
 
       // ================= FEEDBACK PANEL =================
