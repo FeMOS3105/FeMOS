@@ -445,6 +445,17 @@
             <div class="dashCard" data-open="polls"><div class="iconBadge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="label">Polls</div><div class="stat" id="statPolls">Loading...</div></div>
             <div class="dashCard" data-open="collect"><div class="iconBadge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M9 13h6M9 17h6"/></svg></div><div class="label">Quick Collect</div><div class="stat" id="statCollect">Loading...</div></div>
             <div class="dashCard settingsCard" data-open="dangerZone"><div class="iconBadge settingsBadge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div><div class="label">My Settings</div><div class="stat">Manage your account</div></div>
+            <div class="dashCard" id="enterCRCard" style="display:none;background:linear-gradient(135deg,#155fd1,#0b2f9e);color:#fff;cursor:pointer;" onclick="window.location.replace('/cr')">
+              <div style="display:flex;align-items:center;gap:14px;">
+                <div style="width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;">
+                  <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#fff" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <div>
+                  <div style="font-size:1rem;font-weight:700;">Enter As Class Representative</div>
+                  <div style="font-size:0.82rem;opacity:0.85;">Access your CR dashboard</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -520,6 +531,15 @@
             <div class="dzOpt" id="dzEditCourse">
               <div class="dzIcon blue"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg></div>
               <div class="dzInfo"><div class="dzTitle">Edit My Course</div><div class="dzDesc">Switch to a different course or campus</div></div>
+            </div>
+            <div class="dzOpt" id="dzGender">
+              <div class="dzIcon purple" style="background:linear-gradient(135deg,#c084fc,#9333ea);">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M3 21v-2a7 7 0 0 1 7-7h4a7 7 0 0 1 7 7v2"/></svg>
+              </div>
+              <div class="dzInfo">
+                <div class="dzTitle">Gender</div>
+                <div class="dzDesc" id="dzGenderValue">Loading...</div>
+              </div>
             </div>
             <div class="dzOpt" id="dzRegNumber">
               <div class="dzIcon green"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M9 13h6M9 17h6"/></svg></div>
@@ -737,6 +757,23 @@
       </div>
     </div>
 
+    <!-- ============ GENDER GATE OVERLAY ============ -->
+    <div id="genderGateOverlay" style="position:fixed;inset:0;background:rgba(13,27,75,0.7);display:none;align-items:center;justify-content:center;z-index:9999;padding:18px;">
+      <div style="background:#fff;border-radius:20px;padding:28px 24px;max-width:380px;width:100%;text-align:center;">
+        <div style="font-size:2rem;margin-bottom:12px;">👤</div>
+        <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:6px;color:var(--ink);">Complete Your Registration</h3>
+        <p style="font-size:0.85rem;color:var(--muted);margin-bottom:20px;">Please select your gender to continue using FeMOS.</p>
+        <div style="margin-bottom:20px;">
+          <select id="genderGateSelect" style="width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid var(--line);font-size:0.95rem;color:var(--ink);background:#fbfdff;appearance:none;background-image:url('data:image/svg+xml;utf8,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%235c6b9a%27 stroke-width=%272%27><path d=%27m6 9 6 6 6-6%27/></svg>');background-repeat:no-repeat;background-position:right 14px center;background-size:18px;">
+            <option value="" disabled selected>-- Select Gender --</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </div>
+        <button onclick="saveGenderGate()" style="width:100%;padding:14px;border:none;border-radius:12px;font-weight:700;font-size:0.95rem;cursor:pointer;background:linear-gradient(90deg,var(--water-mid),var(--water-deep));color:#fff;">Save &amp; Continue</button>
+      </div>
+    </div>
+
     <div class="toast" id="regWarnToast">
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
       <span>You haven't set a registration number yet. <a href="#" id="regWarnLink">Set it now in My Settings</a> so your lecturer can track your reads.</span>
@@ -865,6 +902,18 @@
         return "Something went wrong. Please try again.";
       }
 
+      async function saveGenderGate() {
+        const sel = document.getElementById("genderGateSelect");
+        const val = sel.value;
+        if (!val) { sel.style.borderColor = "var(--danger)"; return; }
+        try {
+          await db.collection("users").doc(auth.currentUser.uid).set({ gender: val }, { merge: true });
+          document.getElementById("genderGateOverlay").style.display = "none";
+        } catch (e) {
+          alert("Failed to save. Please try again.");
+        }
+      }
+
       // ---------- Navigation between card grid and detail views ----------
       document.querySelectorAll("[data-open]").forEach(function (card) {
         card.addEventListener("click", function () {
@@ -910,6 +959,11 @@
           const data = doc.exists ? doc.data() : null;
           if (!data || !data.courseId) { window.location.replace("/register"); return; }
 
+          if (!data.gender) {
+            document.getElementById("genderGateOverlay").style.display = "flex";
+            return;
+          }
+
           myInstitutionId = data.institutionId; myCourseId = data.courseId;
           myCourseName = data.courseName || ""; myInstitutionName = data.institutionName || ""; myCampusName = data.campusName || "";
           myRegNumber = data.registrationNumber || "";
@@ -941,6 +995,8 @@
           document.getElementById("rCampus").textContent = myCampusName || "—";
           document.getElementById("rCourse").textContent = myCourseName || "—";
 
+          document.getElementById("dzGenderValue").textContent = (data.gender || "Not set").charAt(0).toUpperCase() + (data.gender || "Not set").slice(1);
+
           const status = data.registrationStatus || (data.confirmedByCR ? "confirmed" : "pending");
           document.getElementById("statReg").textContent = status === "confirmed" ? "✓ Verified" : "⏳ Pending";
           document.getElementById("statReg").style.color = status === "confirmed" ? "var(--success)" : "var(--warn)";
@@ -955,6 +1011,12 @@
             const initials = (user.displayName || user.email || "?").trim().split(/\s+/).map(function (p) { return p[0]; }).slice(0, 2).join("").toUpperCase();
             document.getElementById("uAv").textContent = initials;
             document.getElementById("pAv").textContent = initials;
+          }
+
+          // Check if user is a CR
+          const crRoleDoc = await db.collection("userRoles").doc(user.uid).get();
+          if (crRoleDoc.exists && crRoleDoc.data().role === "cr") {
+            document.getElementById("enterCRCard").style.display = "block";
           }
 
           loadCarousel();
@@ -1554,6 +1616,24 @@
           } catch (err) { dzMsg("dzEditMsg", friendlyError(err), "err"); }
           finally { btn.disabled = false; btn.textContent = "Confirm Change"; }
         };
+      });
+
+      // ---------- 1b. GENDER ----------
+      document.getElementById("dzGender").addEventListener("click", async function () {
+        const current = (await db.collection("users").doc(auth.currentUser.uid).get()).data().gender || "";
+        showConfirm("Your current gender: " + (current || "Not set") + ". Would you like to change it?", async function () {
+          const overlay = document.createElement("div");
+          overlay.id = "genderEditOverlay";
+          overlay.style.cssText = "position:fixed;inset:0;background:rgba(13,27,75,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;padding:18px;";
+          overlay.innerHTML = '<div style="background:#fff;border-radius:20px;padding:28px 24px;max-width:380px;width:100%;text-align:center;"><h3 style="font-size:1rem;font-weight:700;margin-bottom:16px;">Change Gender</h3><select id="genderEditSelect" style="width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid var(--line);font-size:0.95rem;color:var(--ink);background:#fbfdff;margin-bottom:16px;"><option value="male"' + (current === "male" ? " selected" : "") + '>Male</option><option value="female"' + (current === "female" ? " selected" : "") + '>Female</option></select><div style="display:flex;gap:10px;"><button onclick="document.getElementById(\'genderEditOverlay\').remove()" style="flex:1;padding:12px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font-weight:600;cursor:pointer;">Cancel</button><button id="genderEditSaveBtn" style="flex:1;padding:12px;border:none;border-radius:12px;background:linear-gradient(90deg,var(--water-mid),var(--water-deep));color:#fff;font-weight:700;cursor:pointer;">Save</button></div></div>';
+          document.body.appendChild(overlay);
+          document.getElementById("genderEditSaveBtn").addEventListener("click", async function () {
+            const val = document.getElementById("genderEditSelect").value;
+            await db.collection("users").doc(auth.currentUser.uid).set({ gender: val }, { merge: true });
+            document.getElementById("dzGenderValue").textContent = val.charAt(0).toUpperCase() + val.slice(1);
+            overlay.remove();
+          });
+        });
       });
 
       // ---------- 2. REGISTRATION NUMBER ----------

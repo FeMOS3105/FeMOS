@@ -171,6 +171,19 @@
             <input type="text" id="fullName" placeholder="e.g. Jonathan John Athanas" required/>
           </div>
         </div>
+
+        <div class="field">
+          <label for="signupGender">Gender</label>
+          <div class="input-wrap">
+            <svg class="left-icon" viewBox="0 0 24 24"><path d="M12 2a5 5 0 0 1 5 5c0 2.76-2.24 5-5 5s-5-2.24-5-5a5 5 0 0 1 5-5zm0 12c-4 0-8 2-8 4v2h16v-2c0-2-4-4-8-4z"/></svg>
+            <select id="signupGender" style="width:100%;padding:13px 14px 13px 42px;border-radius:12px;border:1.5px solid var(--line);font-size:0.95rem;color:var(--ink);background:#fbfdff;appearance:none;background-image:url('data:image/svg+xml;utf8,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%235c6b9a%27 stroke-width=%272%27><path d=%27m6 9 6 6 6-6%27/></svg>');background-repeat:no-repeat;background-position:right 14px center;background-size:18px;">
+              <option value="" disabled selected>-- Select Gender --</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+        </div>
+
         <button type="button" class="btn" id="btnStep1Next">Next</button>
         <div class="msg" id="msgStep1"></div>
       </div>
@@ -394,14 +407,14 @@
 
       // ---------- Form state, persisted to sessionStorage so it survives a reload ----------
       const STORAGE_KEY = "femos_signup_state_v1";
-      const state = { fullName: "", photoFile: null, photoPreviewUrl: "", email: "", password: "", otpSent: "", otpSentAt: 0, recoveryQuestion: "", recoveryAnswer: "" };
+      const state = { fullName: "", gender: "", photoFile: null, photoPreviewUrl: "", email: "", password: "", otpSent: "", otpSentAt: 0, recoveryQuestion: "", recoveryAnswer: "" };
       let currentStep = 1;
       let passwordChoice = null;
 
       function saveSessionState() {
         try {
           sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
-            step: currentStep, passwordChoice: passwordChoice, fullName: state.fullName, photoPreviewUrl: state.photoPreviewUrl,
+            step: currentStep, passwordChoice: passwordChoice, fullName: state.fullName, gender: state.gender, photoPreviewUrl: state.photoPreviewUrl,
             email: state.email, password: state.password, otpSent: state.otpSent, otpSentAt: state.otpSentAt,
             recoveryQuestion: state.recoveryQuestion, recoveryAnswer: state.recoveryAnswer,
           }));
@@ -455,10 +468,14 @@
       });
 
       document.getElementById("fullName").addEventListener("input", function (e) { state.fullName = e.target.value; });
+      document.getElementById("signupGender").addEventListener("change", function (e) { state.gender = e.target.value; saveSessionState(); });
       document.getElementById("btnStep1Next").addEventListener("click", function () {
         const name = document.getElementById("fullName").value.trim();
         if (!name) { showMsg("msgStep1", "Please enter your full name first.", "err"); return; }
         state.fullName = name;
+        const gender = document.getElementById("signupGender").value;
+        if (!gender) { showMsg("msgStep1", "Please select your gender.", "err"); return; }
+        state.gender = gender;
         goToStep(2);
       });
 
@@ -555,6 +572,7 @@
         if (!password || !confirmPw) { showMsg("msgStep2", "Set and confirm your password.", "err"); return; }
         if (password !== confirmPw) { showMsg("msgStep2", "Passwords do not match.", "err"); return; }
         if (!recoveryQuestion || !recoveryAnswer) { showMsg("msgStep2", "Choose a recovery question and provide an answer, in case you forget your password later.", "err"); return; }
+        if (!state.gender) { showMsg("msgStep2", "Please go back and select your gender.", "err"); return; }
         if (passwordChoice === "own") {
           const r = evaluatePassword(password);
           if (r.metCount < 4) { showMsg("msgStep2", "Please choose a stronger password (mix uppercase, lowercase, numbers, symbols) or use the suggested one.", "err"); return; }
@@ -650,7 +668,7 @@
           const recoveryAnswerHash = await sha256Hex(state.recoveryAnswer);
           await withTimeout(
             db.collection("users").doc(user.uid).set({
-              fullName: state.fullName, email: state.email, photoURL: photoURL || null, verified: true,
+              fullName: state.fullName, email: state.email, photoURL: photoURL || null, gender: state.gender || null, verified: true,
               institution: null, course: null, confirmedByCR: false,
               recoveryQuestion: state.recoveryQuestion, recoveryAnswerHash: recoveryAnswerHash,
               createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -707,8 +725,10 @@
         passwordChoice = saved.passwordChoice || null;
         state.recoveryQuestion = saved.recoveryQuestion || "";
         state.recoveryAnswer = saved.recoveryAnswer || "";
+        state.gender = saved.gender || "";
 
         if (state.fullName) document.getElementById("fullName").value = state.fullName;
+        if (state.gender) document.getElementById("signupGender").value = state.gender;
         if (state.recoveryQuestion) document.getElementById("recoveryQuestion").value = state.recoveryQuestion;
         if (state.recoveryAnswer) document.getElementById("recoveryAnswer").value = state.recoveryAnswer;
         if (state.photoPreviewUrl) avatarCircle.innerHTML = '<img src="' + state.photoPreviewUrl + '" alt="Profile Picture"/>';

@@ -83,6 +83,15 @@
         </div>
 
         <div class="field">
+          <label for="regGender">Gender</label>
+          <select id="regGender" required>
+            <option value="" disabled selected>-- Select Gender --</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </div>
+
+        <div class="field">
           <label for="course">Course</label>
           <select id="course" required disabled>
             <option value="" disabled selected>-- Select Campus First --</option>
@@ -206,6 +215,10 @@
           const initials = (user.displayName || user.email || "?").trim().split(/\s+/).map(function (p) { return p[0]; }).slice(0, 2).join("").toUpperCase();
           document.getElementById("userAv").textContent = initials;
         }
+        const userDoc = await db.collection("users").doc(user.uid).get();
+        if (userDoc.exists && userDoc.data().gender) {
+          document.getElementById("regGender").value = userDoc.data().gender;
+        }
         loadInstitutions();
       });
 
@@ -216,6 +229,8 @@
         const campusId = campusSelect.value;
         const courseId = courseSelect.value;
         const courseName = courseSelect.options[courseSelect.selectedIndex] ? courseSelect.options[courseSelect.selectedIndex].textContent : "";
+        const gender = document.getElementById("regGender").value;
+        if (!gender) { showMsg("Please select your gender.", "err"); return; }
         if (!institutionId || !campusId || !courseId) { showMsg("Select an institution, campus, and course before continuing.", "err"); return; }
 
         const btn = document.getElementById("btnSaveReg");
@@ -225,6 +240,7 @@
             institutionId: institutionId, institutionName: selectedInstitutionName,
             campusId: campusId, campusName: selectedCampusName,
             courseId: courseId, courseName: courseName,
+            gender: gender,
             registrationStatus: "pending", confirmedByCR: false,
           };
           regData = await FeMOSEncrypt.encryptFields(currentUser.uid, regData, ["name", "email", "registrationNumber"]);

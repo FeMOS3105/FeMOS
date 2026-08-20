@@ -161,6 +161,24 @@
       .courseRow { display: flex; align-items: center; justify-content: space-between; padding: 9px 4px; border-bottom: 1px solid var(--line); position: relative; }
       .courseRow:last-of-type { border-bottom: none; }
       .courseRow .cname { font-size: 0.86rem; color: var(--ink); }
+      .courseMiniCard { border: 1.5px solid var(--line); border-radius: 12px; margin-bottom: 10px; background: #fff; overflow: hidden; transition: border-color 0.2s, box-shadow 0.2s; }
+      .courseMiniCard:hover { border-color: var(--water-mid); box-shadow: 0 2px 8px rgba(21,95,209,0.1); }
+      .courseMiniHeader { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; cursor: pointer; user-select: none; }
+      .courseMiniHeader .cname { font-weight: 600; font-size: 0.9rem; color: var(--ink); }
+      .courseExpandIcon { font-size: 1.2rem; color: var(--muted); transition: transform 0.2s; font-weight: 700; }
+      .courseMiniCard.open .courseExpandIcon { transform: rotate(90deg); }
+      .courseMiniBody { padding: 0 14px 14px; border-top: 1px solid var(--line); }
+      .courseMiniLoading { padding: 12px 0; text-align: center; font-size: 0.82rem; color: var(--muted); }
+      .courseCrTag { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; margin: 10px 4px 0; }
+      .courseCrTag.male { background: #e8f4fd; color: #155fd1; }
+      .courseCrTag.female { background: #fce8f4; color: #c2185b; }
+      .courseRosterList { margin-top: 10px; }
+      .courseRosterItem { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: 8px; font-size: 0.82rem; border-bottom: 1px solid var(--line); }
+      .courseRosterItem:last-child { border-bottom: none; }
+      .courseRosterItem .rName { font-weight: 600; color: var(--ink); }
+      .courseRosterItem .rReg { font-size: 0.76rem; color: var(--muted); }
+      .noRosterNote { padding: 12px 0; text-align: center; font-size: 0.82rem; color: var(--muted); font-style: italic; }
+      .noCrNote { padding: 8px 0; font-size: 0.82rem; color: var(--muted); font-style: italic; }
       .courseMenuBtn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 4px 8px; border-radius: 6px; }
       .courseMenuBtn:hover { background: #f5f9ff; }
       .addCourseRow { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
@@ -248,6 +266,15 @@
             </div>
           </nav>
           <div class="sidebarFooter">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-top:1px solid var(--line);margin-top:auto;">
+              <div>
+                <div style="font-size:0.8rem;font-weight:700;color:var(--ink);">Theme</div>
+                <div id="dzThemeDesc" style="font-size:0.72rem;color:var(--muted);">Light mode is on</div>
+              </div>
+              <div id="dzThemeToggle" onclick="feMosToggleTheme()" style="position:relative;width:44px;height:22px;border-radius:11px;cursor:pointer;transition:background 0.3s;background:#e0e4ec;">
+                <div id="dzThemeKnob" style="position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.3);transition:left 0.3s;"></div>
+              </div>
+            </div>
             <button class="logoutBtn" id="btnLogout">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
               Log Out
@@ -698,17 +725,88 @@
           } else {
             courseSnap.forEach(function (courseDoc) {
               const row = document.createElement("div");
-              row.className = "courseRow";
+              row.className = "courseMiniCard";
+              row.setAttribute("data-course-id", courseDoc.id);
               row.innerHTML =
-                '<span class="cname">' + escapeHtml(courseDoc.data().name) + '</span>' +
-                '<button class="courseMenuBtn" data-course-menu-toggle>⋮</button>' +
-                '<div class="dropdown" data-course-menu>' +
+                '<div class="courseMiniHeader" data-course-toggle>' +
+                  '<span class="cname">' + escapeHtml(courseDoc.data().name) + '</span>' +
+                  '<span class="courseExpandIcon">\u203A</span>' +
+                '</div>' +
+                '<div class="courseMiniBody" style="display:none;">' +
+                  '<div class="courseMiniLoading">Loading details...</div>' +
+                '</div>' +
+                '<button class="courseMenuBtn" data-course-menu-toggle style="position:absolute;top:10px;right:8px;z-index:5;">\u22EE</button>' +
+                '<div class="dropdown" data-course-menu style="position:absolute;right:10px;top:42px;background:#fff;border-radius:12px;box-shadow:0 16px 40px rgba(13,27,75,0.22);min-width:190px;z-index:40;overflow:hidden;display:none;">' +
                   '<button data-edit-course>Edit Name</button>' +
                   '<button data-assign-cr>Assign CR</button>' +
                   '<button class="danger" data-delete-course>Delete Course</button>' +
                 '</div>';
               wireCourseRow(row, collegeDoc.id, courseDoc.id, courseDoc.data().name);
               courseListEl.appendChild(row);
+            });
+            const miniCards = courseListEl.querySelectorAll(".courseMiniCard");
+            miniCards.forEach(function (card) {
+              const header = card.querySelector(".courseMiniHeader");
+              const body = card.querySelector(".courseMiniBody");
+              let loaded = false;
+              header.addEventListener("click", async function () {
+                const isOpen = card.classList.contains("open");
+                if (isOpen) {
+                  card.classList.remove("open");
+                  body.style.display = "none";
+                  return;
+                }
+                card.classList.add("open");
+                body.style.display = "block";
+                if (!loaded) {
+                  loaded = true;
+                  body.innerHTML = '<div class="courseMiniLoading">Loading details...</div>';
+                  try {
+                    const courseId = card.getAttribute("data-course-id");
+                    const crSnap = await db.collection("userRoles")
+                      .where("role", "==", "cr")
+                      .where("institutionId", "==", myInstitutionId)
+                      .where("courseId", "==", courseId)
+                      .get();
+                    let html = "";
+                    if (crSnap.empty) {
+                      html += '<div class="noCrNote">No CR assigned yet</div>';
+                    } else {
+                      for (const crDoc of crSnap.docs) {
+                        const crData = crDoc.data();
+                        const crUserDoc = await db.collection("users").doc(crDoc.id).get();
+                        const crUser = crUserDoc.exists ? crUserDoc.data() : {};
+                        const crGender = crUser.gender || "unknown";
+                        const crName = crUser.fullName || crData.email || "Unknown";
+                        const genderLabel = crGender === "male" ? "Male CR" : crGender === "female" ? "Female CR" : "CR";
+                        const tagClass = crGender === "male" ? "male" : "female";
+                        html += '<div class="courseCrTag ' + tagClass + '">' + genderLabel + ': ' + escapeHtml(crName) + '</div>';
+                      }
+                    }
+                    const rosterSnap = await db.collection("users")
+                      .where("institutionId", "==", myInstitutionId)
+                      .where("courseId", "==", courseId)
+                      .where("registrationStatus", "==", "confirmed")
+                      .get();
+                    if (rosterSnap.empty) {
+                      html += '<div class="noRosterNote">No confirmed students yet</div>';
+                    } else {
+                      html += '<div class="courseRosterList">';
+                      rosterSnap.forEach(function (sDoc) {
+                        const s = sDoc.data();
+                        html += '<div class="courseRosterItem">' +
+                          '<span class="rName">' + escapeHtml(s.fullName || s.name || "Unknown") + '</span>' +
+                          '<span class="rReg">' + escapeHtml(s.registrationNumber || "No reg #") + '</span>' +
+                        '</div>';
+                      });
+                      html += '</div>';
+                    }
+                    body.innerHTML = html;
+                  } catch (e) {
+                    body.innerHTML = '<div class="courseMiniLoading">Failed to load details</div>';
+                  }
+                }
+              });
             });
           }
 
@@ -823,6 +921,29 @@
           const userSnap = await db.collection("users").where("email", "==", email).where("institutionId", "==", myInstitutionId).limit(1).get();
           if (userSnap.empty) { alert("No student found with that email registered under your institution."); return; }
           const targetUid = userSnap.docs[0].id;
+          const targetUserDoc = await db.collection("users").doc(targetUid).get();
+          const targetGender = targetUserDoc.exists ? targetUserDoc.data().gender : null;
+          if (!targetGender) {
+            alert("Cannot assign CR: this user has not set their gender yet.");
+            return;
+          }
+          const existingCrSnap = await db.collection("userRoles")
+            .where("role", "==", "cr")
+            .where("institutionId", "==", myInstitutionId)
+            .where("courseId", "==", courseId)
+            .get();
+          let sameGenderExists = false;
+          for (const crDoc of existingCrSnap.docs) {
+            const crUserDoc = await db.collection("users").doc(crDoc.id).get();
+            if (crUserDoc.exists && crUserDoc.data().gender === targetGender) {
+              sameGenderExists = true;
+              break;
+            }
+          }
+          if (sameGenderExists) {
+            alert("A " + targetGender + " CR is already assigned to this course. Each course can have one male and one female CR.");
+            return;
+          }
           await db.collection("userRoles").doc(targetUid).set({
             role: "cr", institutionId: myInstitutionId, courseId: courseId, courseName: courseName,
             assignedAt: firebase.firestore.FieldValue.serverTimestamp(), assignedBy: auth.currentUser.uid,
@@ -858,6 +979,29 @@
           const userSnap = await db.collection("users").where("email", "==", email).where("institutionId", "==", myInstitutionId).limit(1).get();
           if (userSnap.empty) { showMsg("msgCr", "No student found with that email registered under your institution.", "err"); return; }
           const targetUid = userSnap.docs[0].id;
+          const targetUserDoc = await db.collection("users").doc(targetUid).get();
+          const targetGender = targetUserDoc.exists ? targetUserDoc.data().gender : null;
+          if (!targetGender) {
+            showMsg("msgCr", "Cannot assign CR: this user has not set their gender yet.", "err");
+            return;
+          }
+          const existingCrSnap = await db.collection("userRoles")
+            .where("role", "==", "cr")
+            .where("institutionId", "==", myInstitutionId)
+            .where("courseId", "==", courseId)
+            .get();
+          let sameGenderExists = false;
+          for (const crDoc of existingCrSnap.docs) {
+            const crUserDoc = await db.collection("users").doc(crDoc.id).get();
+            if (crUserDoc.exists && crUserDoc.data().gender === targetGender) {
+              sameGenderExists = true;
+              break;
+            }
+          }
+          if (sameGenderExists) {
+            showMsg("msgCr", "A " + targetGender + " CR is already assigned to this course. Each course can have one male and one female CR.", "err");
+            return;
+          }
           await db.collection("userRoles").doc(targetUid).set({
             role: "cr", institutionId: myInstitutionId, courseId: courseId, courseName: courseName,
             assignedAt: firebase.firestore.FieldValue.serverTimestamp(), assignedBy: auth.currentUser.uid,
@@ -880,11 +1024,16 @@
           for (const doc of snap.docs) {
             const d = doc.data();
             let label = doc.id;
+            let crGender = null;
             try {
               const userDoc = await db.collection("users").doc(doc.id).get();
-              if (userDoc.exists) label = userDoc.data().fullName || userDoc.data().email || doc.id;
+              if (userDoc.exists) {
+                label = userDoc.data().fullName || userDoc.data().email || doc.id;
+                crGender = userDoc.data().gender || null;
+              }
             } catch (e) {}
-            html += '<div class="prow"><div class="info"><b>' + escapeHtml(label) + '</b><span>' + escapeHtml(d.courseName || d.courseId) + '</span></div>' +
+            const genderLabel = crGender === "male" ? " · Male CR" : crGender === "female" ? " · Female CR" : "";
+            html += '<div class="prow"><div class="info"><b>' + escapeHtml(label) + '</b><span>' + escapeHtml(d.courseName || d.courseId) + genderLabel + '</span></div>' +
                     '<div class="actions"><button class="btn-sm btn-reject" data-revoke="' + doc.id + '">Revoke</button></div></div>';
           }
           listEl.innerHTML = html;
