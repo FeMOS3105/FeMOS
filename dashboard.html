@@ -799,6 +799,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script src="fcm.js"></script>
+    <script src="crypto.js"></script>
 
     <script>
       const firebaseConfig = {
@@ -903,11 +904,11 @@
 
       auth.onAuthStateChanged(async function (user) {
         const gate = document.getElementById("gate");
-        if (!user) { window.location.replace("login.html"); return; }
+        if (!user) { window.location.replace("/login"); return; }
         try {
           const doc = await db.collection("users").doc(user.uid).get();
           const data = doc.exists ? doc.data() : null;
-          if (!data || !data.courseId) { window.location.replace("registration.html"); return; }
+          if (!data || !data.courseId) { window.location.replace("/register"); return; }
 
           myInstitutionId = data.institutionId; myCourseId = data.courseId;
           myCourseName = data.courseName || ""; myInstitutionName = data.institutionName || ""; myCampusName = data.campusName || "";
@@ -964,7 +965,7 @@
       });
 
       document.getElementById("btnLogout").addEventListener("click", function () {
-        showConfirm("Do you really want to logout?", async function () { await auth.signOut(); window.location.replace("login.html"); });
+        showConfirm("Do you really want to logout?", async function () { await auth.signOut(); window.location.replace("/login"); });
       });
 
       let initialized = false;
@@ -1059,7 +1060,7 @@
               if (annSeenIds[change.doc.id]) return;
               annSeenIds[change.doc.id] = true;
               if (document.hidden) {
-                showLocalNotification("New Announcement: " + (d.title || "FeMOS"), d.body ? d.body.substring(0, 120) : "Tap to read", "/dashboard.html");
+                showLocalNotification("New Announcement: " + (d.title || "FeMOS"), d.body ? d.body.substring(0, 120) : "Tap to read", "/dashboard");
               }
             });
           });
@@ -1199,7 +1200,7 @@
             card.innerHTML =
               '<div class="collectRow"><div><div class="ititle">' + escapeHtml(d.title) + '</div><div class="imeta">' + escapeHtml(d.instructions) + '</div>' +
               (mySub.exists ? '<div class="submittedTag">✓ Submitted: ' + escapeHtml(mySub.data().value) + '</div>' : "") +
-              '</div><a class="btn-outline-sm" href="collect-form.html?id=' + doc.id + '">' + (mySub.exists ? "Update" : "Fill Out") + '</a></div>';
+              '</div><a class="btn-outline-sm" href="/collect?id=' + doc.id + '">' + (mySub.exists ? "Update" : "Fill Out") + '</a></div>';
             listEl.appendChild(card);
           }
           document.getElementById("statCollect").textContent = pendingCount > 0 ? pendingCount + " to fill" : "All submitted";
@@ -1521,7 +1522,9 @@
                   if (typeof emailjs !== "undefined" && !EMAILJS_COURSE_CHANGE_TEMPLATE_ID.startsWith("PUT_")) {
                     try {
                       var crUserDoc = await db.collection("users").doc(crDoc.id).get();
-                      var crEmail = crUserDoc.exists ? crUserDoc.data().email : null;
+                      var crUserData = crUserDoc.exists ? crUserDoc.data() : null;
+                      if (crUserData) crUserData = await FeMOSEncrypt.decryptFields(crDoc.id, crUserData, ["name", "email", "registrationNumber"]);
+                      var crEmail = crUserData ? crUserData.email : null;
                       if (crEmail) {
                         await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_COURSE_CHANGE_TEMPLATE_ID, {
                           to_email: crEmail, to_name: crData.fullName || crData.name || "CR",
@@ -1564,7 +1567,9 @@
         var val = document.getElementById("dzRegNumInput").value.trim();
         if (!val) { dzMsg("dzRegNumMsg", "Enter a registration number.", "err"); return; }
         try {
-          await db.collection("users").doc(auth.currentUser.uid).set({ registrationNumber: val }, { merge: true });
+          var regData = { registrationNumber: val };
+          regData = await FeMOSEncrypt.encryptFields(auth.currentUser.uid, regData, ["name", "email", "registrationNumber"]);
+          await db.collection("users").doc(auth.currentUser.uid).set(regData, { merge: true });
           myRegNumber = val;
           document.getElementById("pRegNum").textContent = val;
           dzMsg("dzRegNumMsg", "Registration number saved.", "ok");
@@ -1704,7 +1709,7 @@
         try {
           await db.collection("users").doc(auth.currentUser.uid).delete();
           await auth.currentUser.delete();
-          window.location.replace("registration.html");
+          window.location.replace("/register");
         } catch (err) {
           if (err.code === "auth/requires-recent-login") {
             dzMsg("dzDeleteMsg", "For security, please log out and log back in, then try again.", "err");
@@ -1959,7 +1964,7 @@
 
       document.getElementById("pinGateLogout").addEventListener("click", async function () {
         await auth.signOut();
-        window.location.replace("login.html");
+        window.location.replace("/login");
       });
 
       // ================= FEEDBACK PANEL =================

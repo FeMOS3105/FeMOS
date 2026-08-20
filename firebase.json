@@ -10,5 +10,34 @@
       "ignore": ["node_modules", ".git"],
       "predeploy": []
     }
-  ]
+  ],
+  "hosting": {
+    "public": ".",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      { "source": "/login", "destination": "/login.html" },
+      { "source": "/signup", "destination": "/signup.html" },
+      { "source": "/register", "destination": "/registration.html" },
+      { "source": "/dashboard", "destination": "/dashboard.html" },
+      { "source": "/cr", "destination": "/cr-dashboard.html" },
+      { "source": "/lecturer", "destination": "/lecturer-dashboard.html" },
+      { "source": "/inst-admin", "destination": "/institution-admin.html" },
+      { "source": "/admin", "destination": "/admin-dashboard.html" },
+      { "source": "/superadmin", "destination": "/admin.html" },
+      { "source": "/reset", "destination": "/reset-password.html" },
+      { "source": "/proof", "destination": "/proof.html" },
+      { "source": "/collect", "destination": "/collect-form.html" },
+      { "source": "/seed", "destination": "/seed-catalog.html" }
+    ],
+    "headers": [
+      {
+        "source": "**",
+        "headers": [
+          { "key": "X-Content-Type-Options", "value": "nosniff" },
+          { "key": "X-Frame-Options", "value": "DENY" },
+          { "key": "Referrer-Policy", "value": "no-referrer" }
+        ]
+      }
+    ]
+  }
 }

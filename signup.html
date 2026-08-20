@@ -133,7 +133,7 @@
         <img src="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png" alt="FeMOS logo"/>
       </div>
       <h1 class="brand">Sign Up for FeMOS</h1>
-      <div class="linkline">Already have a FeMOS account? <a href="login.html">Log In Here</a></div>
+      <div class="linkline">Already have a FeMOS account? <a href="/login">Log In Here</a></div>
 
       <div class="steps">
         <span class="dot active" data-dot="1"></span>
@@ -661,7 +661,7 @@
           await tryStoreCredential(state.email, state.password, state.fullName);
           clearSessionState();
           showMsg("msgStep3", "Verified! Taking you to institution and course registration...", "ok");
-          setTimeout(function () { window.location.replace("registration.html"); }, 900);
+          setTimeout(function () { window.location.replace("/register"); }, 900);
         } catch (err) {
           let message = friendlyError(err);
           showMsg("msgStep3", message, "err");

@@ -117,7 +117,7 @@
       <p class="tag">FastLine Campus OS</p>
       <h2 class="title">Welcome Back</h2>
 
-      <div class="linkline">Are you new in FeMOS? <a href="signup.html">Sign Up Here</a></div>
+      <div class="linkline">Are you new in FeMOS? <a href="/signup">Sign Up Here</a></div>
       <button type="button" class="pill-btn" id="btnToggleManual">Sign In with Other Email</button>
 
       <div class="collapse-panel" id="manualPanel">
@@ -315,7 +315,7 @@
         const btn = this;
         btn.disabled = true; btn.textContent = "Sending...";
         try {
-          const resetUrl = window.location.origin + "/reset-password.html?mode=resetPassword";
+          const resetUrl = window.location.origin + "/reset?mode=resetPassword";
           await auth.sendPasswordResetEmail(email, { url: resetUrl });
           showMsg("msgReset", "Reset link sent! Check " + email + " (including spam/junk folder).", "ok");
         } catch (err) {
@@ -358,20 +358,20 @@
           const roleDoc = await db.collection("userRoles").doc(user.uid).get();
           if (roleDoc.exists) {
             const role = roleDoc.data().role;
-            if (role === "superAdmin") { window.location.replace("admin.html"); return; }
-            if (role === "institutionAdmin") { window.location.replace("institution-admin.html"); return; }
-            if (role === "cr") { window.location.replace("cr-dashboard.html"); return; }
+            if (role === "superAdmin") { window.location.replace("/superadmin"); return; }
+            if (role === "institutionAdmin") { window.location.replace("/inst-admin"); return; }
+            if (role === "cr") { window.location.replace("/cr"); return; }
           }
           const lecSnap = await db.collection("lecturerAssignments").where("lecturerUid", "==", user.uid).limit(1).get();
-          if (!lecSnap.empty) { window.location.replace("lecturer-dashboard.html"); return; }
+          if (!lecSnap.empty) { window.location.replace("/lecturer"); return; }
         } catch (e) { /* if the role check fails, fall through to the normal student flow */ }
 
         const doc = await db.collection("users").doc(user.uid).get();
         const data = doc.exists ? doc.data() : null;
         if (data && data.courseId) {
-          window.location.replace("dashboard.html");
+          window.location.replace("/dashboard");
         } else {
-          window.location.replace("registration.html");
+          window.location.replace("/register");
         }
       }
 

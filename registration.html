@@ -196,7 +196,7 @@
       let currentUser = null;
 
       auth.onAuthStateChanged(async function (user) {
-        if (!user) { window.location.replace("login.html"); return; }
+        if (!user) { window.location.replace("/login"); return; }
         currentUser = user;
         document.getElementById("userName").textContent = user.displayName || user.email;
         document.getElementById("userEmail").textContent = user.email;
@@ -221,15 +221,17 @@
         const btn = document.getElementById("btnSaveReg");
         btn.disabled = true; btn.textContent = "Saving...";
         try {
-          await db.collection("users").doc(currentUser.uid).set({
+          let regData = {
             institutionId: institutionId, institutionName: selectedInstitutionName,
             campusId: campusId, campusName: selectedCampusName,
             courseId: courseId, courseName: courseName,
             registrationStatus: "pending", confirmedByCR: false,
-          }, { merge: true });
+          };
+          regData = await FeMOSEncrypt.encryptFields(currentUser.uid, regData, ["name", "email", "registrationNumber"]);
+          await db.collection("users").doc(currentUser.uid).set(regData, { merge: true });
 
           showMsg("Registration submitted! Your status is Pending until confirmed.", "ok");
-          setTimeout(function () { window.location.replace("dashboard.html"); }, 1200);
+          setTimeout(function () { window.location.replace("/dashboard"); }, 1200);
         } catch (err) {
           showMsg("Could not save your registration. Please try again.", "err");
         } finally {

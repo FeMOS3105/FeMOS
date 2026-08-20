@@ -368,6 +368,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
     <script src="fcm.js"></script>
+    <script src="crypto.js"></script>
 
     <script>
       const firebaseConfig = {
@@ -428,7 +429,7 @@
 
       auth.onAuthStateChanged(async function (user) {
         const gate = document.getElementById("gate");
-        if (!user) { window.location.replace("login.html"); return; }
+        if (!user) { window.location.replace("/login"); return; }
         try {
           const snap = await db.collection("lecturerAssignments").where("lecturerUid", "==", user.uid).get();
           if (snap.empty) {
@@ -448,7 +449,7 @@
       });
 
       document.getElementById("btnLogout").addEventListener("click", function () {
-        showConfirm("Do you really want to logout?", async function () { await auth.signOut(); window.location.replace("login.html"); });
+        showConfirm("Do you really want to logout?", async function () { await auth.signOut(); window.location.replace("/login"); });
       });
 
       /* ================= SIDEBAR NAV ================= */
@@ -652,6 +653,9 @@
           const sd = sessionDoc.data();
           const checkinsSnap = await db.collection("attendanceSessions").doc(sessionId).collection("checkins").get();
           const totalStudents = await db.collection("users").where("courseId", "==", sd.courseId).where("role", "==", "student").where("registrationStatus", "==", "confirmed").get();
+          for (const sDoc of totalStudents.docs) {
+            await FeMOSEncrypt.decryptFields(sDoc.id, sDoc.data(), ["name", "email", "registrationNumber"]);
+          }
           const total = totalStudents.size || checkinsSnap.size;
           let present = 0, late = 0, leftEarly = 0;
           let html = '<h2 style="margin-bottom:4px;">' + escapeHtml(sd.label) + '</h2><div class="hint">' + fmtDate(sd.startedAt) + (sd.room ? " · Room " + escapeHtml(sd.room) : "") + '</div>';
@@ -874,7 +878,12 @@
         if (typeof emailjs === "undefined") return;
         try {
           const usersSnap = await db.collection("users").where("courseId", "==", courseId).where("registrationStatus", "==", "confirmed").get();
-          var emails = usersSnap.docs.map(function (d) { return d.data().email; }).filter(function (e) { return !!e; });
+          var decryptedUsers = [];
+          for (const uDoc of usersSnap.docs) {
+            var uData = await FeMOSEncrypt.decryptFields(uDoc.id, uDoc.data(), ["name", "email", "registrationNumber"]);
+            decryptedUsers.push(uData);
+          }
+          var emails = decryptedUsers.map(function (d) { return d.email; }).filter(function (e) { return !!e; });
           for (var i = 0; i < emails.length; i++) {
             emailjs.send(EMAILJS_SERVICE_ID, "template_announcement", {
               to_email: emails[i], ann_title: title, ann_body: body.substring(0, 500),

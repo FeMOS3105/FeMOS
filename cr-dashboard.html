@@ -336,6 +336,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script src="fcm.js"></script>
+    <script src="crypto.js"></script>
 
     <script>
       const firebaseConfig = {
@@ -420,7 +421,7 @@
 
       auth.onAuthStateChanged(async function (user) {
         const gate = document.getElementById("gate");
-        if (!user) { window.location.replace("login.html"); return; }
+        if (!user) { window.location.replace("/login"); return; }
         try {
           const roleDoc = await db.collection("userRoles").doc(user.uid).get();
           if (!roleDoc.exists || roleDoc.data().role !== "cr") {
@@ -440,7 +441,7 @@
       });
 
       document.getElementById("btnLogout").addEventListener("click", function () {
-        showConfirm("Do you really want to logout?", async function () { await auth.signOut(); window.location.replace("login.html"); });
+        showConfirm("Do you really want to logout?", async function () { await auth.signOut(); window.location.replace("/login"); });
       });
 
       let initialized = false;
@@ -589,7 +590,12 @@
         if (typeof emailjs === "undefined") return;
         try {
           const usersSnap = await db.collection("users").where("courseId", "==", courseId).where("registrationStatus", "==", "confirmed").get();
-          var emails = usersSnap.docs.map(function (d) { return d.data().email; }).filter(function (e) { return !!e; });
+          var emails = [];
+          for (const doc of usersSnap.docs) {
+            let ud = doc.data();
+            ud = await FeMOSEncrypt.decryptFields(auth.currentUser.uid, ud, ["name", "email", "registrationNumber"]);
+            if (ud.email) emails.push(ud.email);
+          }
           for (var i = 0; i < emails.length; i++) {
             emailjs.send(EMAILJS_SERVICE_ID, "template_announcement", {
               to_email: emails[i], ann_title: title, ann_body: body.substring(0, 500),
@@ -751,7 +757,7 @@
       });
 
       function collectFormUrl(formId) {
-        return window.location.href.replace(/cr-dashboard\.html.*$/, "collect-form.html?id=" + formId);
+        return window.location.href.replace(/cr-dashboard\.html.*$/, "/collect?id=" + formId);
       }
 
       async function loadCollectForms() {
@@ -857,7 +863,7 @@
             .where("courseId", "==", myCourseId)
             .where("registrationStatus", "==", "pending")
             .get();
-          pendingApproveDocs = snap.docs;
+          pendingApproveDocs = [];
           if (snap.empty) {
             countEl.textContent = "No students waiting for approval in " + myCourseName + ".";
             listEl.innerHTML = '<div class="empty">All caught up.</div>';
@@ -872,8 +878,10 @@
             approveAllBtn.addEventListener("click", approveAllPending);
             listEl.appendChild(approveAllBtn);
           }
-          snap.forEach(function (doc) {
-            const d = doc.data();
+          for (const doc of snap.docs) {
+            let d = doc.data();
+            d = await FeMOSEncrypt.decryptFields(auth.currentUser.uid, d, ["name", "email", "registrationNumber"]);
+            pendingApproveDocs.push({ id: doc.id, data: d });
             const row = document.createElement("div");
             row.className = "prow";
             row.innerHTML =
@@ -908,7 +916,7 @@
               });
             });
             listEl.appendChild(row);
-          });
+          }
         } catch (err) {
           countEl.textContent = "";
           listEl.innerHTML = '<div class="empty">Could not load list. Please try again later.</div>';
@@ -918,15 +926,15 @@
         if (!pendingApproveDocs.length) return;
         showConfirm("Approve all " + pendingApproveDocs.length + " pending students?", async function () {
           let approved = 0, skipped = 0;
-          for (const docSnap of pendingApproveDocs) {
-            const d = docSnap.data();
+          for (const item of pendingApproveDocs) {
+            const d = item.data;
             const regNum = (d.registrationNumber || "").trim();
             if (!regNum) { skipped++; continue; }
             const dupSnap = await db.collection("users").where("registrationNumber", "==", regNum).where("registrationStatus", "==", "confirmed").limit(1).get();
-            if (!dupSnap.empty && dupSnap.docs[0].id !== docSnap.id) { skipped++; continue; }
+            if (!dupSnap.empty && dupSnap.docs[0].id !== item.id) { skipped++; continue; }
             try {
-              await db.collection("users").doc(docSnap.id).set({ registrationStatus: "confirmed", confirmedByCR: true }, { merge: true });
-              if (!d.studentId) { await generateStudentId(docSnap.id, myInstitutionId); }
+              await db.collection("users").doc(item.id).set({ registrationStatus: "confirmed", confirmedByCR: true }, { merge: true });
+              if (!d.studentId) { await generateStudentId(item.id, myInstitutionId); }
               approved++;
             } catch (e) { skipped++; }
           }
@@ -948,7 +956,7 @@
           const snap = await db.collection("users")
             .where("institutionId", "==", myInstitutionId).where("courseId", "==", myCourseId)
             .where("registrationStatus", "==", "confirmed").get();
-          rosterCache = snap.docs.map(function (d) { return d.data(); });
+          rosterCache = [];
           rosterDocs = snap.docs;
           if (snap.empty) {
             countEl.textContent = "No confirmed students yet in " + myCourseName + ".";
@@ -958,8 +966,10 @@
           }
           countEl.textContent = snap.size + " confirmed student(s) in " + myCourseName;
           csvBtn.style.display = "inline-block";
-          snap.forEach(function (doc) {
-            const s = doc.data();
+          for (const doc of snap.docs) {
+            let s = doc.data();
+            s = await FeMOSEncrypt.decryptFields(auth.currentUser.uid, s, ["name", "email", "registrationNumber"]);
+            rosterCache.push(s);
             const row = document.createElement("div");
             row.className = "prow";
             row.innerHTML =
@@ -981,7 +991,7 @@
               });
             });
             listEl.appendChild(row);
-          });
+          }
         } catch (err) {
           countEl.textContent = "";
           csvBtn.style.display = "none";

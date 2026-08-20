@@ -258,7 +258,7 @@
           </div>
         </div>
         <div style="text-align:center;margin-top:20px;">
-          <a href="login.html" style="font-size:0.82rem;color:var(--water-deep);font-weight:600;text-decoration:none;">← Back to Login</a>
+          <a href="/login" style="font-size:0.82rem;color:var(--water-deep);font-weight:600;text-decoration:none;">← Back to Login</a>
         </div>
       </div>
     </div>
@@ -308,6 +308,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script src="fcm.js"></script>
+    <script src="crypto.js"></script>
 
     <script>
       /* ==========================================
@@ -442,7 +443,7 @@
       var userRoles = {};  /* { superAdmin: bool, institutionAdmin: {id,name}, lecturer: [...assignments], cr: {instId,courseId,courseName} } */
 
       auth.onAuthStateChanged(async function(user) {
-        if (!user) { window.location.replace("login.html"); return; }
+        if (!user) { window.location.replace("/login"); return; }
         try {
           /* Load user doc */
           var userDoc = await db.collection("users").doc(user.uid).get();
@@ -520,7 +521,7 @@
         showConfirm("Do you really want to logout?", async function() {
           try { await removeFCMToken(auth.currentUser); } catch(e) {}
           await auth.signOut();
-          window.location.replace("login.html");
+          window.location.replace("/login");
         }, {okText:"Log Out",okClass:"btn"});
       });
 

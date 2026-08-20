@@ -367,6 +367,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
     <script src="fcm.js"></script>
+    <script src="crypto.js"></script>
 
     <script>
       const firebaseConfig = {
@@ -461,14 +462,14 @@
 
       auth.onAuthStateChanged(async function (user) {
         const gate = document.getElementById("gate");
-        if (!user) { window.location.replace("login.html"); return; }
+        if (!user) { window.location.replace("/login"); return; }
         try {
           const roleDoc = await db.collection("userRoles").doc(user.uid).get();
           if (!roleDoc.exists || roleDoc.data().role !== "institutionAdmin") {
             gate.innerHTML =
               "<h2>Access Denied</h2>" +
               "<p style='color:var(--muted);font-size:0.85rem;margin-top:8px;'>Your account (" + user.email + ") is not an Institution Admin. " +
-              "Ask your Super Admin to grant you access from admin.html.</p>";
+              "Ask your Super Admin to grant you access from /superadmin.</p>";
             return;
           }
           myInstitutionId = roleDoc.data().institutionId;
@@ -486,7 +487,7 @@
       });
 
       document.getElementById("btnLogout").addEventListener("click", function () {
-        showConfirm("Do you really want to logout?", async function () { await auth.signOut(); window.location.replace("login.html"); });
+        showConfirm("Do you really want to logout?", async function () { await auth.signOut(); window.location.replace("/login"); });
       });
 
       // ---------- Sidebar navigation ----------

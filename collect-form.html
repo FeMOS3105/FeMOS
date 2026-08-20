@@ -86,7 +86,7 @@
         auth.onAuthStateChanged(async function (user) {
           if (!user) {
             const returnUrl = window.location.href;
-            window.location.href = "login.html?return=" + encodeURIComponent(returnUrl);
+            window.location.href = "/login?return=" + encodeURIComponent(returnUrl);
             return;
           }
           try {
