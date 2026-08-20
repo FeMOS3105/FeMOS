@@ -8,6 +8,7 @@ const PRECACHE = [
   "/theme.css",
   "/theme.js",
   "/fcm.js",
+  "/reset-password.html",
   "/manifest.json",
 ];
 

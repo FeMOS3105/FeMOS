@@ -315,7 +315,8 @@
         const btn = this;
         btn.disabled = true; btn.textContent = "Sending...";
         try {
-          await auth.sendPasswordResetEmail(email);
+          const resetUrl = window.location.origin + "/reset-password.html?mode=resetPassword";
+          await auth.sendPasswordResetEmail(email, { url: resetUrl });
           showMsg("msgReset", "Reset link sent! Check " + email + " (including spam/junk folder).", "ok");
         } catch (err) {
           const message =
