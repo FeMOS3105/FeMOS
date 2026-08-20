@@ -841,41 +841,56 @@
         return newId;
       }
 
+      let pendingApproveDocs = [];
       async function loadApprove() {
         const listEl = document.getElementById("approveList");
         const countEl = document.getElementById("approveCount");
         listEl.innerHTML = "";
         countEl.textContent = "Loading...";
         try {
-          // Reading directly from "users" (instead of the courseRosters
-          // collectionGroup) - it's a plain multi-equality query on a regular
-          // collection, which needs no special index and uses the same
-          // permission path that Class Roster already relies on successfully.
           const snap = await db.collection("users")
             .where("institutionId", "==", myInstitutionId)
             .where("courseId", "==", myCourseId)
             .where("registrationStatus", "==", "pending")
             .get();
+          pendingApproveDocs = snap.docs;
           if (snap.empty) {
             countEl.textContent = "No students waiting for approval in " + myCourseName + ".";
             listEl.innerHTML = '<div class="empty">All caught up.</div>';
             return;
           }
           countEl.textContent = snap.size + " student(s) awaiting your approval";
+          if (snap.size > 1) {
+            const approveAllBtn = document.createElement("button");
+            approveAllBtn.className = "btn-sm btn-approve";
+            approveAllBtn.textContent = "Approve All (" + snap.size + ")";
+            approveAllBtn.style.marginBottom = "12px";
+            approveAllBtn.addEventListener("click", approveAllPending);
+            listEl.appendChild(approveAllBtn);
+          }
           snap.forEach(function (doc) {
             const d = doc.data();
             const row = document.createElement("div");
             row.className = "prow";
             row.innerHTML =
               '<div class="info"><b>' + escapeHtml(d.fullName || "(no name)") + "</b>" +
-              "<span>" + escapeHtml(d.email || "") + "</span></div>" +
+              "<span>" + escapeHtml(d.email || "") + "</span>" +
+              (d.registrationNumber ? "<span>Reg: " + escapeHtml(d.registrationNumber) + "</span>" : '<span style="color:var(--danger);">No registration number</span>') +
+              "</div>" +
               '<div class="itemActions"><button class="btn-sm btn-approve">Approve</button><button class="btn-sm btn-reject">Reject</button></div>';
             row.querySelector(".btn-approve").addEventListener("click", async function () {
+              const regNum = (d.registrationNumber || "").trim();
+              if (!regNum) { showToast("Cannot approve: student has no registration number."); return; }
+              const dupSnap = await db.collection("users").where("registrationNumber", "==", regNum).where("registrationStatus", "==", "confirmed").limit(1).get();
+              if (!dupSnap.empty && dupSnap.docs[0].id !== doc.id) {
+                showToast("Invalid registration number: " + regNum + " is already taken by another student.");
+                return;
+              }
               try {
                 await db.collection("users").doc(doc.id).set({ registrationStatus: "confirmed", confirmedByCR: true }, { merge: true });
                 if (!d.studentId) { await generateStudentId(doc.id, myInstitutionId); }
                 loadApprove(); loadRoster();
-              } catch (err) { alert("Could not approve. Please try again."); }
+              } catch (err) { showToast("Could not approve. Please try again."); }
             });
             row.querySelector(".btn-reject").addEventListener("click", function () {
               showConfirm("Reject " + (d.fullName || "this student") + "? They will need to register again.", async function () {
@@ -885,19 +900,40 @@
                     { merge: true }
                   );
                   loadApprove();
-                } catch (err) { alert("Could not reject. Please try again."); }
+                } catch (err) { showToast("Could not reject. Please try again."); }
               });
             });
             listEl.appendChild(row);
           });
         } catch (err) {
           countEl.textContent = "";
-          listEl.innerHTML = '<div class="empty">Could not load list. Please try again later. + "</div>";
+          listEl.innerHTML = '<div class="empty">Could not load list. Please try again later.</div>';
         }
+      }
+      async function approveAllPending() {
+        if (!pendingApproveDocs.length) return;
+        showConfirm("Approve all " + pendingApproveDocs.length + " pending students?", async function () {
+          let approved = 0, skipped = 0;
+          for (const docSnap of pendingApproveDocs) {
+            const d = docSnap.data();
+            const regNum = (d.registrationNumber || "").trim();
+            if (!regNum) { skipped++; continue; }
+            const dupSnap = await db.collection("users").where("registrationNumber", "==", regNum).where("registrationStatus", "==", "confirmed").limit(1).get();
+            if (!dupSnap.empty && dupSnap.docs[0].id !== docSnap.id) { skipped++; continue; }
+            try {
+              await db.collection("users").doc(docSnap.id).set({ registrationStatus: "confirmed", confirmedByCR: true }, { merge: true });
+              if (!d.studentId) { await generateStudentId(docSnap.id, myInstitutionId); }
+              approved++;
+            } catch (e) { skipped++; }
+          }
+          showToast(approved + " approved" + (skipped ? ", " + skipped + " skipped (missing or duplicate registration number)" : "") + ".");
+          loadApprove(); loadRoster();
+        });
       }
 
       // ================= CLASS ROSTER (confirmed students in my course) =================
       let rosterCache = [];
+      let rosterDocs = [];
       async function loadRoster() {
         const listEl = document.getElementById("rosterList");
         const countEl = document.getElementById("rosterCount");
@@ -909,6 +945,7 @@
             .where("institutionId", "==", myInstitutionId).where("courseId", "==", myCourseId)
             .where("registrationStatus", "==", "confirmed").get();
           rosterCache = snap.docs.map(function (d) { return d.data(); });
+          rosterDocs = snap.docs;
           if (snap.empty) {
             countEl.textContent = "No confirmed students yet in " + myCourseName + ".";
             listEl.innerHTML = '<div class="empty">Once you approve students, they will appear here.</div>';
@@ -917,13 +954,34 @@
           }
           countEl.textContent = snap.size + " confirmed student(s) in " + myCourseName;
           csvBtn.style.display = "inline-block";
-          listEl.innerHTML = '<table class="subTable"><thead><tr><th>Name</th><th>Email</th></tr></thead><tbody>' +
-            rosterCache.map(function (s) { return "<tr><td>" + escapeHtml(s.fullName || "") + "</td><td>" + escapeHtml(s.email || "") + "</td></tr>"; }).join("") +
-            "</tbody></table>";
+          snap.forEach(function (doc) {
+            const s = doc.data();
+            const row = document.createElement("div");
+            row.className = "prow";
+            row.innerHTML =
+              '<div class="info"><b>' + escapeHtml(s.fullName || "(no name)") + "</b>" +
+              "<span>" + escapeHtml(s.email || "") + "</span>" +
+              (s.registrationNumber ? "<span>Reg: " + escapeHtml(s.registrationNumber) + "</span>" : "") +
+              "</div>" +
+              '<div class="itemActions"><button class="btn-sm btn-remove-roster" style="background:transparent;border:1.5px solid var(--danger);color:var(--danger);">Remove</button></div>';
+            row.querySelector(".btn-remove-roster").addEventListener("click", function () {
+              showConfirm("Remove " + (s.fullName || "this student") + " from your roster? They will need to re-register.", async function () {
+                try {
+                  await db.collection("users").doc(doc.id).set(
+                    { institutionId: null, institutionName: null, campusId: null, campusName: null, courseId: null, courseName: null, registrationStatus: null, confirmedByCR: false },
+                    { merge: true }
+                  );
+                  showToast(s.fullName + " removed from roster.");
+                  loadRoster(); loadApprove();
+                } catch (err) { showToast("Could not remove student. Please try again."); }
+              });
+            });
+            listEl.appendChild(row);
+          });
         } catch (err) {
           countEl.textContent = "";
           csvBtn.style.display = "none";
-          listEl.innerHTML = '<div class="empty">Could not load roster. Please try again later. + "</div>";
+          listEl.innerHTML = '<div class="empty">Could not load roster. Please try again later.</div>';
         }
       }
       document.getElementById("btnRosterCsv").addEventListener("click", function () {
@@ -936,7 +994,6 @@
         a.click();
         URL.revokeObjectURL(url);
       });
-
       // ================= COURSE CHANGE REQUESTS =================
       const EMAILJS_PUBLIC_KEY = "n1q50LOlnNH_wWusx";
       const EMAILJS_SERVICE_ID = "service_lx1zlxc";

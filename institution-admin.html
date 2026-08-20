@@ -503,25 +503,32 @@
       }
 
       // ================= PENDING REGISTRATIONS =================
+      let pendingDocs = [];
       async function loadPending() {
         const listEl = document.getElementById("pendingList");
         const countEl = document.getElementById("pendingCount");
         listEl.innerHTML = "";
         countEl.textContent = "Loading...";
         try {
-          // Reading directly from "users" instead of the courseRosters
-          // collectionGroup - a plain equality query on a regular collection,
-          // no special index or collection-group permission scope needed.
           const snap = await db.collection("users")
             .where("institutionId", "==", myInstitutionId)
             .where("registrationStatus", "==", "pending")
             .get();
+          pendingDocs = snap.docs;
           if (snap.empty) {
             countEl.textContent = "No pending registrations for " + myInstitutionName + ".";
             listEl.innerHTML = '<div class="empty">All caught up.</div>';
             return;
           }
           countEl.textContent = snap.size + " student(s) awaiting confirmation";
+          if (snap.size > 1) {
+            const approveAllBtn = document.createElement("button");
+            approveAllBtn.className = "btn-sm btn-approve";
+            approveAllBtn.textContent = "Approve All (" + snap.size + ")";
+            approveAllBtn.style.marginBottom = "12px";
+            approveAllBtn.addEventListener("click", approveAllPending);
+            listEl.appendChild(approveAllBtn);
+          }
           snap.forEach(function (doc) {
             const d = doc.data();
             const row = document.createElement("div");
@@ -529,9 +536,11 @@
             row.innerHTML =
               '<div class="info"><b>' + escapeHtml(d.fullName || "(no name)") + "</b>" +
               "<span>" + escapeHtml(d.email || "") + "</span>" +
-              "<span>" + escapeHtml(d.courseName || "") + " — " + escapeHtml(d.campusName || "") + "</span></div>" +
+              "<span>" + escapeHtml(d.courseName || "") + " — " + escapeHtml(d.campusName || "") + "</span>" +
+              (d.registrationNumber ? "<span>Reg: " + escapeHtml(d.registrationNumber) + "</span>" : '<span style="color:var(--danger);">No registration number</span>') +
+              "</div>" +
               '<div class="actions"><button class="btn-sm btn-approve">Approve</button><button class="btn-sm btn-reject">Reject</button></div>';
-            row.querySelector(".btn-approve").addEventListener("click", async function () { await approveStudent(doc.id, !!d.studentId); });
+            row.querySelector(".btn-approve").addEventListener("click", async function () { await approveStudent(doc.id, d); });
             row.querySelector(".btn-reject").addEventListener("click", async function () { await rejectStudent(doc.id); });
             listEl.appendChild(row);
           });
@@ -539,6 +548,27 @@
           countEl.textContent = "";
           listEl.innerHTML = '<div class="empty">Could not load pending list. Please try again later.</div>';
         }
+      }
+      async function approveAllPending() {
+        if (!pendingDocs.length) return;
+        showConfirm("Approve all " + pendingDocs.length + " pending students?", async function () {
+          let approved = 0, skipped = 0;
+          for (const docSnap of pendingDocs) {
+            const d = docSnap.data();
+            const regNum = (d.registrationNumber || "").trim();
+            if (regNum) {
+              const dupSnap = await db.collection("users").where("registrationNumber", "==", regNum).where("registrationStatus", "==", "confirmed").limit(1).get();
+              if (!dupSnap.empty && dupSnap.docs[0].id !== docSnap.id) { skipped++; continue; }
+            }
+            try {
+              await db.collection("users").doc(docSnap.id).set({ registrationStatus: "confirmed", confirmedByCR: true }, { merge: true });
+              if (!d.studentId) { await generateStudentId(docSnap.id, myInstitutionId); }
+              approved++;
+            } catch (e) { skipped++; }
+          }
+          showToast(approved + " approved" + (skipped ? ", " + skipped + " skipped (invalid or duplicate registration number)" : "") + ".");
+          loadPending();
+        });
       }
       async function generateStudentId(uid, institutionId) {
         const year = new Date().getFullYear();
@@ -553,12 +583,22 @@
         await db.collection("users").doc(uid).set({ studentId: newId }, { merge: true });
         return newId;
       }
-      async function approveStudent(studentUid, alreadyHasId) {
+      async function approveStudent(studentUid, userData) {
         try {
+          const regNum = (userData.registrationNumber || "").trim();
+          if (!regNum) {
+            showToast("Cannot approve: student has no registration number.");
+            return;
+          }
+          const dupSnap = await db.collection("users").where("registrationNumber", "==", regNum).where("registrationStatus", "==", "confirmed").limit(1).get();
+          if (!dupSnap.empty && dupSnap.docs[0].id !== studentUid) {
+            showToast("Invalid registration number: " + regNum + " is already taken by another student.");
+            return;
+          }
           await db.collection("users").doc(studentUid).set({ registrationStatus: "confirmed", confirmedByCR: true }, { merge: true });
-          if (!alreadyHasId) { await generateStudentId(studentUid, myInstitutionId); }
+          if (!userData.studentId) { await generateStudentId(studentUid, myInstitutionId); }
           loadPending();
-        } catch (err) { alert("Could not approve. Please try again."); }
+        } catch (err) { showToast("Could not approve. Please try again."); }
       }
       function rejectStudent(studentUid) {
         showConfirm("Reject this registration? The student will need to register again.", async function () {
@@ -568,7 +608,7 @@
               { merge: true }
             );
             loadPending();
-          } catch (err) { alert("Could not reject. Please try again."); }
+          } catch (err) { showToast("Could not reject. Please try again."); }
         });
       }
 

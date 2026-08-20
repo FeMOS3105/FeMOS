@@ -649,21 +649,71 @@
         wireSuperAdminEvents();
       }
 
+      var pendingDocsCache = [];
       async function loadPendingAdmin() {
         var el = document.getElementById("pendingList");
         try {
-          var snap = await db.collection("users").where("registrationStatus","==","pending").get();
+          var query = db.collection("users").where("registrationStatus","==","pending");
+          if (activeRole === "institutionAdmin" && userRoles.institutionAdmin) {
+            query = query.where("institutionId","==",userRoles.institutionAdmin.id);
+          } else if (activeRole === "cr" && userRoles.cr) {
+            query = query.where("institutionId","==",userRoles.cr.instId).where("courseId","==",userRoles.cr.courseId);
+          }
+          var snap = await query.get();
+          pendingDocsCache = snap.docs;
           if (snap.empty) { el.innerHTML = '<div class="empty">No pending registrations.</div>'; return; }
           el.innerHTML = "";
+          if (snap.size > 1) {
+            var approveAllBtn = document.createElement("button");
+            approveAllBtn.className = "btn btn-sm btn-approve";
+            approveAllBtn.textContent = "Approve All (" + snap.size + ")";
+            approveAllBtn.style.marginBottom = "12px";
+            approveAllBtn.addEventListener("click", approveAllPendingAdmin);
+            el.appendChild(approveAllBtn);
+          }
           snap.docs.forEach(function(doc) {
             var d = doc.data();
+            var regInfo = d.registrationNumber ? ' · Reg: '+escapeHtml(d.registrationNumber) : ' · <span style="color:var(--danger)">No reg number</span>';
             var row = document.createElement("div"); row.className = "prow";
-            row.innerHTML = '<div class="pleft"><div class="pname">'+escapeHtml(d.fullName||d.email||"Unknown")+'</div><div class="pmeta">'+escapeHtml(d.email||"")+' · '+(d.institutionName||"")+' · '+(d.courseName||"")+'</div></div><div class="pright"><button class="btn btn-sm btn-approve" data-approve="'+doc.id+'">Approve</button><button class="btn btn-sm btn-reject" data-reject="'+doc.id+'">Reject</button></div>';
+            row.innerHTML = '<div class="pleft"><div class="pname">'+escapeHtml(d.fullName||d.email||"Unknown")+'</div><div class="pmeta">'+escapeHtml(d.email||"")+' · '+(d.institutionName||"")+' · '+(d.courseName||"")+regInfo+'</div></div><div class="pright"><button class="btn btn-sm btn-approve" data-approve="'+doc.id+'">Approve</button><button class="btn btn-sm btn-reject" data-reject="'+doc.id+'">Reject</button></div>';
             el.appendChild(row);
           });
-          el.querySelectorAll("[data-approve]").forEach(function(b){b.addEventListener("click",async function(){var uid=b.getAttribute("data-approve");b.disabled=true;b.textContent="...";try{var udoc=await db.collection("users").doc(uid).get();var ud=udoc.data();var iid=ud.institutionId||"";var alreadyHasId=!!ud.studentId;if(!alreadyHasId&&iid)await generateStudentId(uid,iid);await db.collection("users").doc(uid).set({registrationStatus:"confirmed",confirmedByCR:false},{merge:true});showToast("Student approved.");loadPendingAdmin();}catch(e){b.disabled=false;b.textContent="Approve";}});});
+          el.querySelectorAll("[data-approve]").forEach(function(b){b.addEventListener("click",async function(){
+            var uid=b.getAttribute("data-approve");b.disabled=true;b.textContent="...";
+            try{
+              var udoc=await db.collection("users").doc(uid).get();var ud=udoc.data();
+              var regNum=(ud.registrationNumber||"").trim();
+              if(!regNum){showToast("Cannot approve: student has no registration number.");b.disabled=false;b.textContent="Approve";return;}
+              var dupSnap=await db.collection("users").where("registrationNumber","==",regNum).where("registrationStatus","==","confirmed").limit(1).get();
+              if(!dupSnap.empty&&dupSnap.docs[0].id!==uid){showToast("Invalid registration number: "+regNum+" is already taken by another student.");b.disabled=false;b.textContent="Approve";return;}
+              var iid=ud.institutionId||"";
+              if(!ud.studentId&&iid)await generateStudentId(uid,iid);
+              await db.collection("users").doc(uid).set({registrationStatus:"confirmed",confirmedByCR:true},{merge:true});
+              showToast("Student approved.");loadPendingAdmin();
+            }catch(e){b.disabled=false;b.textContent="Approve";}
+          });});
           el.querySelectorAll("[data-reject]").forEach(function(b){b.addEventListener("click",function(){showConfirm("Reject this registration?",async function(){var uid=b.getAttribute("data-reject");b.disabled=true;try{await db.collection("users").doc(uid).set({institutionId:null,campusId:null,courseId:null,courseName:null,institutionName:null,campusName:null,registrationStatus:null,confirmedByCR:false},{merge:true});showToast("Registration rejected.");loadPendingAdmin();}catch(e){b.disabled=false;}});});});
         } catch(e) { el.innerHTML = '<div class="empty">Error loading.</div>'; }
+      }
+      async function approveAllPendingAdmin() {
+        if (!pendingDocsCache.length) return;
+        showConfirm("Approve all " + pendingDocsCache.length + " pending students?", async function () {
+          var approved = 0, skipped = 0;
+          for (var docSnap of pendingDocsCache) {
+            var d = docSnap.data();
+            var regNum = (d.registrationNumber || "").trim();
+            if (!regNum) { skipped++; continue; }
+            var dupSnap = await db.collection("users").where("registrationNumber","==",regNum).where("registrationStatus","==","confirmed").limit(1).get();
+            if (!dupSnap.empty && dupSnap.docs[0].id !== docSnap.id) { skipped++; continue; }
+            try {
+              await db.collection("users").doc(docSnap.id).set({registrationStatus:"confirmed",confirmedByCR:true},{merge:true});
+              if (!d.studentId && d.institutionId) { await generateStudentId(docSnap.id, d.institutionId); }
+              approved++;
+            } catch (e) { skipped++; }
+          }
+          showToast(approved + " approved" + (skipped ? ", " + skipped + " skipped (missing or duplicate registration number)" : "") + ".");
+          loadPendingAdmin();
+        });
       }
 
       async function loadCatalogTree() {
@@ -1033,9 +1083,20 @@
             var d = doc.data();
             csvData.push([d.fullName||d.email||"",d.email||"",d.registrationNumber||"",d.studentId||""]);
             var row = document.createElement("div"); row.className = "prow";
-            row.innerHTML = '<div class="pleft"><div class="pname">'+escapeHtml(d.fullName||d.email||"Unknown")+'</div><div class="pmeta">'+escapeHtml(d.registrationNumber||"Not set")+' · '+escapeHtml(d.studentId||"No ID")+'</div></div>';
+            row.innerHTML = '<div class="pleft"><div class="pname">'+escapeHtml(d.fullName||d.email||"Unknown")+'</div><div class="pmeta">'+escapeHtml(d.registrationNumber||"Not set")+' \xb7 '+escapeHtml(d.studentId||"No ID")+'</div></div><div class="pright"><button class="btn btn-sm btn-reject" data-remove-roster="'+doc.id+'" style="font-size:0.75rem;padding:4px 10px;">Remove</button></div>';
             el.appendChild(row);
           });
+          el.querySelectorAll("[data-remove-roster]").forEach(function(b){b.addEventListener("click",function(){
+            var uid=b.getAttribute("data-remove-roster");
+            var docSnap=snap.docs.find(function(d){return d.id===uid;});
+            var name=docSnap?(docSnap.data().fullName||"this student"):"this student";
+            showConfirm("Remove "+name+" from your roster? They will need to re-register.",async function(){
+              try{
+                await db.collection("users").doc(uid).set({institutionId:null,institutionName:null,campusId:null,campusName:null,courseId:null,courseName:null,registrationStatus:null,confirmedByCR:false},{merge:true});
+                showToast(name+" removed from roster.");loadRoster();
+              }catch(e){showToast("Could not remove student.");}
+            });
+          });});
           var csvBtn = document.getElementById("btnRosterCsv");
           if (csvBtn) csvBtn.onclick = function() {
             var csv = csvData.map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"';}).join(",");}).join("\n");
