@@ -19,17 +19,34 @@
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
         font-family: "Segoe UI", system-ui, sans-serif; background: linear-gradient(180deg, #eef5ff 0%, #f7fbff 100%);
-        color: var(--ink); min-height: 100vh; padding: 20px 16px 60px;
+        color: var(--ink); min-height: 100vh;
       }
-      .shell { max-width: 860px; margin: 0 auto; }
-      .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
-      .brand { display: flex; align-items: center; gap: 10px; }
-      .brand img { width: 42px; height: 42px; border-radius: 50%; box-shadow: 0 6px 16px rgba(21,95,209,0.25); }
-      .brand h1 { font-size: 1.15rem; background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-      .userchip { display: flex; align-items: center; gap: 8px; background: #fff; border-radius: 999px; padding: 6px 14px 6px 6px; box-shadow: 0 6px 16px rgba(13,27,75,0.08); font-size: 0.82rem; }
-      .userchip .av { width: 26px; height: 26px; border-radius: 50%; background: var(--water-mid); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; overflow: hidden; }
-      .userchip .av img { width: 100%; height: 100%; object-fit: cover; }
-      .userchip button { background: none; border: none; color: var(--danger); font-weight: 600; cursor: pointer; font-size: 0.78rem; margin-left: 6px; }
+      #app{display:none;min-height:100vh;}
+      .appLayout{display:flex;min-height:100vh;}
+      .sidebar{width:260px;min-height:100vh;background:#fff;border-right:1.5px solid var(--line);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:transform 0.3s ease;}
+      .sidebarUser{padding:20px 18px 14px;border-bottom:1.5px solid var(--line);text-align:center;}
+      .sidebarUser .sAvatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#7be3b0,#1a9d63);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;color:#fff;font-weight:700;font-size:1.1rem;overflow:hidden;}
+      .sidebarUser .sAvatar img{width:100%;height:100%;object-fit:cover;}
+      .sidebarUser .sName{font-weight:700;font-size:0.88rem;}
+      .sidebarUser .sRole{font-size:0.72rem;color:var(--muted);margin-top:2px;}
+      .sidebarUser .sInfo{font-size:0.68rem;color:var(--water-deep);font-weight:600;margin-top:4px;}
+      .sidebarNav{flex:1;overflow-y:auto;padding:12px 0;}
+      .sidebarNav .navSection{font-size:0.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;padding:10px 18px 6px;}
+      .sidebarNav .navItem{display:flex;align-items:center;gap:10px;padding:11px 18px;cursor:pointer;font-size:0.85rem;font-weight:600;color:var(--muted);transition:all 0.15s;border-left:3px solid transparent;}
+      .sidebarNav .navItem:hover{background:#f0f4fb;color:var(--ink);}
+      .sidebarNav .navItem.active{background:linear-gradient(90deg,rgba(46,168,238,0.08),transparent);color:var(--water-deep);border-left-color:var(--water-deep);font-weight:700;}
+      .sidebarNav .navItem svg{width:18px;height:18px;flex-shrink:0;}
+      .sidebarFooter{padding:14px 18px;border-top:1.5px solid var(--line);}
+      .sidebarFooter .logoutBtn{display:flex;align-items:center;gap:8px;width:100%;padding:10px;border-radius:10px;border:none;background:#fdecec;color:var(--danger);font-weight:700;font-size:0.85rem;cursor:pointer;transition:background 0.15s;justify-content:center;}
+      .sidebarFooter .logoutBtn:hover{background:#f8d5d5;}
+      .hamburger{display:none;position:fixed;top:14px;left:14px;z-index:200;width:42px;height:42px;border-radius:12px;background:#fff;border:1.5px solid var(--line);cursor:pointer;box-shadow:0 4px 12px rgba(13,27,75,0.08);align-items:center;justify-content:center;}
+      .hamburger svg{width:20px;height:20px;stroke:var(--ink);}
+      .sidebarOverlay{display:none;position:fixed;inset:0;background:rgba(13,27,75,0.4);z-index:90;}
+      .sidebarOverlay.open{display:block;}
+      .contentArea{flex:1;margin-left:260px;padding:24px 28px 60px;}
+      .contentPanel{display:none;}
+      .contentPanel.active{display:block;}
+      @media(max-width:768px){.sidebar{transform:translateX(-100%);}.sidebar.open{transform:translateX(0);}.sidebarOverlay.open{display:block;}.hamburger{display:flex;}.contentArea{margin-left:0;padding:16px 14px 60px;padding-top:64px;}}
 
       .cardGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
       .courseCard { border-radius: 18px; padding: 18px; cursor: pointer; box-shadow: 0 12px 30px rgba(13,27,75,0.1); color: #fff; background: linear-gradient(135deg, var(--water-light), var(--water-deep)); min-height: 100px; display: flex; flex-direction: column; justify-content: space-between; transition: transform .15s; }
@@ -109,26 +126,6 @@
         width: 100%; max-height: 300px; object-fit: cover; border-radius: 12px;
         box-shadow: 0 4px 14px rgba(13,27,75,0.1);
       }
-      .lecTabs { display: flex; gap: 8px; margin: 18px 0 20px; }
-      .lecTab {
-        flex: 1; padding: 14px 16px; border: 1.5px solid var(--line); border-radius: 14px;
-        background: #fff; font-size: 0.85rem; font-weight: 700; color: var(--muted);
-        cursor: pointer; text-align: center; transition: all 0.25s;
-        display: flex; align-items: center; justify-content: center; gap: 8px;
-        box-shadow: 0 4px 12px rgba(13,27,75,0.04);
-      }
-      .lecTab:hover { border-color: var(--water-mid); color: var(--ink); }
-      .lecTab.active {
-        background: linear-gradient(135deg, var(--water-mid), var(--water-deep));
-        color: #fff; border-color: transparent;
-        box-shadow: 0 6px 20px rgba(21,95,209,0.3);
-        transform: translateY(-1px);
-      }
-      .lecTab svg { width: 18px; height: 18px; flex-shrink: 0; }
-      .lecTab.active svg { stroke: #fff; }
-      .lecTabPanel { display: none; }
-      .lecTabPanel.active { display: block; animation: tabFadeIn 0.3s ease; }
-      @keyframes tabFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
       .lecSectionTitle {
         font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
         color: var(--water-deep); margin-bottom: 12px; padding-bottom: 8px;
@@ -179,172 +176,189 @@
       .sessionStat.absent .num { color: var(--danger); }
       .sessionStat.leftEarly .num { color: #e07b20; }
       @media (max-width: 640px) {
-        .lecTabs { flex-wrap: wrap; }
-        .lecTab { flex: 1 1 45%; }
         .attRow { flex-wrap: wrap; }
         .attRow .attTime { width: 100%; }
       }
     </style>
   </head>
   <body>
-    <div class="shell">
-      <div id="gate" class="gate-card">Checking access...</div>
-
-      <div id="app" style="display:none;">
-        <div class="topbar">
-          <div class="brand">
-            <img src="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png" alt="FeMOS"/>
-            <h1>Lecturer Dashboard</h1>
-          </div>
-          <div class="userchip">
-            <div class="av" id="lecAv">?</div>
-            <span id="lecName">...</span>
-            <button id="btnLogout">Log Out</button>
-          </div>
-        </div>
-
-        <div id="homeView">
-          <p class="hint">Tap a course to open or manage its attendance sessions.</p>
-          <div class="cardGrid" id="courseGrid"><div class="empty">Loading your courses...</div></div>
-        </div>
-
-        <div id="courseDetail" style="display:none;">
-          <button class="backBtn" id="btnBackToCourses">← All My Courses</button>
-          <h2 id="detailCourseTitle" style="font-size:1.1rem;margin-bottom:4px;">Course</h2>
-          <div id="detailCourseSub" style="font-size:0.78rem;color:var(--muted);margin-bottom:14px;"></div>
-
-          <div class="lecTabs">
-            <button class="lecTab active" data-lec-tab="attendance">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/><path d="M8 3v4M16 3v4"/><path d="m9 15 2 2 4-4"/></svg>
-              Attendance
-            </button>
-            <button class="lecTab" data-lec-tab="announcements">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 0 0 1 1h2l4 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15 8a4 4 0 0 1 0 8"/><path d="M18 5a8 8 0 0 1 0 14"/></svg>
-              Announcements
-            </button>
-          </div>
-
-          <!-- ===== ATTENDANCE TAB ===== -->
-          <div class="lecTabPanel active" data-lec-panel="attendance">
-            <div class="lecSectionTitle">Open a Session</div>
-            <div class="card" id="openSessionCard">
-              <div class="field"><label>Session Label</label><input id="attLabel" placeholder="e.g. Monday Lecture, Week 5"/></div>
-              <div class="field"><label>Room (optional)</label><input id="attRoom" placeholder="e.g. LT2"/></div>
-              <div class="field">
-                <label>Geographical Range</label>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                  <button class="geoBtn active" data-range="25">25m</button>
-                  <button class="geoBtn" data-range="50">50m</button>
-                  <button class="geoBtn" data-range="100">100m</button>
-                </div>
-                <div class="hint" style="margin-top:6px;">Students must be within this distance to check in.</div>
-              </div>
-              <div class="field" style="display:flex;align-items:center;gap:10px;">
-                <label style="margin-bottom:0;">Allow Sign-Out?</label>
-                <label class="toggle"><input type="checkbox" id="attAllowSignOut"/><span class="slider"></span></label>
-                <span class="hint" style="margin:0;">Students can mark when they leave</span>
-              </div>
-              <div class="hint" id="gpsHint">We'll ask for your location once you open the session.</div>
-              <button class="btn" id="btnOpenSession">Open Session</button>
-              <div class="msg" id="msgAtt"></div>
-            </div>
-
-            <div id="activeSessionCard" style="display:none;">
-              <div class="lecSectionTitle">Active Session</div>
-              <div class="card">
-                <h2 id="activeSessionTitle">Active Session</h2>
-                <div class="hint" id="activeSessionMeta"></div>
-                <div class="sessionStats" id="sessionStats">
-                  <div class="sessionStat present"><div class="num" id="statPresent">0</div><div class="lbl">Present</div></div>
-                  <div class="sessionStat late"><div class="num" id="statLate">0</div><div class="lbl">Late</div></div>
-                  <div class="sessionStat leftEarly"><div class="num" id="statLeftEarly">0</div><div class="lbl">Left Early</div></div>
-                  <div class="sessionStat absent"><div class="num" id="statAbsent">0</div><div class="lbl">Absent</div></div>
-                </div>
-                <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;background:var(--ink);border-radius:14px;padding:18px;margin-bottom:16px;">
-                  <div id="qrHolder" style="background:#fff;padding:10px;border-radius:10px;"></div>
-                  <div>
-                    <div style="font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.55);margin-bottom:6px;">Or type this code</div>
-                    <div id="attCode" style="font-family:'Consolas',monospace;font-weight:700;font-size:1.8rem;letter-spacing:6px;color:#fff;"></div>
-                    <div style="font-size:0.76rem;color:rgba(255,255,255,0.5);margin-top:6px;">Changes every 60 seconds</div>
-                  </div>
-                </div>
-                <div class="hint" id="checkinCount">0 students checked in</div>
-                <div id="checkinList" style="margin:10px 0;"></div>
-                <div style="display:flex;gap:8px;margin-top:12px;">
-                  <button class="btn" style="flex:1;" id="btnExportCsv">Export CSV</button>
-                  <button class="btn" style="flex:1;" id="btnExportPdf">Export PDF</button>
-                </div>
-                <button class="btn" style="background:transparent;border:1.5px solid var(--danger);color:var(--danger);margin-top:12px;width:100%;" id="btnCloseSession">Close Session</button>
-              </div>
-            </div>
-
-            <div id="sessionReportCard" style="display:none;">
-              <div class="lecSectionTitle">Session Report</div>
-              <div class="card" id="sessionReportContent"></div>
-              <button class="btn" style="margin-top:12px;" id="btnBackToOpen">Open New Session</button>
-            </div>
-
-            <div class="lecSectionTitle" style="margin-top:8px;">Past Sessions</div>
-            <div class="card">
-              <div id="attHistoryList"><div class="empty">Loading...</div></div>
-            </div>
-          </div>
-
-          <!-- ===== ANNOUNCEMENTS TAB ===== -->
-          <div class="lecTabPanel" data-lec-panel="announcements">
-            <div class="lecSectionTitle">Post an Announcement</div>
-            <div class="card">
-              <div class="hint">Reaches every student registered in this course. You'll see exactly who has read it.</div>
-              <div class="field">
-                <label>Use a Template? (optional)</label>
-                <select id="annTemplateSelect" style="width:100%;padding:10px 12px;border-radius:9px;border:1.5px solid var(--line);font-size:0.9rem;background:#fbfdff;">
-                  <option value="">— Write from scratch —</option>
-                </select>
-              </div>
-              <div class="field"><label>Title</label><input id="annTitle" placeholder="e.g. Assignment 2 deadline moved"/></div>
-              <div class="field"><label>Message</label><textarea id="annBody" style="width:100%;padding:11px 13px;border-radius:10px;border:1.5px solid var(--line);font-size:0.92rem;background:#fbfdff;min-height:90px;resize:vertical;font-family:inherit;" placeholder="Write the full announcement..."></textarea></div>
-              <div class="field">
-                <label>Attach Image (optional)</label>
-                <div class="fileUploadZone" id="annFileZone">
-                  <div class="uploadIcon">+</div>
-                  <div class="uploadText">Tap to attach a poster or image</div>
-                  <div class="uploadHint">PNG, JPG, GIF up to 5MB</div>
-                  <input type="file" id="annFileInput" accept="image/png,image/jpeg,image/gif,image/webp"/>
-                </div>
-                <div class="filePreview" id="annFilePreview">
-                  <img id="annFileImg" src="" alt="Preview"/>
-                  <button class="removeFile" id="annRemoveFile">✕</button>
-                </div>
-              </div>
-              <div class="expiryBar" style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-                <label style="font-size:0.82rem;font-weight:600;color:var(--muted);">Auto-Expire:</label>
-                <select id="annExpiry" style="padding:6px 10px;border:1.5px solid var(--line);border-radius:8px;font-size:0.82rem;">
-                  <option value="none">Never</option>
-                  <option value="24h">24 Hours</option>
-                  <option value="7d" selected>7 Days</option>
-                  <option value="custom">Custom</option>
-                </select>
-                <input type="datetime-local" id="annExpiryCustom" style="display:none;padding:6px 10px;border:1.5px solid var(--line);border-radius:8px;font-size:0.82rem;"/>
-              </div>
-              <button class="btn" id="btnPostAnn">Post Announcement</button>
-              <div class="msg" id="msgAnn"></div>
-            </div>
-
-            <div class="lecSectionTitle">Sent Announcements</div>
-            <div id="annList"><div class="empty">Loading...</div></div>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <div class="overlay" id="confirmOverlay">
+    <div class="overlay" id="confirmOverlay" style="display:none!important;">
       <div class="confirmBox">
         <p id="confirmMsg">Are you sure?</p>
         <div class="confirmActions">
           <button class="cancel" id="confirmCancelBtn">Cancel</button>
           <button class="ok" id="confirmOkBtn">Close Session</button>
         </div>
+      </div>
+    </div>
+
+    <div id="gate" class="gate-card">Checking access...</div>
+
+    <div id="app" style="display:none;">
+      <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="sidebarOverlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+      <div class="appLayout">
+        <aside class="sidebar" id="sidebar">
+          <div class="sidebarUser">
+            <div class="sAvatar" id="sAv">?</div>
+            <div class="sName" id="sName">...</div>
+            <div class="sRole">Lecturer</div>
+            <div class="sInfo" id="sInfo"></div>
+          </div>
+          <nav class="sidebarNav" id="sidebarNav">
+            <div class="navSection">Menu</div>
+            <div class="navItem active" data-nav="home" onclick="navTo('home')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              My Courses
+            </div>
+            <div id="courseNavItems" style="display:none;">
+              <div class="navSection">Course</div>
+              <div class="navItem" data-nav="attendance" onclick="navTo('attendance')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/><path d="M8 3v4M16 3v4"/><path d="m9 15 2 2 4-4"/></svg>
+                Attendance
+              </div>
+              <div class="navItem" data-nav="announcements" onclick="navTo('announcements')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 0 0 1 1h2l4 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15 8a4 4 0 0 1 0 8"/><path d="M18 5a8 8 0 0 1 0 14"/></svg>
+                Announcements
+              </div>
+            </div>
+          </nav>
+          <div class="sidebarFooter">
+            <button class="logoutBtn" id="btnLogout">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Log Out
+            </button>
+          </div>
+        </aside>
+
+        <main class="contentArea">
+          <!-- ===== HOME: Course Grid ===== -->
+          <div class="contentPanel active" id="homeView">
+            <h2 style="font-size:1.15rem;margin-bottom:4px;">My Courses</h2>
+            <p class="hint">Tap a course to open or manage its attendance sessions.</p>
+            <div class="cardGrid" id="courseGrid"><div class="empty">Loading your courses...</div></div>
+          </div>
+
+          <!-- ===== COURSE DETAIL ===== -->
+          <div class="contentPanel" id="courseDetail">
+            <h2 id="detailCourseTitle" style="font-size:1.1rem;margin-bottom:4px;">Course</h2>
+            <div id="detailCourseSub" style="font-size:0.78rem;color:var(--muted);margin-bottom:14px;"></div>
+
+            <!-- ===== ATTENDANCE TAB ===== -->
+            <div class="contentPanel active" data-detail-panel="attendance">
+              <div class="lecSectionTitle">Open a Session</div>
+              <div class="card" id="openSessionCard">
+                <div class="field"><label>Session Label</label><input id="attLabel" placeholder="e.g. Monday Lecture, Week 5"/></div>
+                <div class="field"><label>Room (optional)</label><input id="attRoom" placeholder="e.g. LT2"/></div>
+                <div class="field">
+                  <label>Geographical Range</label>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <button class="geoBtn active" data-range="25">25m</button>
+                    <button class="geoBtn" data-range="50">50m</button>
+                    <button class="geoBtn" data-range="100">100m</button>
+                  </div>
+                  <div class="hint" style="margin-top:6px;">Students must be within this distance to check in.</div>
+                </div>
+                <div class="field" style="display:flex;align-items:center;gap:10px;">
+                  <label style="margin-bottom:0;">Allow Sign-Out?</label>
+                  <label class="toggle"><input type="checkbox" id="attAllowSignOut"/><span class="slider"></span></label>
+                  <span class="hint" style="margin:0;">Students can mark when they leave</span>
+                </div>
+                <div class="hint" id="gpsHint">We'll ask for your location once you open the session.</div>
+                <button class="btn" id="btnOpenSession">Open Session</button>
+                <div class="msg" id="msgAtt"></div>
+              </div>
+
+              <div id="activeSessionCard" style="display:none;">
+                <div class="lecSectionTitle">Active Session</div>
+                <div class="card">
+                  <h2 id="activeSessionTitle">Active Session</h2>
+                  <div class="hint" id="activeSessionMeta"></div>
+                  <div class="sessionStats" id="sessionStats">
+                    <div class="sessionStat present"><div class="num" id="statPresent">0</div><div class="lbl">Present</div></div>
+                    <div class="sessionStat late"><div class="num" id="statLate">0</div><div class="lbl">Late</div></div>
+                    <div class="sessionStat leftEarly"><div class="num" id="statLeftEarly">0</div><div class="lbl">Left Early</div></div>
+                    <div class="sessionStat absent"><div class="num" id="statAbsent">0</div><div class="lbl">Absent</div></div>
+                  </div>
+                  <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;background:var(--ink);border-radius:14px;padding:18px;margin-bottom:16px;">
+                    <div id="qrHolder" style="background:#fff;padding:10px;border-radius:10px;"></div>
+                    <div>
+                      <div style="font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.55);margin-bottom:6px;">Or type this code</div>
+                      <div id="attCode" style="font-family:'Consolas',monospace;font-weight:700;font-size:1.8rem;letter-spacing:6px;color:#fff;"></div>
+                      <div style="font-size:0.76rem;color:rgba(255,255,255,0.5);margin-top:6px;">Changes every 60 seconds</div>
+                    </div>
+                  </div>
+                  <div class="hint" id="checkinCount">0 students checked in</div>
+                  <div id="checkinList" style="margin:10px 0;"></div>
+                  <div style="display:flex;gap:8px;margin-top:12px;">
+                    <button class="btn" style="flex:1;" id="btnExportCsv">Export CSV</button>
+                    <button class="btn" style="flex:1;" id="btnExportPdf">Export PDF</button>
+                  </div>
+                  <button class="btn" style="background:transparent;border:1.5px solid var(--danger);color:var(--danger);margin-top:12px;width:100%;" id="btnCloseSession">Close Session</button>
+                </div>
+              </div>
+
+              <div id="sessionReportCard" style="display:none;">
+                <div class="lecSectionTitle">Session Report</div>
+                <div class="card" id="sessionReportContent"></div>
+                <button class="btn" style="margin-top:12px;" id="btnBackToOpen">Open New Session</button>
+              </div>
+
+              <div class="lecSectionTitle" style="margin-top:8px;">Past Sessions</div>
+              <div class="card">
+                <div id="attHistoryList"><div class="empty">Loading...</div></div>
+              </div>
+            </div>
+
+            <!-- ===== ANNOUNCEMENTS TAB ===== -->
+            <div class="contentPanel" data-detail-panel="announcements">
+              <div class="lecSectionTitle">Post an Announcement</div>
+              <div class="card">
+                <div class="hint">Reaches every student registered in this course. You'll see exactly who has read it.</div>
+                <div class="field">
+                  <label>Use a Template? (optional)</label>
+                  <select id="annTemplateSelect" style="width:100%;padding:10px 12px;border-radius:9px;border:1.5px solid var(--line);font-size:0.9rem;background:#fbfdff;">
+                    <option value="">— Write from scratch —</option>
+                  </select>
+                </div>
+                <div class="field"><label>Title</label><input id="annTitle" placeholder="e.g. Assignment 2 deadline moved"/></div>
+                <div class="field"><label>Message</label><textarea id="annBody" style="width:100%;padding:11px 13px;border-radius:10px;border:1.5px solid var(--line);font-size:0.92rem;background:#fbfdff;min-height:90px;resize:vertical;font-family:inherit;" placeholder="Write the full announcement..."></textarea></div>
+                <div class="field">
+                  <label>Attach Image (optional)</label>
+                  <div class="fileUploadZone" id="annFileZone">
+                    <div class="uploadIcon">+</div>
+                    <div class="uploadText">Tap to attach a poster or image</div>
+                    <div class="uploadHint">PNG, JPG, GIF up to 5MB</div>
+                    <input type="file" id="annFileInput" accept="image/png,image/jpeg,image/gif,image/webp"/>
+                  </div>
+                  <div class="filePreview" id="annFilePreview">
+                    <img id="annFileImg" src="" alt="Preview"/>
+                    <button class="removeFile" id="annRemoveFile">✕</button>
+                  </div>
+                </div>
+                <div class="expiryBar" style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                  <label style="font-size:0.82rem;font-weight:600;color:var(--muted);">Auto-Expire:</label>
+                  <select id="annExpiry" style="padding:6px 10px;border:1.5px solid var(--line);border-radius:8px;font-size:0.82rem;">
+                    <option value="none">Never</option>
+                    <option value="24h">24 Hours</option>
+                    <option value="7d" selected>7 Days</option>
+                    <option value="custom">Custom</option>
+                  </select>
+                  <input type="datetime-local" id="annExpiryCustom" style="display:none;padding:6px 10px;border:1.5px solid var(--line);border-radius:8px;font-size:0.82rem;"/>
+                </div>
+                <button class="btn" id="btnPostAnn">Post Announcement</button>
+                <div class="msg" id="msgAnn"></div>
+              </div>
+
+              <div class="lecSectionTitle">Sent Announcements</div>
+              <div id="annList"><div class="empty">Loading...</div></div>
+            </div>
+
+          </div>
+        </main>
       </div>
     </div>
 
@@ -398,10 +412,11 @@
       function showConfirm(message, onConfirm) {
         const overlay = document.getElementById("confirmOverlay");
         document.getElementById("confirmMsg").textContent = message;
+        overlay.style.display = "flex";
         overlay.classList.add("show");
         const okBtn = document.getElementById("confirmOkBtn");
         const cancelBtn = document.getElementById("confirmCancelBtn");
-        function cleanup() { overlay.classList.remove("show"); okBtn.removeEventListener("click", onOk); cancelBtn.removeEventListener("click", onCancel); }
+        function cleanup() { overlay.classList.remove("show"); overlay.style.display = "none"; okBtn.removeEventListener("click", onOk); cancelBtn.removeEventListener("click", onCancel); }
         function onOk() { cleanup(); onConfirm(); }
         function onCancel() { cleanup(); }
         okBtn.addEventListener("click", onOk);
@@ -423,9 +438,9 @@
           myAssignments = snap.docs.map(function (d) { return d.data(); });
           gate.style.display = "none";
           document.getElementById("app").style.display = "block";
-          document.getElementById("lecName").textContent = user.displayName || user.email;
-          if (user.photoURL) { document.getElementById("lecAv").innerHTML = '<img src="' + user.photoURL + '" alt=""/>'; }
-          else { document.getElementById("lecAv").textContent = (user.email || "?")[0].toUpperCase(); }
+          document.getElementById("sName").textContent = user.displayName || user.email;
+          if (user.photoURL) { document.getElementById("sAv").innerHTML = '<img src="' + user.photoURL + '" alt=""/>'; }
+          else { document.getElementById("sAv").textContent = (user.email || "?")[0].toUpperCase(); }
           renderCourseGrid();
         } catch (err) {
           gate.innerHTML = "Could not verify your access. Please try refreshing the page.";
@@ -435,6 +450,35 @@
       document.getElementById("btnLogout").addEventListener("click", function () {
         showConfirm("Do you really want to logout?", async function () { await auth.signOut(); window.location.replace("login.html"); });
       });
+
+      /* ================= SIDEBAR NAV ================= */
+      let currentNav = "home";
+
+      function navTo(target) {
+        closeSidebar();
+        if (target === "home") {
+          document.getElementById("homeView").classList.add("active");
+          document.getElementById("courseDetail").classList.remove("active");
+          document.getElementById("courseNavItems").style.display = "none";
+          activeSessionId = null;
+          if (attTickTimer) clearInterval(attTickTimer);
+        } else if (target === "attendance" || target === "announcements") {
+          document.getElementById("homeView").classList.remove("active");
+          document.getElementById("courseDetail").classList.add("active");
+          document.querySelectorAll("[data-detail-panel]").forEach(function (p) { p.classList.toggle("active", p.getAttribute("data-detail-panel") === target); });
+        }
+        currentNav = target;
+        document.querySelectorAll(".navItem").forEach(function (n) { n.classList.toggle("active", n.getAttribute("data-nav") === target); });
+      }
+
+      function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("open");
+        document.getElementById("sidebarOverlay").classList.toggle("open");
+      }
+      function closeSidebar() {
+        document.getElementById("sidebar").classList.remove("open");
+        document.getElementById("sidebarOverlay").classList.remove("open");
+      }
 
       function renderCourseGrid() {
         const grid = document.getElementById("courseGrid");
@@ -446,36 +490,20 @@
         });
       }
 
-      document.getElementById("btnBackToCourses").addEventListener("click", function () {
-        document.getElementById("courseDetail").style.display = "none";
-        document.getElementById("homeView").style.display = "block";
-        activeSessionId = null;
-        if (attTickTimer) clearInterval(attTickTimer);
-      });
-
       function openCourse(assignment) {
         currentAssignment = assignment;
-        document.getElementById("homeView").style.display = "none";
-        document.getElementById("courseDetail").style.display = "block";
+        document.getElementById("courseNavItems").style.display = "block";
         document.getElementById("detailCourseTitle").textContent = assignment.courseName;
         document.getElementById("detailCourseSub").textContent = (assignment.collegeName || "") + " · " + (assignment.institutionName || "");
         document.getElementById("openSessionCard").style.display = "block";
         document.getElementById("activeSessionCard").style.display = "none";
         activeSessionId = null;
-        switchLecTab("attendance");
+        navTo("attendance");
         loadAttendanceHistory();
         loadAnnouncements();
         loadAnnTemplates();
         initFCM(auth.currentUser);
       }
-
-      function switchLecTab(tab) {
-        document.querySelectorAll(".lecTab").forEach(function (t) { t.classList.toggle("active", t.getAttribute("data-lec-tab") === tab); });
-        document.querySelectorAll(".lecTabPanel").forEach(function (p) { p.classList.toggle("active", p.getAttribute("data-lec-panel") === tab); });
-      }
-      document.querySelectorAll(".lecTab").forEach(function (t) {
-        t.addEventListener("click", function () { switchLecTab(t.getAttribute("data-lec-tab")); });
-      });
 
       // ================= ATTENDANCE =================
       let activeSessionId = null;

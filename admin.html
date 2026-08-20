@@ -18,36 +18,48 @@
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
         font-family: "Segoe UI", system-ui, sans-serif; background: linear-gradient(180deg, #eef5ff 0%, #f7fbff 100%);
-        color: var(--ink); min-height: 100vh; padding: 20px 16px 60px;
+        color: var(--ink); min-height: 100vh; padding: 0;
       }
-      .shell { max-width: 880px; margin: 0 auto; }
-      .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 22px; flex-wrap: wrap; }
-      .brand { display: flex; align-items: center; gap: 10px; }
-      .brand img { width: 42px; height: 42px; border-radius: 50%; box-shadow: 0 6px 16px rgba(21,95,209,0.25); }
-      .brand h1 { font-size: 1.2rem; background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-      .userchip { display: flex; align-items: center; gap: 8px; background: #fff; border-radius: 999px; padding: 6px 14px 6px 6px; box-shadow: 0 6px 16px rgba(13,27,75,0.08); font-size: 0.82rem; }
-      .userchip .av { width: 26px; height: 26px; border-radius: 50%; background: var(--water-mid); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; overflow: hidden; }
-      .userchip .av img { width: 100%; height: 100%; object-fit: cover; }
-      .userchip button { background: none; border: none; color: var(--danger); font-weight: 600; cursor: pointer; font-size: 0.78rem; margin-left: 6px; }
+      #app{display:none;min-height:100vh;}
+      .appLayout{display:flex;min-height:100vh;}
+      .sidebar{width:260px;min-height:100vh;background:#fff;border-right:1.5px solid var(--line);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:transform 0.3s ease;}
+      .sidebarUser{padding:20px 18px 14px;border-bottom:1.5px solid var(--line);text-align:center;}
+      .sidebarUser .sAvatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#ffcf6b,#e0791b);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;color:#fff;font-weight:700;font-size:1.1rem;overflow:hidden;}
+      .sidebarUser .sAvatar img{width:100%;height:100%;object-fit:cover;}
+      .sidebarUser .sName{font-weight:700;font-size:0.88rem;}
+      .sidebarUser .sRole{font-size:0.72rem;color:var(--muted);margin-top:2px;}
+      .sidebarNav{flex:1;overflow-y:auto;padding:12px 0;}
+      .sidebarNav .navSection{font-size:0.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;padding:10px 18px 6px;}
+      .sidebarNav .navItem{display:flex;align-items:center;gap:10px;padding:11px 18px;cursor:pointer;font-size:0.85rem;font-weight:600;color:var(--muted);transition:all 0.15s;border-left:3px solid transparent;}
+      .sidebarNav .navItem:hover{background:#f0f4fb;color:var(--ink);}
+      .sidebarNav .navItem.active{background:linear-gradient(90deg,rgba(46,168,238,0.08),transparent);color:var(--water-deep);border-left-color:var(--water-deep);font-weight:700;}
+      .sidebarNav .navItem svg{width:18px;height:18px;flex-shrink:0;}
+      .sidebarFooter{padding:14px 18px;border-top:1.5px solid var(--line);}
+      .sidebarFooter .logoutBtn{display:flex;align-items:center;gap:8px;width:100%;padding:10px;border-radius:10px;border:none;background:#fdecec;color:var(--danger);font-weight:700;font-size:0.85rem;cursor:pointer;transition:background 0.15s;justify-content:center;}
+      .sidebarFooter .logoutBtn:hover{background:#f8d5d5;}
+      .hamburger{display:none;position:fixed;top:14px;left:14px;z-index:200;width:42px;height:42px;border-radius:12px;background:#fff;border:1.5px solid var(--line);cursor:pointer;box-shadow:0 4px 12px rgba(13,27,75,0.08);align-items:center;justify-content:center;}
+      .hamburger svg{width:20px;height:20px;stroke:var(--ink);}
+      .sidebarOverlay{display:none;position:fixed;inset:0;background:rgba(13,27,75,0.4);z-index:90;}
+      .sidebarOverlay.open{display:block;}
+      .contentArea{flex:1;margin-left:260px;padding:24px 28px 60px;}
+      .contentPanel{display:none;}
+      .contentPanel.active{display:block;}
+      .panelHeader{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+      .panelHeader h2{font-size:1.15rem;font-weight:700;}
+      @media(max-width:768px){.sidebar{transform:translateX(-100%);}.sidebar.open{transform:translateX(0);}.sidebarOverlay.open{display:block;}.hamburger{display:flex;}.contentArea{margin-left:0;padding:16px 14px 60px;padding-top:64px;}}
 
-      .tabbar { display: flex; gap: 4px; background: #fff; padding: 4px; border-radius: 12px; box-shadow: 0 6px 16px rgba(13,27,75,0.06); margin-bottom: 20px; width: 100%; }
-      .tabbtn { flex: 1; padding: 9px 14px; border: none; background: transparent; border-radius: 9px; font-weight: 600; font-size: 0.86rem; color: var(--muted); cursor: pointer; white-space: nowrap; text-align: center; }
-      .tabbtn.active { background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); color: #fff; }
+      .overlay { position: fixed; inset: 0; background: rgba(13,27,75,0.55); display: none; align-items: center; justify-content: center; z-index: 300; padding: 20px; }
+      .overlay.show { display: flex; }
+      .promptBox { background: #fff; border-radius: 18px; padding: 28px 24px; width: 100%; box-shadow: 0 20px 60px rgba(13,27,75,0.2); }
+
       @media (max-width: 640px) {
-        body { padding: 14px 12px 40px; }
-        .tabbar { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
-        .tabbtn { flex: none; padding: 10px 8px; font-size: 0.78rem; white-space: normal; min-height: 42px; display: flex; align-items: center; justify-content: center; }
-        .tabbtn:last-child:nth-child(odd) { grid-column: 1 / -1; }
+        body { padding: 0; }
+        .row2 { grid-template-columns: 1fr; }
         .prow { flex-direction: column; align-items: flex-start; }
         .prow .actions { width: 100%; }
         .prow .actions .btn-sm { flex: 1; }
-        .row2 { grid-template-columns: 1fr; }
-        .brand h1 { font-size: 1rem; }
         .card { padding: 16px; }
       }
-
-      .panel { display: none; }
-      .panel.active { display: block; }
 
       .card { background: #fff; border-radius: 18px; box-shadow: 0 14px 40px rgba(13,27,75,0.08); padding: 22px; margin-bottom: 16px; }
       .card h2 { font-size: 1rem; margin-bottom: 4px; }
@@ -89,154 +101,185 @@
         width: 100%; max-height: 300px; object-fit: cover; border-radius: 12px;
         box-shadow: 0 4px 14px rgba(13,27,75,0.1);
       }
+
+      .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#fff;color:var(--ink);border:1.5px solid var(--line);border-radius:12px;padding:12px 22px;font-size:0.88rem;font-weight:600;box-shadow:0 8px 30px rgba(13,27,75,0.15);z-index:999;display:none;}
+      .toast.show{display:block;}
     </style>
   </head>
   <body>
-    <div class="shell">
-      <div id="gate" class="gate-card">Checking admin access...</div>
-
-      <div id="app" style="display:none;">
-        <div class="topbar">
-          <div class="brand">
-            <img src="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png" alt="FeMOS"/>
-            <h1>FeMOS Admin</h1>
-          </div>
-          <div class="userchip">
-            <div class="av" id="adminAv">?</div>
-            <span id="adminName">...</span>
-            <button id="btnLogout">Log Out</button>
-          </div>
-        </div>
-
-        <div class="tabbar">
-          <button class="tabbtn active" data-tab="pending">Pending Registrations</button>
-          <button class="tabbtn" data-tab="catalog">Catalog Management</button>
-          <button class="tabbtn" data-tab="instadmins">Institution Admins</button>
-          <button class="tabbtn" data-tab="banners">Dashboard Banners</button>
-          <button class="tabbtn" data-tab="templates">Poster Templates</button>
-        </div>
-
-        <!-- ============ PENDING REGISTRATIONS ============ -->
-        <div class="panel active" id="panel-pending">
-          <div class="card">
-            <h2>Pending Registrations</h2>
-            <div class="hint" id="pendingCount">Loading...</div>
-            <div id="pendingList"></div>
-          </div>
-        </div>
-
-        <!-- ============ CATALOG MANAGEMENT ============ -->
-        <div class="panel" id="panel-catalog">
-          <div class="card">
-            <h2>Add Institution</h2>
-            <div class="hint">Short code becomes its ID (e.g. MUST, UDSM) — keep it unique.</div>
-            <div class="row2">
-              <div class="field"><label>Code</label><input id="newInstCode" placeholder="e.g. MUST"/></div>
-              <div class="field"><label>Full Name</label><input id="newInstName" placeholder="e.g. Mbeya University of Science and Technology"/></div>
-            </div>
-            <button class="btn" id="btnAddInstitution">Add Institution</button>
-            <div class="msg" id="msgInst"></div>
-          </div>
-
-          <div class="card">
-            <h2>Add Campus</h2>
-            <div class="row2">
-              <div class="field"><label>Institution</label><select id="campusInstSelect"></select></div>
-              <div class="field"><label>Campus Name</label><input id="newCampusName" placeholder="e.g. Iyunga Campus"/></div>
-            </div>
-            <button class="btn" id="btnAddCampus">Add Campus</button>
-            <div class="msg" id="msgCampus"></div>
-          </div>
-
-          <div class="card">
-            <h2>Add Course</h2>
-            <div class="row2">
-              <div class="field"><label>Institution</label><select id="courseInstSelect"></select></div>
-              <div class="field"><label>Campus</label><select id="courseCampusSelect"><option value="">-- pick institution first --</option></select></div>
-            </div>
-            <div class="field"><label>Course Name</label><input id="newCourseName" placeholder="e.g. BSc. Software Engineering"/></div>
-            <button class="btn" id="btnAddCourse">Add Course</button>
-            <div class="msg" id="msgCourse"></div>
-          </div>
-
-          <div class="card">
-            <h2>Current Catalog</h2>
-            <div class="hint">Deleting an institution or campus is only allowed once it has no courses/campuses left inside it.</div>
-            <div id="catalogTree"></div>
-          </div>
-        </div>
-        <!-- ============ INSTITUTION ADMINS ============ -->
-        <div class="panel" id="panel-instadmins">
-          <div class="card">
-            <h2>Grant Institution Admin Access</h2>
-            <div class="hint">Enter the email of an already-registered FeMOS user, and pick which institution they'll manage.</div>
-            <div class="row2">
-              <div class="field"><label>Institution</label><select id="grantInstSelect"></select></div>
-              <div class="field"><label>User's Email</label><input id="grantEmail" placeholder="e.g. registrar@must.ac.tz"/></div>
-            </div>
-            <button class="btn" id="btnGrantInstAdmin">Grant Institution Admin</button>
-            <div class="msg" id="msgGrant"></div>
-          </div>
-
-          <div class="card">
-            <h2>Current Institution Admins</h2>
-            <div id="instAdminList"><div class="empty">Loading...</div></div>
-          </div>
-        </div>
-
-        <!-- ============ DASHBOARD BANNERS ============ -->
-        <div class="panel" id="panel-banners">
-          <div class="card">
-            <h2>Dashboard Slider Images</h2>
-            <div class="hint">These 5 images slide at the top of every student's dashboard — separately for each institution. Choose an institution, paste up to 5 image URLs, and save. Leave a slot blank to skip it.</div>
-            <div class="field"><label>Institution</label><select id="bannerInstSelect"></select></div>
-            <div class="field"><label>Image 1 URL</label><input id="bannerUrl1" placeholder="https://res.cloudinary.com/..."/></div>
-            <div class="field"><label>Image 2 URL</label><input id="bannerUrl2" placeholder="https://res.cloudinary.com/..."/></div>
-            <div class="field"><label>Image 3 URL</label><input id="bannerUrl3" placeholder="https://res.cloudinary.com/..."/></div>
-            <div class="field"><label>Image 4 URL</label><input id="bannerUrl4" placeholder="https://res.cloudinary.com/..."/></div>
-            <div class="field"><label>Image 5 URL</label><input id="bannerUrl5" placeholder="https://res.cloudinary.com/..."/></div>
-            <button class="btn" id="btnSaveBanners">Save Slider for This Institution</button>
-            <div class="msg" id="msgBanner"></div>
-          </div>
-          <div class="card">
-            <h2>Preview</h2>
-            <div id="bannerPreview"><div class="empty">Choose an institution above to see its current slides.</div></div>
-          </div>
-        </div>
-
-        <!-- ============ POSTER TEMPLATES ============ -->
-        <div class="panel" id="panel-templates">
-          <div class="card">
-            <h2>Create a Poster Template</h2>
-            <div class="hint">Templates help CRs, lecturers, and institution admins post announcements faster — they just pick a template, edit if needed, and send.</div>
-            <div class="field"><label>Institution</label><select id="tplInstSelect"></select></div>
-            <div class="field"><label>Template Title</label><input id="tplTitle" placeholder="e.g. Exam Schedule Announcement"/></div>
-            <div class="field"><label>Default Body Text</label><textarea id="tplBody" placeholder="Write the default message body that will pre-fill when this template is used..."></textarea></div>
-            <div class="field">
-              <label>Poster Image URL (optional)</label>
-              <input id="tplImageUrl" placeholder="https://res.cloudinary.com/..."/>
-              <div id="tplImagePreview" style="display:none;margin-top:8px;"><img id="tplPreviewImg" src="" style="width:100%;max-height:180px;object-fit:cover;border-radius:12px;"/></div>
-            </div>
-            <button class="btn" id="btnCreateTemplate">Save Template</button>
-            <div class="msg" id="msgTemplate"></div>
-          </div>
-
-          <div class="card">
-            <h2>Existing Templates</h2>
-            <div class="hint">Select an institution above to see its templates.</div>
-            <div id="templateList"><div class="empty">Choose an institution to view templates.</div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="overlay" id="confirmOverlay">
+    <div class="overlay" id="confirmOverlay" style="display:none!important;">
       <div class="promptBox" style="max-width:340px;">
         <p id="confirmMsg" style="font-weight:600;margin-bottom:16px;text-align:center;">Are you sure?</p>
         <div style="display:flex;gap:10px;">
           <button class="btn-outline" id="confirmCancelBtn" style="flex:1;padding:11px;border-radius:10px;border:1.5px solid var(--line);background:#f2f4f8;color:var(--ink);font-weight:700;cursor:pointer;">Cancel</button>
           <button class="btn" id="confirmOkBtn" style="flex:1;padding:11px;border-radius:10px;background:var(--danger);color:#fff;border:none;font-weight:700;cursor:pointer;">Confirm</button>
         </div>
+      </div>
+    </div>
+
+    <div id="gate" class="gate-card" style="padding:20px;">Checking admin access...</div>
+
+    <div id="app">
+      <button class="hamburger" id="hamburgerBtn" onclick="openSidebar()">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="sidebarOverlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+      <div class="appLayout">
+        <aside class="sidebar" id="sidebar">
+          <div class="sidebarUser">
+            <div class="sAvatar" id="adminAv">?</div>
+            <div class="sName" id="adminName">...</div>
+            <div class="sRole">Super Admin</div>
+          </div>
+          <nav class="sidebarNav">
+            <div class="navSection">Management</div>
+            <div class="navItem active" data-tab="pending" onclick="switchTab(this)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+              Pending Registrations
+            </div>
+            <div class="navItem" data-tab="catalog" onclick="switchTab(this)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              Catalog Management
+            </div>
+            <div class="navItem" data-tab="instadmins" onclick="switchTab(this)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              Institution Admins
+            </div>
+            <div class="navItem" data-tab="banners" onclick="switchTab(this)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              Dashboard Banners
+            </div>
+            <div class="navItem" data-tab="templates" onclick="switchTab(this)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+              Poster Templates
+            </div>
+          </nav>
+          <div class="sidebarFooter">
+            <button class="logoutBtn" id="btnLogout">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Log Out
+            </button>
+          </div>
+        </aside>
+
+        <main class="contentArea">
+          <!-- ============ PENDING REGISTRATIONS ============ -->
+          <div class="contentPanel active" id="panel-pending">
+            <div class="panelHeader"><h2>Pending Registrations</h2></div>
+            <div class="card">
+              <div class="hint" id="pendingCount">Loading...</div>
+              <div id="pendingList"></div>
+            </div>
+          </div>
+
+          <!-- ============ CATALOG MANAGEMENT ============ -->
+          <div class="contentPanel" id="panel-catalog">
+            <div class="panelHeader"><h2>Catalog Management</h2></div>
+            <div class="card">
+              <h2>Add Institution</h2>
+              <div class="hint">Short code becomes its ID (e.g. MUST, UDSM) — keep it unique.</div>
+              <div class="row2">
+                <div class="field"><label>Code</label><input id="newInstCode" placeholder="e.g. MUST"/></div>
+                <div class="field"><label>Full Name</label><input id="newInstName" placeholder="e.g. Mbeya University of Science and Technology"/></div>
+              </div>
+              <button class="btn" id="btnAddInstitution">Add Institution</button>
+              <div class="msg" id="msgInst"></div>
+            </div>
+
+            <div class="card">
+              <h2>Add Campus</h2>
+              <div class="row2">
+                <div class="field"><label>Institution</label><select id="campusInstSelect"></select></div>
+                <div class="field"><label>Campus Name</label><input id="newCampusName" placeholder="e.g. Iyunga Campus"/></div>
+              </div>
+              <button class="btn" id="btnAddCampus">Add Campus</button>
+              <div class="msg" id="msgCampus"></div>
+            </div>
+
+            <div class="card">
+              <h2>Add Course</h2>
+              <div class="row2">
+                <div class="field"><label>Institution</label><select id="courseInstSelect"></select></div>
+                <div class="field"><label>Campus</label><select id="courseCampusSelect"><option value="">-- pick institution first --</option></select></div>
+              </div>
+              <div class="field"><label>Course Name</label><input id="newCourseName" placeholder="e.g. BSc. Software Engineering"/></div>
+              <button class="btn" id="btnAddCourse">Add Course</button>
+              <div class="msg" id="msgCourse"></div>
+            </div>
+
+            <div class="card">
+              <h2>Current Catalog</h2>
+              <div class="hint">Deleting an institution or campus is only allowed once it has no courses/campuses left inside it.</div>
+              <div id="catalogTree"></div>
+            </div>
+          </div>
+
+          <!-- ============ INSTITUTION ADMINS ============ -->
+          <div class="contentPanel" id="panel-instadmins">
+            <div class="panelHeader"><h2>Institution Admins</h2></div>
+            <div class="card">
+              <h2>Grant Institution Admin Access</h2>
+              <div class="hint">Enter the email of an already-registered FeMOS user, and pick which institution they'll manage.</div>
+              <div class="row2">
+                <div class="field"><label>Institution</label><select id="grantInstSelect"></select></div>
+                <div class="field"><label>User's Email</label><input id="grantEmail" placeholder="e.g. registrar@must.ac.tz"/></div>
+              </div>
+              <button class="btn" id="btnGrantInstAdmin">Grant Institution Admin</button>
+              <div class="msg" id="msgGrant"></div>
+            </div>
+
+            <div class="card">
+              <h2>Current Institution Admins</h2>
+              <div id="instAdminList"><div class="empty">Loading...</div></div>
+            </div>
+          </div>
+
+          <!-- ============ DASHBOARD BANNERS ============ -->
+          <div class="contentPanel" id="panel-banners">
+            <div class="panelHeader"><h2>Dashboard Banners</h2></div>
+            <div class="card">
+              <h2>Dashboard Slider Images</h2>
+              <div class="hint">These 5 images slide at the top of every student's dashboard — separately for each institution. Choose an institution, paste up to 5 image URLs, and save. Leave a slot blank to skip it.</div>
+              <div class="field"><label>Institution</label><select id="bannerInstSelect"></select></div>
+              <div class="field"><label>Image 1 URL</label><input id="bannerUrl1" placeholder="https://res.cloudinary.com/..."/></div>
+              <div class="field"><label>Image 2 URL</label><input id="bannerUrl2" placeholder="https://res.cloudinary.com/..."/></div>
+              <div class="field"><label>Image 3 URL</label><input id="bannerUrl3" placeholder="https://res.cloudinary.com/..."/></div>
+              <div class="field"><label>Image 4 URL</label><input id="bannerUrl4" placeholder="https://res.cloudinary.com/..."/></div>
+              <div class="field"><label>Image 5 URL</label><input id="bannerUrl5" placeholder="https://res.cloudinary.com/..."/></div>
+              <button class="btn" id="btnSaveBanners">Save Slider for This Institution</button>
+              <div class="msg" id="msgBanner"></div>
+            </div>
+            <div class="card">
+              <h2>Preview</h2>
+              <div id="bannerPreview"><div class="empty">Choose an institution above to see its current slides.</div></div>
+            </div>
+          </div>
+
+          <!-- ============ POSTER TEMPLATES ============ -->
+          <div class="contentPanel" id="panel-templates">
+            <div class="panelHeader"><h2>Poster Templates</h2></div>
+            <div class="card">
+              <h2>Create a Poster Template</h2>
+              <div class="hint">Templates help CRs, lecturers, and institution admins post announcements faster — they just pick a template, edit if needed, and send.</div>
+              <div class="field"><label>Institution</label><select id="tplInstSelect"></select></div>
+              <div class="field"><label>Template Title</label><input id="tplTitle" placeholder="e.g. Exam Schedule Announcement"/></div>
+              <div class="field"><label>Default Body Text</label><textarea id="tplBody" placeholder="Write the default message body that will pre-fill when this template is used..."></textarea></div>
+              <div class="field">
+                <label>Poster Image URL (optional)</label>
+                <input id="tplImageUrl" placeholder="https://res.cloudinary.com/..."/>
+                <div id="tplImagePreview" style="display:none;margin-top:8px;"><img id="tplPreviewImg" src="" style="width:100%;max-height:180px;object-fit:cover;border-radius:12px;"/></div>
+              </div>
+              <button class="btn" id="btnCreateTemplate">Save Template</button>
+              <div class="msg" id="msgTemplate"></div>
+            </div>
+
+            <div class="card">
+              <h2>Existing Templates</h2>
+              <div class="hint">Select an institution above to see its templates.</div>
+              <div id="templateList"><div class="empty">Choose an institution to view templates.</div></div>
+            </div>
+          </div>
+        </main>
       </div>
     </div>
 
@@ -262,7 +305,6 @@
       const auth = firebase.auth(app);
       const db = firebase.firestore(app);
 
-      // ================= EMAILJS CONFIG (reuses your existing Service ID/Public Key) =================
       const EMAILJS_PUBLIC_KEY = "n1q50LOlnNH_wWusx";
       const EMAILJS_SERVICE_ID = "service_lx1zlxc";
       const EMAILJS_ADMIN_GRANT_TEMPLATE_ID ="template_i38al3f";
@@ -276,21 +318,47 @@
       function showConfirm(message, onConfirm) {
         const overlay = document.getElementById("confirmOverlay");
         document.getElementById("confirmMsg").textContent = message;
-        overlay.classList.add("show");
+        overlay.style.display = "flex";
         const okBtn = document.getElementById("confirmOkBtn");
         const cancelBtn = document.getElementById("confirmCancelBtn");
-        function cleanup() { overlay.classList.remove("show"); okBtn.removeEventListener("click", onOk); cancelBtn.removeEventListener("click", onCancel); }
+        function cleanup() { overlay.style.display = "none"; okBtn.removeEventListener("click", onOk); cancelBtn.removeEventListener("click", onCancel); }
         function onOk() { cleanup(); onConfirm(); }
         function onCancel() { cleanup(); }
         okBtn.addEventListener("click", onOk);
         cancelBtn.addEventListener("click", onCancel);
       }
 
+      function showToast(text) {
+        var t = document.createElement("div");
+        t.className = "toast show";
+        t.innerHTML = '<span>'+text+'</span>';
+        document.body.appendChild(t);
+        setTimeout(function() { t.remove(); }, 3500);
+      }
+
+      /* ---- Sidebar / hamburger ---- */
+      function openSidebar() {
+        document.getElementById("sidebar").classList.add("open");
+        document.getElementById("sidebarOverlay").classList.add("open");
+      }
+      function closeSidebar() {
+        document.getElementById("sidebar").classList.remove("open");
+        document.getElementById("sidebarOverlay").classList.remove("open");
+      }
+
+      /* ---- Tab switching via sidebar nav ---- */
+      function switchTab(el) {
+        document.querySelectorAll(".navItem").forEach(function (n) { n.classList.remove("active"); });
+        document.querySelectorAll(".contentPanel").forEach(function (p) { p.classList.remove("active"); });
+        el.classList.add("active");
+        document.getElementById("panel-" + el.getAttribute("data-tab")).classList.add("active");
+        closeSidebar();
+      }
+
       // ---------- Access gate ----------
       auth.onAuthStateChanged(async function (user) {
         const gate = document.getElementById("gate");
         if (!user) { window.location.replace("login.html"); return; }
-        }
         try {
           const roleDoc = await db.collection("userRoles").doc(user.uid).get();
           if (!roleDoc.exists || roleDoc.data().role !== "superAdmin") {
@@ -319,16 +387,6 @@
 
       document.getElementById("btnLogout").addEventListener("click", function () {
         showConfirm("Do you really want to logout?", async function () { await auth.signOut(); window.location.replace("login.html"); });
-      });
-
-      // ---------- Tabs ----------
-      document.querySelectorAll(".tabbtn").forEach(function (btn) {
-        btn.addEventListener("click", function () {
-          document.querySelectorAll(".tabbtn").forEach(function (b) { b.classList.remove("active"); });
-          document.querySelectorAll(".panel").forEach(function (p) { p.classList.remove("active"); });
-          btn.classList.add("active");
-          document.getElementById("panel-" + btn.getAttribute("data-tab")).classList.add("active");
-        });
       });
 
       let appInitialized = false;
@@ -639,7 +697,6 @@
           showMsg("msgGrant", "Granted! " + email + " is now Institution Admin for " + instName + ".", "ok");
           loadInstAdminList();
 
-          // Best-effort email notification - if it fails, the grant itself has already succeeded.
           if (typeof emailjs !== "undefined" && !EMAILJS_ADMIN_GRANT_TEMPLATE_ID.startsWith("PUT_")) {
             try {
               await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_ADMIN_GRANT_TEMPLATE_ID, {
