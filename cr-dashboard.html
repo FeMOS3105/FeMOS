@@ -330,7 +330,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="fcm.js"></script>
 
     <script>
       const firebaseConfig = {
@@ -447,6 +449,7 @@
         loadFeedback();
         loadNotifBadge();
         loadRoster();
+        initFCM(auth.currentUser);
       }
 
       // ================= ANNOUNCEMENTS =================

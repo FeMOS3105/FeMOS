@@ -104,17 +104,7 @@
       return;
     }
 
-    /* ---- Firefox Android: ⋮ menu → Install ---- */
-    if (isFirefoxAndroid()) {
-      var ffTip = document.createElement("div");
-      ffTip.id = "pwaInstallBtn";
-      ffTip.style.cssText = tipStyle;
-      ffTip.innerHTML = 'Install FeMOS: Tap <b>⋮</b> then <b>Install</b>';
-      ffTip.addEventListener("click", function () { ffTip.remove(); });
-      document.body.appendChild(ffTip);
-      setTimeout(function () { var el = document.getElementById("pwaInstallBtn"); if (el) el.remove(); }, 12000);
-      return;
-    }
+    /* ---- Firefox Android: no PWA install support — don't show anything ---- */
 
     /* ---- Other browsers: don't show anything ---- */
   }

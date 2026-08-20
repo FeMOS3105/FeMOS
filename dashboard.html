@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FeMOS — Dashboard</title>
     <link rel="icon" type="image/png" href="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png"/>
+    <link rel="manifest" href="manifest.json"/>
+    <meta name="theme-color" content="#155fd1"/>
     <link rel="stylesheet" href="theme.css"/>
     <script src="theme.js"></script>
+    <script src="pwa.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <style>
@@ -792,7 +795,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="fcm.js"></script>
 
     <script>
       const firebaseConfig = {
@@ -973,6 +978,7 @@
         updateAppLockUI();
         requestNotifyPermission();
         startAnnouncementListener();
+        initFCM(auth.currentUser);
       }
 
       // ================= ANNOUNCEMENTS =================

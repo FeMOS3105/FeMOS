@@ -7,6 +7,7 @@ const PRECACHE = [
   "/registration.html",
   "/theme.css",
   "/theme.js",
+  "/fcm.js",
   "/manifest.json",
 ];
 
@@ -49,7 +50,21 @@ self.addEventListener("fetch", function (event) {
 self.addEventListener("push", function (event) {
   var data = { title: "FeMOS", body: "You have a new notification." };
   if (event.data) {
-    try { data = event.data.json(); } catch (e) { data.body = event.data.text(); }
+    try {
+      var raw = event.data.json();
+      /* FCM sends notification nested under .notification */
+      if (raw.notification) {
+        data.title = raw.notification.title || data.title;
+        data.body = raw.notification.body || data.body;
+        data.tag = raw.notification.tag;
+        data.url = (raw.data && raw.data.url) || "/dashboard.html";
+      } else {
+        data.title = raw.title || data.title;
+        data.body = raw.body || data.body;
+        data.tag = raw.tag;
+        data.url = raw.url || "/dashboard.html";
+      }
+    } catch (e) { data.body = event.data.text(); }
   }
   event.waitUntil(
     self.registration.showNotification(data.title, {
