@@ -556,9 +556,10 @@
             <div class="dzOpt" id="dzAppLock">
               <div class="dzIcon blue"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg></div>
               <div class="dzInfo"><div class="dzTitle">App Lock</div><div class="dzDesc" id="dzAppLockDesc">Set a 4-digit PIN to lock your app</div></div>
-              <div class="dzToggle" id="dzAppLockToggle" style="margin-left:auto;width:44px;height:24px;border-radius:12px;background:#e0e4ec;position:relative;cursor:pointer;transition:background 0.3s;flex-shrink:0;">
-                <div id="dzAppLockKnob" style="width:20px;height:20px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:left 0.3s;box-shadow:0 2px 4px rgba(0,0,0,0.15);"></div>
-              </div>
+            </div>
+            <div class="dzOpt" id="dzAppLockChange" style="display:none;">
+              <div class="dzIcon" style="background:linear-gradient(135deg,#f59e0b,#d97706);"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg></div>
+              <div class="dzInfo"><div class="dzTitle">Change PIN</div><div class="dzDesc">Update your App Lock PIN</div></div>
             </div>
             <div class="dzOpt" id="dzTheme">
               <div class="dzIcon blue"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></div>
@@ -1857,17 +1858,14 @@
       }
 
       function updateAppLockUI() {
-        var toggle = document.getElementById("dzAppLockToggle");
-        var knob = document.getElementById("dzAppLockKnob");
         var desc = document.getElementById("dzAppLockDesc");
+        var changeRow = document.getElementById("dzAppLockChange");
         if (appLockEnabled) {
-          toggle.style.background = "var(--water-mid)";
-          knob.style.left = "22px";
-          desc.textContent = "Change or disable your PIN";
+          desc.textContent = "Tap to disable App Lock";
+          changeRow.style.display = "flex";
         } else {
-          toggle.style.background = "#e0e4ec";
-          knob.style.left = "2px";
           desc.textContent = "Set a 4-digit PIN to lock your app";
+          changeRow.style.display = "none";
         }
       }
 
@@ -1887,15 +1885,21 @@
         } catch (e) { /* silent */ }
       }
 
-      // --- App Lock toggle click ---
-      document.getElementById("dzAppLockToggle").addEventListener("click", function (e) {
-        e.stopPropagation();
+      // --- App Lock: click row to toggle on/off ---
+      document.getElementById("dzAppLock").addEventListener("click", function () {
         if (appLockEnabled) {
-          openDzOverlay("dzPinChangeOverlay");
-          document.getElementById("dzPinOld").value = "";
-          document.getElementById("dzPinNew").value = "";
-          document.getElementById("dzPinNewConfirm").value = "";
-          document.getElementById("dzPinChangeMsg").className = "msg";
+          showConfirm("Do you really want to disable App Lock?", async function () {
+            try {
+              await db.collection("users").doc(auth.currentUser.uid).set({ appLockPin: firebase.firestore.FieldValue.delete() }, { merge: true });
+              appLockEnabled = false;
+              appLockPinHash = "";
+              updateAppLockUI();
+              sessionStorage.removeItem("femosUnlocked_" + auth.currentUser.uid);
+              showAppLockToast("App Lock has been disabled.");
+            } catch (e) {
+              alert("Failed to disable App Lock. Please try again.");
+            }
+          });
         } else {
           openDzOverlay("dzPinSetupOverlay");
           showDzStep("pinStep1", "pinDot1", "pinDot2");
@@ -1906,10 +1910,13 @@
         }
       });
 
-      // Also allow clicking the row itself
-      document.getElementById("dzAppLock").addEventListener("click", function (e) {
-        if (e.target.closest("#dzAppLockToggle")) return;
-        document.getElementById("dzAppLockToggle").click();
+      // --- Change PIN row ---
+      document.getElementById("dzAppLockChange").addEventListener("click", function () {
+        openDzOverlay("dzPinChangeOverlay");
+        document.getElementById("dzPinOld").value = "";
+        document.getElementById("dzPinNew").value = "";
+        document.getElementById("dzPinNewConfirm").value = "";
+        document.getElementById("dzPinChangeMsg").className = "msg";
       });
 
       // --- PIN Setup Step 1: auto-advance + enable Continue ---
