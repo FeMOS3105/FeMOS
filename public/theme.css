@@ -1,0 +1,208 @@
+/* FeMOS Dark Theme — applied via [data-theme="dark"] on <html> */
+html[data-theme="dark"] {
+  --ink: #e2e8f0;
+  --muted: #94a3b8;
+  --line: #334155;
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-card: #1e293b;
+  --bg-card-hover: #253349;
+  --bg-input: #1e293b;
+  --bg-surface: #162032;
+  --text-on-dark: #e2e8f0;
+}
+
+/* ---- Body & Shell ---- */
+html[data-theme="dark"] body {
+  background: linear-gradient(180deg, #0f172a 0%, #162032 100%) !important;
+  color: var(--ink) !important;
+}
+html[data-theme="dark"] .shell { color: var(--ink); }
+
+/* ---- Topbar ---- */
+html[data-theme="dark"] .topbar { background: rgba(30,41,59,0.92) !important; border-bottom-color: var(--line); }
+html[data-theme="dark"] .userchip { background: var(--bg-card) !important; color: var(--ink); }
+html[data-theme="dark"] .userchip .av { background: var(--water-deep); color: #fff; }
+html[data-theme="dark"] .userchip span { color: var(--ink); }
+html[data-theme="dark"] .brand h1 { color: var(--water-light) !important; -webkit-text-fill-color: var(--water-light) !important; }
+
+/* ---- All Cards (with !important to beat inline styles) ---- */
+html[data-theme="dark"] .dashCard {
+  background: var(--bg-card) !important;
+  border-color: var(--line) !important;
+  color: var(--ink);
+}
+html[data-theme="dark"] .dashCard::before { background: radial-gradient(circle, rgba(46,168,238,0.12), transparent 70%) !important; }
+html[data-theme="dark"] .dashCard:hover { background: var(--bg-card-hover) !important; border-color: var(--water-mid) !important; }
+html[data-theme="dark"] .dashCard .stat { color: var(--muted); }
+html[data-theme="dark"] .dashCard .label { color: var(--ink); }
+
+html[data-theme="dark"] .card { background: var(--bg-card) !important; border-color: var(--line); color: var(--ink); }
+html[data-theme="dark"] .itemCard { background: var(--bg-card) !important; border-color: var(--line); color: var(--ink); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+html[data-theme="dark"] .itemCard[data-ann-click]:hover { border-color: var(--water-mid); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+html[data-theme="dark"] .annExpanded { background: var(--bg-card) !important; border-color: var(--line); color: var(--ink); }
+
+/* ---- Detail Area ---- */
+html[data-theme="dark"] .detailArea { background: transparent; color: var(--ink); }
+
+/* ---- Back Button ---- */
+html[data-theme="dark"] .backBtn { background: var(--bg-card) !important; color: var(--ink); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+
+/* ---- Empty state boxes ---- */
+html[data-theme="dark"] .empty { color: var(--muted); background: var(--bg-secondary); border-color: var(--line); }
+
+/* ---- Text colors ---- */
+html[data-theme="dark"] h1, html[data-theme="dark"] h2, html[data-theme="dark"] h3,
+html[data-theme="dark"] h4, html[data-theme="dark"] .ititle, html[data-theme="dark"] .dzTitle {
+  color: var(--ink) !important;
+}
+html[data-theme="dark"] .imeta, html[data-theme="dark"] .dzDesc, html[data-theme="dark"] .hint,
+html[data-theme="dark"] p { color: var(--muted) !important; }
+html[data-theme="dark"] .ibody { color: var(--text-on-dark) !important; }
+html[data-theme="dark"] span { color: inherit; }
+html[data-theme="dark"] div { color: inherit; }
+
+/* ---- Profile Block ---- */
+html[data-theme="dark"] .profileBlock { background: var(--bg-card) !important; border-color: var(--line); }
+html[data-theme="dark"] .profileBlock .row { border-bottom-color: var(--line); }
+html[data-theme="dark"] .profileBlock .row span:first-child { color: var(--muted) !important; }
+html[data-theme="dark"] .profileBlock .row span:last-child { color: var(--ink) !important; }
+
+/* ---- Status Pills ---- */
+html[data-theme="dark"] .statusPill { border-color: var(--line); }
+html[data-theme="dark"] .statusPill.pending { background: rgba(138,97,0,0.2); color: #fbbf24 !important; }
+html[data-theme="dark"] .statusPill.confirmed { background: rgba(31,174,110,0.2); color: #34d399 !important; }
+
+/* ---- Stat big ---- */
+html[data-theme="dark"] .statBig { color: var(--water-light) !important; }
+html[data-theme="dark"] .statLabel { color: var(--muted); }
+
+/* ---- Read confirmed ---- */
+html[data-theme="dark"] .readConfirmed { color: #34d399 !important; }
+
+/* ---- Carousel ---- */
+html[data-theme="dark"] .carousel { background: var(--bg-card) !important; border-color: var(--line); }
+html[data-theme="dark"] .carousel-empty { color: var(--muted); }
+
+/* ---- Tabs ---- */
+html[data-theme="dark"] .tabbar { background: var(--bg-secondary) !important; }
+html[data-theme="dark"] .tabbtn { color: var(--muted); }
+html[data-theme="dark"] .tabbtn.active { color: #fff; }
+
+/* ---- Announcement Tabs ---- */
+html[data-theme="dark"] .annTabs { background: transparent; }
+html[data-theme="dark"] .annTab { background: var(--bg-secondary) !important; color: var(--muted); border-color: var(--line); }
+html[data-theme="dark"] .annTab.active { background: linear-gradient(135deg, var(--water-light), var(--water-deep)) !important; color: #fff; border-color: transparent; }
+html[data-theme="dark"] .annTab .tabCount { background: rgba(255,255,255,0.15); color: #fff; }
+html[data-theme="dark"] .annTab:not(.active) .tabCount { background: var(--line); color: var(--muted); }
+
+/* ---- Forms & Inputs ---- */
+html[data-theme="dark"] input, html[data-theme="dark"] select, html[data-theme="dark"] textarea {
+  background: var(--bg-input) !important;
+  border-color: var(--line) !important;
+  color: var(--ink) !important;
+}
+html[data-theme="dark"] input::placeholder, html[data-theme="dark"] textarea::placeholder { color: #64748b !important; }
+html[data-theme="dark"] label { color: var(--muted) !important; }
+
+/* ---- Buttons ---- */
+html[data-theme="dark"] .btn { color: #fff; }
+html[data-theme="dark"] .btn-outline { color: var(--ink); background: var(--bg-secondary); border-color: var(--line); }
+html[data-theme="dark"] .btn-sm { color: var(--ink); background: var(--bg-secondary); border-color: var(--line); }
+html[data-theme="dark"] .dzCancel { background: var(--bg-secondary) !important; color: var(--ink); }
+html[data-theme="dark"] .dzConfirm { color: #fff; }
+html[data-theme="dark"] .optBtn { background: var(--bg-secondary) !important; color: var(--ink) !important; border-color: var(--line); }
+html[data-theme="dark"] .optBtn:hover { border-color: var(--water-mid); }
+html[data-theme="dark"] .optVoted { background: rgba(46,168,238,0.12) !important; border-color: var(--water-mid); }
+
+/* ---- Toggle link ---- */
+html[data-theme="dark"] .toggleLink { color: var(--water-light); }
+
+/* ---- Danger Zone ---- */
+html[data-theme="dark"] .dangerCard { border-color: rgba(225,75,75,0.25) !important; }
+html[data-theme="dark"] .dangerCard::before { background: radial-gradient(circle, rgba(225,75,75,0.1), transparent 70%) !important; }
+html[data-theme="dark"] .dangerBadge { background: linear-gradient(135deg, #e14b4b, #c62828) !important; }
+html[data-theme="dark"] .dzOpt { background: var(--bg-card) !important; border-color: var(--line); color: var(--ink); }
+html[data-theme="dark"] .dzOpt:hover { background: var(--bg-card-hover); }
+html[data-theme="dark"] .dzDanger { background: rgba(225,75,75,0.08) !important; border-color: rgba(225,75,75,0.3); }
+html[data-theme="dark"] .dzDanger:hover { background: rgba(225,75,75,0.14) !important; }
+html[data-theme="dark"] .dzInfo .dzTitle { color: var(--ink) !important; }
+html[data-theme="dark"] .dzInfo .dzDesc { color: var(--muted) !important; }
+
+/* ---- Modals / Overlays ---- */
+html[data-theme="dark"] .dzOverlay { background: rgba(0,0,0,0.75) !important; }
+html[data-theme="dark"] .dzBox { background: var(--bg-card) !important; color: var(--ink); }
+html[data-theme="dark"] .dzBox h3 { color: var(--ink) !important; }
+html[data-theme="dark"] .dzBox .dzSub { color: var(--muted); }
+html[data-theme="dark"] .pinGateOverlay { background: rgba(0,0,0,0.8) !important; }
+html[data-theme="dark"] .pinGateBox { background: var(--bg-card) !important; color: var(--ink); }
+html[data-theme="dark"] .pinGateBox h3 { color: var(--ink) !important; }
+html[data-theme="dark"] .pinGateBox .pinSub { color: var(--muted); }
+html[data-theme="dark"] .pinInput { background: var(--bg-input) !important; border-color: var(--line) !important; color: var(--ink) !important; }
+html[data-theme="dark"] .overlay { background: rgba(0,0,0,0.7) !important; }
+html[data-theme="dark"] .promptBox { background: var(--bg-card); color: var(--ink); }
+html[data-theme="dark"] .promptBox p { color: var(--muted); }
+
+/* ---- Feedback panel ---- */
+html[data-theme="dark"] .feedbackPanel { background: var(--bg-card) !important; color: var(--ink); }
+html[data-theme="dark"] .feedbackFab { background: var(--water-deep) !important; }
+html[data-theme="dark"] .feedbackItem { background: var(--bg-card) !important; border-color: var(--line); }
+html[data-theme="dark"] .feedbackItem.unread { background: var(--bg-card-hover) !important; border-left-color: var(--water-mid); }
+html[data-theme="dark"] .fpWarning { background: rgba(224,160,32,0.1); color: var(--warn); }
+html[data-theme="dark"] .fpSuccess { color: var(--ink); }
+html[data-theme="dark"] .fpSuccess h4 { color: var(--ink); }
+html[data-theme="dark"] .fpSuccess p { color: var(--muted); }
+html[data-theme="dark"] .fpHeader { border-bottom-color: var(--line); }
+html[data-theme="dark"] .fpHeaderTop h4 { color: var(--ink); }
+
+/* ---- Toast ---- */
+html[data-theme="dark"] .toast { background: var(--bg-card) !important; color: var(--ink) !important; border-color: var(--line); }
+
+/* ---- Attendance ---- */
+html[data-theme="dark"] .attCard { background: var(--bg-card) !important; border-color: var(--line); }
+html[data-theme="dark"] .attItem { background: var(--bg-card); border-color: var(--line); }
+
+/* ---- Gate card ---- */
+html[data-theme="dark"] .gate-card { background: var(--bg-card) !important; color: var(--ink); border-color: var(--line); }
+
+/* ---- Strength meter ---- */
+html[data-theme="dark"] .strengthMeter { background: var(--line); }
+html[data-theme="dark"] .strengthText { color: var(--muted); }
+
+/* ---- Table ---- */
+html[data-theme="dark"] table { border-color: var(--line); }
+html[data-theme="dark"] th { background: var(--bg-secondary) !important; color: var(--ink) !important; border-color: var(--line); }
+html[data-theme="dark"] td { border-color: var(--line); color: var(--ink); }
+html[data-theme="dark"] .subTable th { background: var(--bg-secondary) !important; color: var(--ink) !important; }
+html[data-theme="dark"] .subTable td { color: var(--ink); }
+
+/* ---- Scrollbar ---- */
+html[data-theme="dark"] ::-webkit-scrollbar { width: 6px; }
+html[data-theme="dark"] ::-webkit-scrollbar-track { background: var(--bg-primary); }
+html[data-theme="dark"] ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+
+/* ---- Reg not set ---- */
+html[data-theme="dark"] .regNotSet { color: var(--warn) !important; }
+
+/* ---- Login/Signup/Registration cards ---- */
+html[data-theme="dark"] .auth-card { background: var(--bg-card) !important; border-color: var(--line); }
+html[data-theme="dark"] .field input, html[data-theme="dark"] .field select { background: var(--bg-input) !important; border-color: var(--line) !important; color: var(--ink) !important; }
+
+/* ---- Poster preview ---- */
+html[data-theme="dark"] .tplPreview img { border-color: var(--line); }
+
+/* ---- Chip/Badge elements ---- */
+html[data-theme="dark"] .unreadBadge { border-color: var(--bg-card); }
+
+/* ---- Collect form ---- */
+html[data-theme="dark"] .collectFormCard { background: var(--bg-card) !important; border-color: var(--line); }
+
+/* ---- Ann image ---- */
+html[data-theme="dark"] .annImage img { box-shadow: 0 4px 14px rgba(0,0,0,0.3); }
+
+/* ---- No-indexedDB warning ---- */
+html[data-theme="dark"] .warn-banner { background: rgba(224,160,32,0.15); color: var(--warn); border-color: var(--warn); }
+
+/* ---- PWA Install Button ---- */
+@keyframes pwaSlideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+html[data-theme="dark"] #pwaInstallBtn { background: linear-gradient(135deg, #1e40af, #155fd1); }

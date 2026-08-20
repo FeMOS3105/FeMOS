@@ -1,0 +1,2123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FeMOS — Dashboard</title>
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png"/>
+    <link rel="manifest" href="manifest.json"/>
+    <meta name="theme-color" content="#155fd1"/>
+    <link rel="stylesheet" href="theme.css"/>
+    <script src="theme.js"></script>
+    <script src="pwa.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+    <style>
+      :root {
+        --water-light: #5fd4f0; --water-mid: #2ea8ee; --water-deep: #155fd1;
+        --ink: #0d1b4b; --muted: #5c6b9a; --line: #dbe6fb; --danger: #e14b4b; --success: #1fae6e; --warn: #e0a020;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: "Segoe UI", system-ui, sans-serif; background: linear-gradient(180deg, #eef5ff 0%, #f7fbff 100%);
+        color: var(--ink); min-height: 100vh; padding: 20px 16px 60px;
+      }
+      .shell { max-width: 860px; margin: 0 auto; }
+      .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+      .brand { display: flex; align-items: center; gap: 10px; }
+      .brand img { width: 40px; height: 40px; border-radius: 50%; box-shadow: 0 6px 16px rgba(21,95,209,0.25); }
+      .brand h1 { font-size: 1.1rem; background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .userchip { display: flex; align-items: center; gap: 8px; background: #fff; border-radius: 999px; padding: 6px 14px 6px 6px; box-shadow: 0 6px 16px rgba(13,27,75,0.08); font-size: 0.82rem; }
+      .userchip .av { width: 26px; height: 26px; border-radius: 50%; background: var(--water-mid); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; overflow: hidden; }
+      .userchip .av img { width: 100%; height: 100%; object-fit: cover; }
+      .userchip button { background: none; border: none; color: var(--danger); font-weight: 600; cursor: pointer; font-size: 0.78rem; margin-left: 6px; }
+
+      /* ---------- Sliding banner carousel ---------- */
+      .carousel { position: relative; width: 100%; height: 26vh; min-height: 150px; max-height: 260px; border-radius: 20px; overflow: hidden; box-shadow: 0 16px 40px rgba(13,27,75,0.15); margin-bottom: 18px; background: linear-gradient(120deg, var(--water-light), var(--water-deep)); }
+      .carousel .slide { position: absolute; inset: 0; opacity: 0; transition: opacity .7s ease; }
+      .carousel .slide.show { opacity: 1; }
+      .carousel .slide img { width: 100%; height: 100%; object-fit: cover; }
+      .carousel-dots { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; justify-content: center; gap: 6px; }
+      .carousel-dots span { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.5); }
+      .carousel-dots span.active { background: #fff; }
+      .carousel-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: #fff; font-weight: 700; font-size: 1.1rem; text-align: center; padding: 0 20px; }
+
+      /* ---------- Card grid ---------- */
+      .cardGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; margin-bottom: 22px; }
+      .dashCard {
+        border-radius: 18px; padding: 16px; cursor: pointer; position: relative; overflow: hidden;
+        min-height: 118px; display: flex; flex-direction: column; justify-content: space-between;
+        background: rgba(255,255,255,0.75); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+        border: 1.5px solid rgba(46,168,238,0.22);
+        box-shadow: 0 10px 26px rgba(13,27,75,0.07);
+        transition: transform .15s, box-shadow .15s, border-color .15s;
+      }
+      .dashCard::before {
+        content: ""; position: absolute; top: -34%; right: -22%; width: 130px; height: 130px;
+        background: radial-gradient(circle, rgba(95,212,240,0.28), transparent 70%); border-radius: 50%; pointer-events: none;
+      }
+      .dashCard:hover { transform: translateY(-3px); box-shadow: 0 16px 34px rgba(13,27,75,0.12); border-color: rgba(46,168,238,0.45); }
+      .dashCard.unread {
+        border-color: var(--water-mid);
+        box-shadow: 0 0 0 3px rgba(46,168,238,0.15), 0 10px 26px rgba(21,95,209,0.12);
+        animation: unreadPulse 2.5s ease-in-out infinite;
+      }
+      .dashCard.unread .iconBadge { animation: iconGlow 2s ease-in-out infinite; }
+      @keyframes unreadPulse {
+        0%, 100% { box-shadow: 0 0 0 3px rgba(46,168,238,0.15), 0 10px 26px rgba(21,95,209,0.12); }
+        50% { box-shadow: 0 0 0 5px rgba(46,168,238,0.25), 0 12px 30px rgba(21,95,209,0.18); }
+      }
+      @keyframes iconGlow {
+        0%, 100% { box-shadow: 0 6px 16px rgba(21,95,209,0.25); }
+        50% { box-shadow: 0 6px 22px rgba(21,95,209,0.45); }
+      }
+      .unreadBadge {
+        position: absolute; top: -5px; right: -5px; min-width: 20px; height: 20px;
+        background: linear-gradient(135deg, #ff4b4b, #e63946); color: #fff;
+        border-radius: 999px; font-size: 0.68rem; font-weight: 800;
+        display: flex; align-items: center; justify-content: center;
+        padding: 0 5px; border: 2px solid #fff; z-index: 2;
+        animation: badgePop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      @keyframes badgePop {
+        0% { transform: scale(0); }
+        100% { transform: scale(1); }
+      }
+      .dashCard .iconBadge {
+        width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+        background: linear-gradient(135deg, var(--water-light), var(--water-deep)); box-shadow: 0 6px 16px rgba(21,95,209,0.25);
+        position: relative; z-index: 1;
+      }
+      .dashCard .icon { width: 20px; height: 20px; }
+      .dashCard .label { font-weight: 700; font-size: 0.92rem; margin-top: 10px; color: var(--ink); position: relative; z-index: 1; }
+      .dashCard .stat { font-size: 0.75rem; margin-top: 3px; color: var(--muted); position: relative; z-index: 1; }
+      @media (max-width: 560px) {
+        .cardGrid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .dashCard { min-height: 100px; padding: 13px; border-radius: 15px; }
+        .dashCard .iconBadge { width: 34px; height: 34px; border-radius: 10px; }
+        .dashCard .icon { width: 17px; height: 17px; }
+        .dashCard .label { font-size: 0.82rem; margin-top: 8px; }
+        .dashCard .stat { font-size: 0.7rem; }
+      }
+
+      /* ---------- Detail area ---------- */
+      .detailArea { display: none; }
+      .detailArea.show { display: block; }
+      .backBtn { display: inline-flex; align-items: center; gap: 6px; background: #fff; border: none; border-radius: 10px; padding: 9px 16px; font-weight: 600; font-size: 0.84rem; color: var(--ink); cursor: pointer; box-shadow: 0 6px 16px rgba(13,27,75,0.08); margin-bottom: 16px; }
+      .empty { text-align: center; padding: 26px; color: var(--muted); font-size: 0.88rem; border: 1.5px dashed var(--line); border-radius: 12px; }
+
+      .itemCard { background: #fff; border: 1.5px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 12px; box-shadow: 0 8px 22px rgba(13,27,75,0.05); }
+      .itemCard .ititle { font-weight: 700; font-size: 0.96rem; }
+      .itemCard .imeta { font-size: 0.74rem; color: var(--muted); margin-top: 3px; }
+      .itemCard .ibody { font-size: 0.88rem; color: var(--ink); line-height: 1.5; margin: 10px 0; }
+      .readConfirmed { font-size: 0.82rem; color: var(--success); font-weight: 600; display: flex; align-items: center; gap: 5px; }
+      .readConfirmed::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--success); flex-shrink: 0; }
+      .itemCard[data-ann-click] { cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s; }
+      .itemCard[data-ann-click]:hover { border-color: var(--water-mid); box-shadow: 0 10px 28px rgba(13,27,75,0.09); transform: translateY(-1px); }
+      .toast {
+        position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(120%);
+        display: flex; align-items: center; gap: 10px; padding: 12px 18px;
+        background: #fff8e1; border: 1.5px solid #f5c518; border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 2000;
+        font-size: 0.82rem; color: #6d5a00; max-width: 520px; width: calc(100% - 40px);
+        transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      .toast.show { transform: translateX(-50%) translateY(0); }
+      .toast svg { color: #f5c518; flex-shrink: 0; }
+      .toast span { flex: 1; }
+      .toast a { color: var(--water-deep); font-weight: 700; text-decoration: underline; }
+      .toast button { background: none; border: none; color: #6d5a00; cursor: pointer; font-size: 1rem; padding: 0 0 0 6px; opacity: 0.6; }
+      .toast button:hover { opacity: 1; }
+      .annImage { margin-top: 10px; }
+      .annImage img {
+        width: 100%; max-height: 300px; object-fit: cover; border-radius: 12px;
+        box-shadow: 0 4px 14px rgba(13,27,75,0.1); cursor: pointer;
+      }
+      .annTabs { display: flex; gap: 6px; margin-bottom: 16px; }
+      .annTab {
+        flex: 1; padding: 10px 14px; border: 1.5px solid var(--line); border-radius: 10px;
+        background: #fff; font-size: 0.82rem; font-weight: 700; color: var(--muted);
+        cursor: pointer; text-align: center; transition: all 0.2s;
+      }
+      .annTab.active {
+        background: linear-gradient(135deg, var(--water-light), var(--water-deep));
+        color: #fff; border-color: transparent; box-shadow: 0 4px 14px rgba(21,95,209,0.25);
+      }
+      .annTab .tabCount {
+        display: inline-flex; align-items: center; justify-content: center;
+        min-width: 20px; height: 18px; padding: 0 5px; border-radius: 999px;
+        font-size: 0.68rem; font-weight: 800; margin-left: 5px;
+        background: rgba(255,255,255,0.25); color: #fff;
+      }
+      .annTab:not(.active) .tabCount { background: var(--line); color: var(--muted); }
+      .itemCard.annTruncated .ibody {
+        display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;
+        overflow: hidden; margin-bottom: 6px;
+      }
+      .readMoreBtn {
+        display: inline-flex; align-items: center; gap: 4px;
+        background: none; border: none; color: var(--water-deep);
+        font-weight: 700; font-size: 0.8rem; cursor: pointer; padding: 0;
+      }
+      .readMoreBtn:hover { text-decoration: underline; }
+
+      .optBtn {
+        display: flex; align-items: center; width: 100%; text-align: left;
+        padding: 14px 22px; border: 2px solid var(--line); border-radius: 999px;
+        background: linear-gradient(135deg, #f8fbff 0%, #eef5ff 100%);
+        margin-bottom: 10px; cursor: pointer; font-size: 0.9rem; font-weight: 600;
+        color: var(--ink); transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(13,27,75,0.04);
+      }
+      .optBtn:hover {
+        border-color: var(--water-mid);
+        background: linear-gradient(135deg, #e8f4ff 0%, #dceeff 100%);
+        transform: translateY(-1px); box-shadow: 0 4px 12px rgba(46,168,238,0.15);
+      }
+      .optBtn:active {
+        transform: translateY(0);
+        background: linear-gradient(135deg, var(--water-mid), var(--water-deep));
+        color: #fff; border-color: var(--water-deep);
+      }
+      .barRow { margin-bottom: 10px; }
+      .barLabel { display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 4px; }
+      .barTrack { height: 14px; border-radius: 999px; background: #f0f4fb; overflow: hidden; }
+      .barFill { height: 100%; background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); border-radius: 999px; transition: width .3s; }
+      .votedNote { font-size: 0.78rem; color: var(--water-deep); font-weight: 600; margin-bottom: 10px; }
+
+      .collectRow { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 4px 0; }
+      .btn-outline-sm { padding: 8px 16px; border-radius: 8px; border: 1.5px solid var(--line); background: #fff; color: var(--ink); font-weight: 600; font-size: 0.82rem; cursor: pointer; text-decoration: none; display: inline-block; }
+      .submittedTag { font-size: 0.76rem; color: var(--success); font-weight: 600; }
+
+      .field { margin-bottom: 14px; }
+      .field label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--muted); margin-bottom: 5px; }
+      .field input { width: 100%; padding: 11px 13px; border-radius: 10px; border: 1.5px solid var(--line); font-size: 0.92rem; background: #fbfdff; }
+      .btn { padding: 11px 20px; border: none; border-radius: 10px; font-weight: 700; font-size: 0.87rem; cursor: pointer; background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); color: #fff; }
+      .msg { margin-top: 12px; padding: 10px 13px; border-radius: 9px; font-size: 0.82rem; display: none; }
+      .msg.show { display: block; }
+      .msg.err { background: #fdecec; color: var(--danger); }
+      .msg.ok { background: #e9f9f1; color: var(--success); }
+
+      .profileBlock { background: #fff; border-radius: 16px; padding: 18px; box-shadow: 0 10px 28px rgba(13,27,75,0.08); }
+      .profileBlock .bigAv { width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 12px; display: block; background: linear-gradient(135deg, var(--water-light), var(--water-deep)); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 1.5rem; overflow: hidden; }
+      .profileBlock .bigAv img { width: 100%; height: 100%; object-fit: cover; }
+      .profileBlock .row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 0.88rem; }
+      .profileBlock .row span:first-child { color: var(--muted); }
+      .statusPill { font-size: 0.76rem; font-weight: 700; padding: 5px 12px; border-radius: 999px; }
+      .statusPill.pending { background: #fff3d6; color: #8a6100; }
+      .statusPill.confirmed { background: #e9f9f1; color: var(--success); }
+
+      .statBig { font-family: 'Segoe UI'; font-size: 2rem; font-weight: 700; color: var(--water-deep); }
+      .statLabel { font-size: 0.82rem; color: var(--muted); }
+
+      .gate-card { max-width: 460px; margin: 60px auto; text-align: center; background: #fff; border-radius: 18px; padding: 34px 26px; box-shadow: 0 14px 40px rgba(13,27,75,0.1); }
+      .overlay { position: fixed; inset: 0; background: rgba(13,27,75,0.55); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+      .overlay.show { display: flex; }
+      .promptBox { background: #fff; border-radius: 18px; padding: 24px; max-width: 360px; width: 100%; }
+      .promptBox h3 { font-size: 1rem; margin-bottom: 8px; }
+      .promptBox p { font-size: 0.82rem; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
+      .promptBox input { width: 100%; padding: 11px 12px; border-radius: 9px; border: 1.5px solid var(--line); font-size: 0.9rem; margin-bottom: 14px; }
+      .promptActions { display: flex; gap: 10px; }
+      .promptActions button { flex: 1; padding: 11px; border-radius: 10px; border: none; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+      .promptActions .cancel { background: #f2f4f8; color: var(--ink); }
+      .promptActions .ok { background: var(--water-deep); color: #fff; }
+
+      /* ---------- My Settings ---------- */
+      .settingsCard { border: 2px solid rgba(46,168,238,0.25) !important; }
+      .settingsCard::before { background: radial-gradient(circle, rgba(46,168,238,0.18), transparent 70%) !important; }
+      .settingsCard:hover { border-color: var(--water-mid) !important; }
+      .settingsBadge { background: linear-gradient(135deg, var(--water-light), var(--water-deep)) !important; box-shadow: 0 6px 16px rgba(21,95,209,0.3) !important; }
+      .dzOptions { display: flex; flex-direction: column; gap: 12px; }
+      .dzOpt {
+        display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-radius: 14px;
+        background: #fff; border: 1.5px solid var(--line); cursor: pointer;
+        transition: all 0.2s; box-shadow: 0 4px 12px rgba(13,27,75,0.04);
+      }
+      .dzOpt:hover { border-color: var(--water-mid); transform: translateY(-1px); box-shadow: 0 6px 18px rgba(13,27,75,0.08); }
+      .dzOpt .dzIcon {
+        width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+      }
+      .dzOpt .dzIcon.blue { background: linear-gradient(135deg, var(--water-light), var(--water-deep)); }
+      .dzOpt .dzIcon.red { background: linear-gradient(135deg, #f5716c, #c62828); }
+      .dzOpt .dzIcon.green { background: linear-gradient(135deg, #7be3b0, #1a9d63); }
+      .dzOpt .dzIcon.amber { background: linear-gradient(135deg, #ffcf6b, #e0791b); }
+      .dzOpt .dzIcon svg { width: 20px; height: 20px; }
+      .dzOpt .dzInfo .dzTitle { font-weight: 700; font-size: 0.92rem; color: var(--ink); }
+      .dzOpt .dzInfo .dzDesc { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+      .dzDanger { background: #fff5f5; border: 1.5px solid rgba(225,75,75,0.3); }
+      .dzDanger:hover { border-color: var(--danger); background: #fff0f0; }
+
+      /* ---------- App Lock PIN Input ---------- */
+      .pinInputRow { display: flex; gap: 10px; justify-content: center; margin: 18px 0; }
+      .pinInput {
+        width: 52px; height: 60px; text-align: center; font-size: 1.5rem; font-weight: 700;
+        border: 2px solid var(--line); border-radius: 14px; background: #fbfdff;
+        color: var(--ink); outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+        -webkit-text-security: disc;
+      }
+      .pinInput:focus { border-color: var(--water-mid); box-shadow: 0 0 0 3px rgba(46,168,238,0.15); }
+      .pinInput.error { border-color: var(--danger); animation: pinShake 0.4s ease; }
+      @keyframes pinShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+      .pinGateOverlay {
+        position: fixed; inset: 0; background: rgba(13,27,75,0.65); display: none;
+        align-items: center; justify-content: center; z-index: 300; padding: 20px;
+        backdrop-filter: blur(4px);
+      }
+      .pinGateOverlay.show { display: flex; }
+      .pinGateBox {
+        background: #fff; border-radius: 22px; padding: 36px 28px; max-width: 380px; width: 100%;
+        box-shadow: 0 24px 60px rgba(13,27,75,0.3); text-align: center; animation: dzSlideUp 0.3s ease;
+      }
+      .pinGateBox .pinIcon { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, var(--water-light), var(--water-deep)); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+      .pinGateBox .pinIcon svg { width: 30px; height: 30px; stroke: #fff; fill: none; }
+      .pinGateBox h3 { font-size: 1.1rem; margin-bottom: 6px; text-align: center; }
+      .pinGateBox .pinSub { font-size: 0.82rem; color: var(--muted); margin-bottom: 18px; line-height: 1.5; }
+      .pinGateBox .pinError { font-size: 0.8rem; color: var(--danger); margin-top: 10px; display: none; font-weight: 600; }
+      .pinGateBox .pinError.show { display: block; }
+
+      /* ---------- Danger Zone Modals ---------- */
+      .dzOverlay {
+        position: fixed; inset: 0; background: rgba(13,27,75,0.55); display: none;
+        align-items: center; justify-content: center; z-index: 200; padding: 20px;
+      }
+      .dzOverlay.show { display: flex; }
+      .dzBox {
+        background: #fff; border-radius: 18px; padding: 28px; max-width: 440px; width: 100%;
+        box-shadow: 0 20px 60px rgba(13,27,75,0.25); animation: dzSlideUp 0.25s ease;
+        max-height: 90vh; overflow-y: auto;
+      }
+      @keyframes dzSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+      .dzBox h3 { font-size: 1.05rem; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+      .dzBox .dzSub { font-size: 0.82rem; color: var(--muted); margin-bottom: 18px; line-height: 1.5; }
+      .dzBox .field { margin-bottom: 14px; }
+      .dzBox .field label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--muted); margin-bottom: 5px; }
+      .dzBox .field input, .dzBox .field select, .dzBox .field textarea {
+        width: 100%; padding: 11px 13px; border-radius: 10px; border: 1.5px solid var(--line);
+        font-size: 0.92rem; background: #fbfdff; font-family: inherit;
+      }
+      .dzBox .field textarea { min-height: 70px; resize: vertical; }
+      .dzActions { display: flex; gap: 10px; margin-top: 18px; }
+      .dzActions button {
+        flex: 1; padding: 12px; border-radius: 10px; border: none;
+        font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: all 0.15s;
+      }
+      .dzCancel { background: #f2f4f8; color: var(--ink); }
+      .dzCancel:hover { background: #e8ecf2; }
+      .dzConfirm { background: linear-gradient(90deg, var(--water-mid), var(--water-deep)); color: #fff; }
+      .dzConfirm:hover { opacity: 0.9; }
+      .dzDangerBtn { background: linear-gradient(90deg, #e14b4b, #c62828); color: #fff; }
+      .dzDangerBtn:hover { opacity: 0.9; }
+      .dzPhotoPreview {
+        width: 90px; height: 90px; border-radius: 50%; margin: 0 auto 14px; overflow: hidden;
+        background: linear-gradient(135deg, var(--water-light), var(--water-deep));
+        display: flex; align-items: center; justify-content: center; color: #fff;
+        font-weight: 700; font-size: 1.6rem; position: relative;
+      }
+      .dzPhotoPreview img { width: 100%; height: 100%; object-fit: cover; }
+      .dzPhotoPreview .dzPhotoOverlay {
+        position: absolute; inset: 0; background: rgba(13,27,75,0.45); display: flex;
+        align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;
+        cursor: pointer; border-radius: 50%;
+      }
+      .dzPhotoPreview:hover .dzPhotoOverlay { opacity: 1; }
+      .dzPhotoOverlay span { color: #fff; font-size: 0.76rem; font-weight: 700; text-align: center; }
+      .strengthMeter { height: 4px; border-radius: 2px; background: #e8ecf2; margin-top: 6px; overflow: hidden; }
+      .strengthMeter .fill { height: 100%; border-radius: 2px; transition: width 0.3s, background 0.3s; }
+      .strengthText { font-size: 0.72rem; margin-top: 4px; font-weight: 600; }
+      .dzStep { display: none; }
+      .dzStep.active { display: block; }
+      .dzStepIndicator { display: flex; gap: 6px; margin-bottom: 18px; }
+      .dzStepDot { width: 8px; height: 8px; border-radius: 50%; background: #e0e4ec; transition: background 0.2s; }
+      .dzStepDot.active { background: var(--water-deep); }
+      .dzStepDot.done { background: var(--success); }
+
+      /* ============ FEEDBACK FLOATING BUTTON ============ */
+      .feedbackFab {
+        position: fixed; bottom: 28px; right: 28px; z-index: 1500;
+        width: 56px; height: 56px; border-radius: 50%; border: none; cursor: pointer;
+        background: linear-gradient(135deg, var(--water-mid), var(--water-deep));
+        box-shadow: 0 6px 20px rgba(21,95,209,0.35);
+        display: flex; align-items: center; justify-content: center;
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
+      }
+      .feedbackFab:hover { transform: scale(1.08); box-shadow: 0 8px 28px rgba(21,95,209,0.45); }
+      .feedbackFab svg { width: 24px; height: 24px; stroke: #fff; fill: none; }
+      .feedbackFab::after {
+        content: ''; position: absolute; inset: -4px; border-radius: 50%;
+        border: 2.5px solid var(--water-mid); opacity: 0;
+        animation: fabPulse 2.5s ease-in-out infinite;
+      }
+      @keyframes fabPulse {
+        0%, 100% { opacity: 0; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(1.15); }
+      }
+      .feedbackPanel {
+        position: fixed; bottom: 0; right: 0; z-index: 1600;
+        width: 100%; max-width: 420px; height: 70vh;
+        background: #fff; border-radius: 20px 20px 0 0;
+        box-shadow: 0 -8px 40px rgba(13,27,75,0.18);
+        display: flex; flex-direction: column;
+        transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.34, 1.2, 0.64, 1);
+        overflow: hidden;
+      }
+      .feedbackPanel.open { transform: translateY(0); }
+      .feedbackBackdrop {
+        position: fixed; inset: 0; z-index: 1550;
+        background: rgba(13,27,75,0.4); opacity: 0; pointer-events: none;
+        transition: opacity 0.3s;
+      }
+      .feedbackBackdrop.open { opacity: 1; pointer-events: auto; }
+      .fpHeader {
+        padding: 18px 20px 14px; border-bottom: 1.5px solid var(--line);
+        background: linear-gradient(135deg, #f8fbff, #eef5ff);
+      }
+      .fpHeaderTop { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+      .fpHeaderTop h3 { font-size: 1rem; margin: 0; color: var(--ink); }
+      .fpClose { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 1.2rem; padding: 4px; }
+      .fpTabs { display: flex; gap: 6px; }
+      .fpTab {
+        flex: 1; padding: 9px 10px; border: 1.5px solid var(--line); border-radius: 10px;
+        background: #fff; font-size: 0.78rem; font-weight: 700; color: var(--muted);
+        cursor: pointer; text-align: center; transition: all 0.2s;
+      }
+      .fpTab.active {
+        background: linear-gradient(135deg, var(--water-mid), var(--water-deep));
+        color: #fff; border-color: transparent;
+      }
+      .fpBody { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; }
+      .fpBody textarea {
+        flex: 1; min-height: 100px; padding: 12px; border-radius: 12px;
+        border: 1.5px solid var(--line); font-size: 0.88rem; font-family: inherit;
+        resize: none; background: #fbfdff; color: var(--ink);
+      }
+      .fpBody textarea:focus { outline: none; border-color: var(--water-mid); }
+      .fpWarning {
+        display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px;
+        background: #fff8e1; border: 1px solid #f5c518; border-radius: 10px;
+        font-size: 0.76rem; color: #6d5a00; margin-top: 10px; line-height: 1.5;
+      }
+      .fpWarning svg { flex-shrink: 0; margin-top: 1px; }
+      .fpFooter { padding: 12px 20px 16px; border-top: 1.5px solid var(--line); }
+      .fpSend {
+        width: 100%; padding: 12px; border: none; border-radius: 12px; font-weight: 700;
+        font-size: 0.88rem; cursor: pointer; color: #fff;
+        background: linear-gradient(90deg, var(--water-mid), var(--water-deep));
+        transition: opacity 0.2s;
+      }
+      .fpSend:disabled { opacity: 0.5; cursor: not-allowed; }
+      .fpSuccess {
+        text-align: center; padding: 30px 20px; flex: 1; display: flex;
+        flex-direction: column; align-items: center; justify-content: center;
+      }
+      .fpSuccess svg { margin-bottom: 12px; }
+      .fpSuccess h4 { font-size: 1rem; color: var(--ink); margin-bottom: 6px; }
+      .fpSuccess p { font-size: 0.82rem; color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div id="gate" class="gate-card">Loading your dashboard...</div>
+
+      <div id="app" style="display:none;">
+        <div class="topbar">
+          <div class="brand">
+            <img src="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png" alt="FeMOS"/>
+            <h1>FeMOS</h1>
+          </div>
+          <div class="userchip">
+            <div class="av" id="uAv">?</div>
+            <span id="uName">...</span>
+            <button id="btnLogout">Log Out</button>
+          </div>
+        </div>
+
+        <div class="carousel" id="carousel"><div class="carousel-empty">Welcome to FeMOS</div></div>
+
+        <!-- ============ CARD GRID (home) ============ -->
+        <div id="homeView">
+          <div class="cardGrid">
+            <div class="dashCard" data-open="ann"><div class="iconBadge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M3 11v2a1 1 0 0 0 1 1h2l4 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15 8a4 4 0 0 1 0 8"/><path d="M18 5a8 8 0 0 1 0 14"/></svg></div><div class="label">Announcements</div><div class="stat" id="statAnn">Loading...</div></div>
+            <div class="dashCard" data-open="profile"><div class="iconBadge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div><div class="label">My Profile</div><div class="stat">View &amp; check details</div></div>
+            <div class="dashCard" data-open="registration"><div class="iconBadge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg></div><div class="label">My Registration</div><div class="stat" id="statReg">Loading...</div></div>
+            <div class="dashCard" data-open="attendanceHistory"><div class="iconBadge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18"/><path d="M8 3v4M16 3v4"/><path d="m9 15 2 2 4-4"/></svg></div><div class="label">Attendance</div><div class="stat" id="statAttendance">Loading...</div></div>
+            <div class="dashCard" data-open="attendanceScan"><div class="iconBadge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM18 18h3v3h-3zM14 21h3M21 14v3"/></svg></div><div class="label">Scan Attendance</div><div class="stat" id="statScan">Check for open sessions</div></div>
+            <div class="dashCard" data-open="polls"><div class="iconBadge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="label">Polls</div><div class="stat" id="statPolls">Loading...</div></div>
+            <div class="dashCard" data-open="collect"><div class="iconBadge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M9 13h6M9 17h6"/></svg></div><div class="label">Quick Collect</div><div class="stat" id="statCollect">Loading...</div></div>
+            <div class="dashCard settingsCard" data-open="dangerZone"><div class="iconBadge settingsBadge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div><div class="label">My Settings</div><div class="stat">Manage your account</div></div>
+            <div class="dashCard" id="enterCRCard" style="display:none;background:linear-gradient(135deg,#155fd1,#0b2f9e);color:#fff;cursor:pointer;" onclick="window.location.replace('/cr')">
+              <div style="display:flex;align-items:center;gap:14px;">
+                <div style="width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;">
+                  <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#fff" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <div>
+                  <div style="font-size:1rem;font-weight:700;">Enter As Class Representative</div>
+                  <div style="font-size:0.82rem;opacity:0.85;">Access your CR dashboard</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ DETAIL VIEWS ============ -->
+        <div class="detailArea" id="detail-ann">
+          <button class="backBtn" data-back>← Back</button>
+          <div class="annTabs">
+            <button class="annTab active" data-ann-tab="unread">Unread <span class="tabCount" id="annUnreadCount">0</span></button>
+            <button class="annTab" data-ann-tab="read">Read <span class="tabCount" id="annReadCount">0</span></button>
+          </div>
+          <div id="annList"><div class="empty">Loading...</div></div>
+        </div>
+
+        <div class="detailArea" id="detail-profile">
+          <button class="backBtn" data-back>← Back</button>
+          <div class="profileBlock">
+            <div class="bigAv" id="pAv">?</div>
+            <div style="text-align:center;font-weight:700;font-size:1.05rem;" id="pName">...</div>
+            <div style="text-align:center;color:var(--muted);font-size:0.85rem;margin-bottom:16px;" id="pEmail">...</div>
+            <div class="row"><span>Institution</span><span id="pInst">—</span></div>
+            <div class="row"><span>College</span><span id="pCampus">—</span></div>
+            <div class="row"><span>Course</span><span id="pCourse">—</span></div>
+            <div class="row"><span>FeMOS Student ID</span><span id="pStudentId">—</span></div>
+            <div class="row"><span>Registration No.</span><span id="pRegNum">—</span></div>
+          </div>
+        </div>
+
+        <div class="detailArea" id="detail-registration">
+          <button class="backBtn" data-back>← Back</button>
+          <div class="profileBlock">
+            <div style="text-align:center;margin-bottom:14px;"><span class="statusPill" id="rStatus">...</span></div>
+            <div class="row"><span>Institution</span><span id="rInst">—</span></div>
+            <div class="row"><span>College</span><span id="rCampus">—</span></div>
+            <div class="row"><span>Course</span><span id="rCourse">—</span></div>
+          </div>
+        </div>
+
+        <div class="detailArea" id="detail-attendanceHistory">
+          <button class="backBtn" data-back>← Back</button>
+          <div class="profileBlock" style="text-align:center;margin-bottom:14px;">
+            <div class="statBig" id="attRate">—</div>
+            <div class="statLabel">of sessions attended</div>
+          </div>
+          <div id="attHistList"><div class="empty">Loading...</div></div>
+        </div>
+
+        <div class="detailArea" id="detail-attendanceScan">
+          <button class="backBtn" data-back>← Back</button>
+          <div id="scanList"><div class="empty">Loading...</div></div>
+        </div>
+
+        <div class="detailArea" id="detail-polls">
+          <button class="backBtn" data-back>← Back</button>
+          <div id="pollList"><div class="empty">Loading...</div></div>
+        </div>
+
+        <div class="detailArea" id="detail-collect">
+          <button class="backBtn" data-back>← Back</button>
+          <div id="collectList"><div class="empty">Loading...</div></div>
+        </div>
+
+        <!-- ============ DANGER ZONE ============ -->
+        <div class="detailArea" id="detail-dangerZone">
+          <button class="backBtn" data-back>← Back</button>
+          <div style="margin-bottom:16px;">
+            <h2 style="font-size:1.1rem;display:flex;align-items:center;gap:8px;color:var(--water-deep);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              My Settings
+            </h2>
+            <p style="font-size:0.82rem;color:var(--muted);margin-top:4px;">Manage your profile, security, and account preferences.</p>
+          </div>
+          <div class="dzOptions">
+            <div class="dzOpt" id="dzEditCourse">
+              <div class="dzIcon blue"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg></div>
+              <div class="dzInfo"><div class="dzTitle">Edit My Course</div><div class="dzDesc">Switch to a different course or campus</div></div>
+            </div>
+            <div class="dzOpt" id="dzGender">
+              <div class="dzIcon purple" style="background:linear-gradient(135deg,#c084fc,#9333ea);">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M3 21v-2a7 7 0 0 1 7-7h4a7 7 0 0 1 7 7v2"/></svg>
+              </div>
+              <div class="dzInfo">
+                <div class="dzTitle">Gender</div>
+                <div class="dzDesc" id="dzGenderValue">Loading...</div>
+              </div>
+            </div>
+            <div class="dzOpt" id="dzRegNumber">
+              <div class="dzIcon green"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M9 13h6M9 17h6"/></svg></div>
+              <div class="dzInfo"><div class="dzTitle">Add Registration Number</div><div class="dzDesc">Set or update your institutional registration number</div></div>
+            </div>
+            <div class="dzOpt" id="dzPhoto">
+              <div class="dzIcon amber"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div>
+              <div class="dzInfo"><div class="dzTitle">Change Profile Picture</div><div class="dzDesc">Upload a new photo or remove the current one</div></div>
+            </div>
+            <div class="dzOpt" id="dzPassword">
+              <div class="dzIcon blue"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+              <div class="dzInfo"><div class="dzTitle">Add / Change Password</div><div class="dzDesc">Set a password for email login</div></div>
+            </div>
+            <div class="dzOpt" id="dzAppLock">
+              <div class="dzIcon blue"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg></div>
+              <div class="dzInfo"><div class="dzTitle">App Lock</div><div class="dzDesc" id="dzAppLockDesc">Set a 4-digit PIN to lock your app</div></div>
+              <div class="dzToggle" id="dzAppLockToggle" style="margin-left:auto;width:44px;height:24px;border-radius:12px;background:#e0e4ec;position:relative;cursor:pointer;transition:background 0.3s;flex-shrink:0;">
+                <div id="dzAppLockKnob" style="width:20px;height:20px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:left 0.3s;box-shadow:0 2px 4px rgba(0,0,0,0.15);"></div>
+              </div>
+            </div>
+            <div class="dzOpt" id="dzTheme">
+              <div class="dzIcon blue"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></div>
+              <div class="dzInfo"><div class="dzTitle">Theme</div><div class="dzDesc" id="dzThemeDesc">Switch between Light and Dark mode</div></div>
+              <div class="dzToggle" id="dzThemeToggle" style="margin-left:auto;width:44px;height:24px;border-radius:12px;background:var(--water-mid);position:relative;cursor:pointer;transition:background 0.3s;flex-shrink:0;">
+                <div id="dzThemeKnob" style="width:20px;height:20px;border-radius:50%;background:#fff;position:absolute;top:2px;left:22px;transition:left 0.3s;box-shadow:0 2px 4px rgba(0,0,0,0.15);"></div>
+              </div>
+            </div>
+            <div class="dzOpt dzDanger" id="dzDelete">
+              <div class="dzIcon red"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></div>
+              <div class="dzInfo"><div class="dzTitle">Delete My Registration</div><div class="dzDesc">Permanently remove all your course data</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ MODAL: EDIT COURSE (Step 1: Select new course) ============ -->
+    <div class="dzOverlay" id="dzEditCourseOverlay">
+      <div class="dzBox">
+        <div class="dzStepIndicator"><div class="dzStepDot active" id="editDot1"></div><div class="dzStepDot" id="editDot2"></div><div class="dzStepDot" id="editDot3"></div></div>
+        <div class="dzStep active" id="editStep1">
+          <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--water-deep)" stroke-width="2"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg> Edit My Course</h3>
+          <div class="dzSub">Select the new course you'd like to join. If your CR previously confirmed you, they'll need to approve this change.</div>
+          <div class="field"><label>Institution</label><select id="dzEditInst"><option value="">Loading...</option></select></div>
+          <div class="field"><label>Campus</label><select id="dzEditCampus" disabled><option value="">-- pick institution first --</option></select></div>
+          <div class="field"><label>Course</label><select id="dzEditCourseSel" disabled><option value="">-- pick campus first --</option></select></div>
+          <div class="dzActions">
+            <button class="dzCancel" onclick="closeDzOverlay('dzEditCourseOverlay')">Cancel</button>
+            <button class="dzConfirm" id="dzEditCourseNext">Continue</button>
+          </div>
+        </div>
+        <div class="dzStep" id="editStep2">
+          <h3 id="editStep2Title">Confirm Change</h3>
+          <div class="dzSub" id="editStep2Desc"></div>
+          <div class="dzActions">
+            <button class="dzCancel" onclick="showDzStep('editStep1','editDot1','editDot2')">Back</button>
+            <button class="dzConfirm" id="dzEditCourseConfirm">Confirm Change</button>
+          </div>
+        </div>
+        <div class="dzStep" id="editStep3">
+          <div style="text-align:center;margin-bottom:14px;">
+            <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#e9f9f1,#d4f5e4);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <h3 id="editStep3Title" style="margin-bottom:6px;">Request Sent!</h3>
+            <div class="dzSub" id="editStep3Desc">Your CR will review and approve this change. You'll be notified once a decision is made.</div>
+          </div>
+          <div class="dzActions" style="justify-content:center;">
+            <button class="dzConfirm" onclick="closeDzOverlay('dzEditCourseOverlay')" style="min-width:140px;">Done</button>
+          </div>
+        </div>
+        <div class="msg" id="dzEditMsg"></div>
+      </div>
+    </div>
+
+    <!-- ============ MODAL: REGISTRATION NUMBER ============ -->
+    <div class="dzOverlay" id="dzRegNumOverlay">
+      <div class="dzBox">
+        <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/></svg> Registration Number</h3>
+        <div class="dzSub">Enter your official institutional registration number. This is used by your CR and lecturers to identify you.</div>
+        <div class="field"><label>Your current registration number</label><input id="dzRegNumCurrent" readonly style="background:#f5f7fa;color:var(--muted);"/></div>
+        <div class="field"><label>New registration number</label><input id="dzRegNumInput" placeholder="e.g. T21-03-12345"/></div>
+        <div class="dzActions">
+          <button class="dzCancel" onclick="closeDzOverlay('dzRegNumOverlay')">Cancel</button>
+          <button class="dzConfirm" id="dzRegNumSave">Save</button>
+        </div>
+        <div class="msg" id="dzRegNumMsg"></div>
+      </div>
+    </div>
+
+    <!-- ============ MODAL: PROFILE PHOTO ============ -->
+    <div class="dzOverlay" id="dzPhotoOverlay">
+      <div class="dzBox">
+        <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--warn)" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg> Profile Picture</h3>
+        <div class="dzPhotoPreview" id="dzPhotoPreview"><span>Photo</span><div class="dzPhotoOverlay" id="dzPhotoTap"><span>Tap to<br/>change</span></div></div>
+        <input type="file" id="dzPhotoInput" accept="image/png,image/jpeg,image/gif,image/webp" style="display:none;"/>
+        <div class="dzActions" style="flex-direction:column;gap:10px;">
+          <button class="dzConfirm" id="dzPhotoUpload" style="display:none;">Upload New Photo</button>
+          <button class="dzDangerBtn" id="dzPhotoRemove" style="display:none;">Remove Photo</button>
+          <button class="dzCancel" onclick="closeDzOverlay('dzPhotoOverlay')">Cancel</button>
+        </div>
+        <div class="msg" id="dzPhotoMsg"></div>
+      </div>
+    </div>
+
+    <!-- ============ MODAL: ADD/CHANGE PASSWORD ============ -->
+    <div class="dzOverlay" id="dzPassOverlay">
+      <div class="dzBox">
+        <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--water-deep)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Set Password</h3>
+        <div class="dzSub">Create a password so you can sign in with your email and password.</div>
+        <div class="field"><label>New Password</label><input id="dzPassNew" type="password" placeholder="At least 8 characters"/></div>
+        <div class="strengthMeter"><div class="fill" id="dzPassStrength" style="width:0%;"></div></div>
+        <div class="strengthText" id="dzPassStrengthText"></div>
+        <div class="field"><label>Confirm Password</label><input id="dzPassConfirm" type="password" placeholder="Re-enter password"/></div>
+        <div class="dzActions">
+          <button class="dzCancel" onclick="closeDzOverlay('dzPassOverlay')">Cancel</button>
+          <button class="dzConfirm" id="dzPassSave">Set Password</button>
+        </div>
+        <div class="msg" id="dzPassMsg"></div>
+      </div>
+    </div>
+
+    <!-- ============ MODAL: DELETE REGISTRATION (2-step) ============ -->
+    <div class="dzOverlay" id="dzDeleteOverlay">
+      <div class="dzBox">
+        <div class="dzStepIndicator"><div class="dzStepDot active" id="delDot1"></div><div class="dzStepDot" id="delDot2"></div></div>
+        <div class="dzStep active" id="delStep1">
+          <h3 style="color:var(--danger);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Delete Registration?</h3>
+          <div class="dzSub" style="color:var(--danger);font-weight:600;">This action is permanent and cannot be undone. All your course data, attendance records, and announcements will be removed.</div>
+          <div class="dzActions">
+            <button class="dzCancel" onclick="closeDzOverlay('dzDeleteOverlay')">No, Go Back</button>
+            <button class="dzDangerBtn" id="dzDeleteYes">Yes, I Understand</button>
+          </div>
+        </div>
+        <div class="dzStep" id="delStep2">
+          <h3 style="color:var(--danger);">Final Confirmation</h3>
+          <div class="dzSub">Type your email address below to confirm deletion:</div>
+          <div class="field"><input id="dzDeleteEmail" placeholder="Type your email address"/></div>
+          <div class="dzActions">
+            <button class="dzCancel" onclick="showDzStep('delStep1','delDot1','delDot2')">Back</button>
+            <button class="dzDangerBtn" id="dzDeleteConfirm" disabled>Delete Forever</button>
+          </div>
+        </div>
+        <div class="msg" id="dzDeleteMsg"></div>
+      </div>
+    </div>
+
+    <!-- ============ MODAL: SET APP LOCK PIN ============ -->
+    <div class="dzOverlay" id="dzPinSetupOverlay">
+      <div class="dzBox" style="text-align:center;">
+        <div class="dzStepIndicator"><div class="dzStepDot active" id="pinDot1"></div><div class="dzStepDot" id="pinDot2"></div></div>
+        <div class="dzStep active" id="pinStep1">
+          <h3 style="justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--water-deep)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg> Set App Lock PIN</h3>
+          <div class="dzSub" style="text-align:center;">Enter a 4-digit PIN to secure your app. You'll need this PIN every time you open FeMOS.</div>
+          <div class="pinInputRow">
+            <input type="tel" maxlength="1" class="pinInput" data-pin="0" inputmode="numeric" pattern="[0-9]" autocomplete="off"/>
+            <input type="tel" maxlength="1" class="pinInput" data-pin="1" inputmode="numeric" pattern="[0-9]" autocomplete="off"/>
+            <input type="tel" maxlength="1" class="pinInput" data-pin="2" inputmode="numeric" pattern="[0-9]" autocomplete="off"/>
+            <input type="tel" maxlength="1" class="pinInput" data-pin="3" inputmode="numeric" pattern="[0-9]" autocomplete="off"/>
+          </div>
+          <div class="dzActions" style="justify-content:center;">
+            <button class="dzCancel" onclick="closeDzOverlay('dzPinSetupOverlay')">Cancel</button>
+            <button class="dzConfirm" id="dzPinNext" disabled>Continue</button>
+          </div>
+          <div class="msg" id="dzPinMsg1"></div>
+        </div>
+        <div class="dzStep" id="pinStep2">
+          <h3 style="justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--water-deep)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Confirm PIN</h3>
+          <div class="dzSub" style="text-align:center;">Re-enter your 4-digit PIN to confirm.</div>
+          <div class="pinInputRow" id="pinConfirmRow">
+            <input type="tel" maxlength="1" class="pinInput" data-pin="0" inputmode="numeric" pattern="[0-9]" autocomplete="off"/>
+            <input type="tel" maxlength="1" class="pinInput" data-pin="1" inputmode="numeric" pattern="[0-9]" autocomplete="off"/>
+            <input type="tel" maxlength="1" class="pinInput" data-pin="2" inputmode="numeric" pattern="[0-9]" autocomplete="off"/>
+            <input type="tel" maxlength="1" class="pinInput" data-pin="3" inputmode="numeric" pattern="[0-9]" autocomplete="off"/>
+          </div>
+          <div class="dzActions" style="justify-content:center;">
+            <button class="dzCancel" onclick="showDzStep('pinStep1','pinDot1','pinDot2')">Back</button>
+            <button class="dzConfirm" id="dzPinConfirm" disabled>Set PIN</button>
+          </div>
+          <div class="msg" id="dzPinMsg2"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ MODAL: CHANGE PIN ============ -->
+    <div class="dzOverlay" id="dzPinChangeOverlay">
+      <div class="dzBox" style="text-align:center;">
+        <h3 style="justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--water-deep)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg> Change PIN</h3>
+        <div class="dzSub" style="text-align:center;">Enter your current PIN, then set a new one.</div>
+        <div class="field"><label>Current PIN</label><input id="dzPinOld" type="password" maxlength="4" placeholder="Enter current 4-digit PIN" inputmode="numeric" pattern="[0-9]{4}" style="text-align:center;font-size:1.2rem;letter-spacing:12px;" autocomplete="off"/></div>
+        <div class="field"><label>New PIN</label><input id="dzPinNew" type="password" maxlength="4" placeholder="New 4-digit PIN" inputmode="numeric" pattern="[0-9]{4}" style="text-align:center;font-size:1.2rem;letter-spacing:12px;" autocomplete="off"/></div>
+        <div class="field"><label>Confirm New PIN</label><input id="dzPinNewConfirm" type="password" maxlength="4" placeholder="Re-enter new PIN" inputmode="numeric" pattern="[0-9]{4}" style="text-align:center;font-size:1.2rem;letter-spacing:12px;" autocomplete="off"/></div>
+        <div class="dzActions" style="justify-content:center;">
+          <button class="dzCancel" onclick="closeDzOverlay('dzPinChangeOverlay')">Cancel</button>
+          <button class="dzConfirm" id="dzPinChangeSave">Update PIN</button>
+        </div>
+        <div class="msg" id="dzPinChangeMsg"></div>
+      </div>
+    </div>
+
+    <!-- ============ PIN GATE OVERLAY ============ -->
+    <div class="pinGateOverlay" id="pinGateOverlay">
+      <div class="pinGateBox">
+        <div class="pinIcon"><svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg></div>
+        <h3>App Locked</h3>
+        <div class="pinSub">Enter your 4-digit PIN to unlock FeMOS.</div>
+        <div class="pinInputRow" id="pinGateRow">
+          <input type="tel" maxlength="1" class="pinInput" data-pin="0" inputmode="numeric" pattern="[0-9]" autocomplete="off"/>
+          <input type="tel" maxlength="1" class="pinInput" data-pin="1" inputmode="numeric" pattern="[0-9]" autocomplete="off"/>
+          <input type="tel" maxlength="1" class="pinInput" data-pin="2" inputmode="numeric" pattern="[0-9]" autocomplete="off"/>
+          <input type="tel" maxlength="1" class="pinInput" data-pin="3" inputmode="numeric" pattern="[0-9]" autocomplete="off"/>
+        </div>
+        <div class="pinError" id="pinGateError">Incorrect PIN. Try again.</div>
+        <button class="btn-outline" id="pinGateLogout" style="width:100%;margin-top:16px;padding:11px;border-radius:10px;border:1.5px solid var(--line);background:#f2f4f8;color:var(--ink);font-weight:700;cursor:pointer;font-size:0.85rem;">Log Out Instead</button>
+      </div>
+    </div>
+
+    <!-- ============ GENDER GATE OVERLAY ============ -->
+    <div id="genderGateOverlay" style="position:fixed;inset:0;background:rgba(13,27,75,0.7);display:none;align-items:center;justify-content:center;z-index:9999;padding:18px;">
+      <div style="background:#fff;border-radius:20px;padding:28px 24px;max-width:380px;width:100%;text-align:center;">
+        <div style="font-size:2rem;margin-bottom:12px;">👤</div>
+        <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:6px;color:var(--ink);">Complete Your Registration</h3>
+        <p style="font-size:0.85rem;color:var(--muted);margin-bottom:20px;">Please select your gender to continue using FeMOS.</p>
+        <div style="margin-bottom:20px;">
+          <select id="genderGateSelect" style="width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid var(--line);font-size:0.95rem;color:var(--ink);background:#fbfdff;appearance:none;background-image:url('data:image/svg+xml;utf8,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%235c6b9a%27 stroke-width=%272%27><path d=%27m6 9 6 6 6-6%27/></svg>');background-repeat:no-repeat;background-position:right 14px center;background-size:18px;">
+            <option value="" disabled selected>-- Select Gender --</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </div>
+        <button onclick="saveGenderGate()" style="width:100%;padding:14px;border:none;border-radius:12px;font-weight:700;font-size:0.95rem;cursor:pointer;background:linear-gradient(90deg,var(--water-mid),var(--water-deep));color:#fff;">Save &amp; Continue</button>
+      </div>
+    </div>
+
+    <div class="toast" id="regWarnToast">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span>You haven't set a registration number yet. <a href="#" id="regWarnLink">Set it now in My Settings</a> so your lecturer can track your reads.</span>
+      <button id="regWarnClose">✕</button>
+    </div>
+
+    <div class="overlay" id="qrScanOverlay">
+      <div class="promptBox" style="max-width:380px;">
+        <h3>Scan the Attendance QR</h3>
+        <p>Point your camera at the QR code your lecturer is showing.</p>
+        <div id="qrReader" style="width:100%;border-radius:12px;overflow:hidden;"></div>
+        <div class="msg" id="qrScanMsg" style="margin-top:10px;"></div>
+        <button class="btn-outline" id="btnCancelScan" style="width:100%;margin-top:14px;padding:11px;border-radius:10px;border:1.5px solid var(--line);background:#f2f4f8;color:var(--ink);font-weight:700;cursor:pointer;">Cancel</button>
+      </div>
+    </div>
+
+    <div class="overlay" id="confirmOverlay">
+      <div class="promptBox" style="max-width:340px;">
+        <p id="confirmMsg" style="font-weight:600;margin-bottom:16px;text-align:center;">Are you sure?</p>
+        <div style="display:flex;gap:10px;">
+          <button class="btn-outline" id="confirmCancelBtn" style="flex:1;padding:11px;border-radius:10px;border:1.5px solid var(--line);background:#f2f4f8;color:var(--ink);font-weight:700;cursor:pointer;">Cancel</button>
+          <button class="btn" id="confirmOkBtn" style="flex:1;padding:11px;border-radius:10px;background:var(--danger);color:#fff;border:none;font-weight:700;cursor:pointer;">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ FEEDBACK FLOATING BUTTON + PANEL ============ -->
+    <div class="feedbackBackdrop" id="fpBackdrop"></div>
+    <button class="feedbackFab" id="feedbackFab" title="Send Feedback">
+      <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </button>
+    <div class="feedbackPanel" id="feedbackPanel">
+      <div class="fpHeader">
+        <div class="fpHeaderTop">
+          <h3>Send Feedback</h3>
+          <button class="fpClose" id="fpClose">✕</button>
+        </div>
+        <div class="fpTabs">
+          <button class="fpTab active" data-fp-tab="cr">Class Rep</button>
+          <button class="fpTab" data-fp-tab="admin">Institution Admin</button>
+        </div>
+      </div>
+      <div class="fpBody" id="fpBody">
+        <textarea id="fpMessage" placeholder="Write your feedback or suggestion about the system..."></textarea>
+        <div class="fpWarning">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span>Your <strong>name</strong> and <strong>registration number</strong> will be visible to the recipient. Please keep your feedback professional.</span>
+        </div>
+      </div>
+      <div class="fpFooter">
+        <button class="fpSend" id="fpSend">Send Feedback</button>
+        <div class="msg" id="fpMsg"></div>
+      </div>
+    </div>
+
+    <script src="back-nav.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="fcm.js"></script>
+    <script src="crypto.js"></script>
+
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyCb-Y69glDSkNDwgzoCXyUVAz6D86Ccdfo",
+        authDomain: "femos-fe742.firebaseapp.com",
+        projectId: "femos-fe742",
+        storageBucket: "femos-fe742.firebasestorage.app",
+        messagingSenderId: "1022203442714",
+        appId: "1:1022203442714:web:4fa06d28d788c024bf83a3",
+        measurementId: "G-M4DEBFVJCV",
+      };
+      const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth(app);
+      const db = firebase.firestore(app);
+
+      let myInstitutionId = null, myCourseId = null, myCourseName = "", myInstitutionName = "", myCampusName = "";
+      let myRegNumber = "", myConfirmedByCR = false, myRegistrationStatus = "";
+
+      function escapeHtml(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+      function showConfirm(message, onConfirm) {
+        const overlay = document.getElementById("confirmOverlay");
+        document.getElementById("confirmMsg").textContent = message;
+        overlay.classList.add("show");
+        const okBtn = document.getElementById("confirmOkBtn");
+        const cancelBtn = document.getElementById("confirmCancelBtn");
+        function cleanup() { overlay.classList.remove("show"); okBtn.removeEventListener("click", onOk); cancelBtn.removeEventListener("click", onCancel); }
+        function onOk() { cleanup(); onConfirm(); }
+        function onCancel() { cleanup(); }
+        okBtn.addEventListener("click", onOk);
+        cancelBtn.addEventListener("click", onCancel);
+      }
+      function fmtDate(ts) { return ts && ts.toDate ? ts.toDate().toLocaleString() : ""; }
+      function linkifyError(message) {
+        const escaped = escapeHtml(message || "Unknown error");
+        return escaped.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color:var(--water-deep);font-weight:600;">Click here to create the missing index</a>');
+      }
+      function friendlyError(err) {
+        const c = err && err.code;
+        const map = {
+          "permission-denied": "You don't have permission to do this.",
+          "not-found": "The requested data was not found.",
+          "unauthenticated": "Please log in again to continue.",
+          "unavailable": "Service is temporarily unavailable. Try again later.",
+          "deadline-exceeded": "Request timed out. Check your connection and try again.",
+          "resource-exhausted": "Too many requests. Please wait a moment and try again.",
+          "failed-precondition": "This action cannot be completed right now.",
+          "aborted": "The operation was interrupted. Please try again.",
+          "data-loss": "An unexpected error occurred. Please try again.",
+          "already-exists": "This data already exists.",
+          "invalid-argument": "Invalid input. Please check your data and try again.",
+          "internal": "Something went wrong on our end. Please try again later.",
+          "auth/user-not-found": "No account found with this email.",
+          "auth/wrong-password": "Incorrect password.",
+          "auth/invalid-credential": "Invalid email or password.",
+          "auth/too-many-requests": "Too many attempts. Please wait a few minutes.",
+          "auth/network-request-failed": "Network error. Check your internet connection.",
+          "storage/unauthorized": "You don't have permission to upload files.",
+          "storage/canceled": "Upload was cancelled.",
+          "storage/unknown": "Upload failed. Please try again.",
+        };
+        if (c && map[c]) return map[c];
+        if (err && err.message && err.message.includes("index")) return "This query needs a database index. Please contact support to set it up.";
+        return "Something went wrong. Please try again.";
+      }
+
+      async function saveGenderGate() {
+        const sel = document.getElementById("genderGateSelect");
+        const val = sel.value;
+        if (!val) { sel.style.borderColor = "var(--danger)"; return; }
+        try {
+          await db.collection("users").doc(auth.currentUser.uid).set({ gender: val }, { merge: true });
+          document.getElementById("genderGateOverlay").style.display = "none";
+        } catch (e) {
+          alert("Failed to save. Please try again.");
+        }
+      }
+
+      // ---------- Navigation between card grid and detail views ----------
+      document.querySelectorAll("[data-open]").forEach(function (card) {
+        card.addEventListener("click", function () {
+          document.getElementById("homeView").style.display = "none";
+          document.getElementById("detail-" + card.getAttribute("data-open")).classList.add("show");
+        });
+      });
+      document.querySelectorAll("[data-back]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          document.querySelectorAll(".detailArea").forEach(function (d) { d.classList.remove("show"); });
+          document.getElementById("homeView").style.display = "block";
+        });
+      });
+
+      // ---------- Banner carousel ----------
+      async function loadCarousel() {
+        const el = document.getElementById("carousel");
+        try {
+          const doc = await db.collection("instBanners").doc(myInstitutionId).get();
+          const images = ((doc.exists && doc.data().images) || []).filter(function (u) { return u; });
+          if (images.length === 0) return;
+          el.innerHTML = images.map(function (url, i) {
+            return '<div class="slide' + (i === 0 ? " show" : "") + '"><img src="' + escapeHtml(url) + '" alt=""/></div>';
+          }).join("") + '<div class="carousel-dots">' + images.map(function (_, i) { return '<span' + (i === 0 ? ' class="active"' : "") + "></span>"; }).join("") + "</div>";
+          if (images.length > 1) {
+            let idx = 0;
+            setInterval(function () {
+              const slides = el.querySelectorAll(".slide");
+              const dots = el.querySelectorAll(".carousel-dots span");
+              slides[idx].classList.remove("show"); dots[idx].classList.remove("active");
+              idx = (idx + 1) % slides.length;
+              slides[idx].classList.add("show"); dots[idx].classList.add("active");
+            }, 4500);
+          }
+        } catch (e) { /* keep default welcome message if banners fail to load */ }
+      }
+
+      auth.onAuthStateChanged(async function (user) {
+        const gate = document.getElementById("gate");
+        if (!user) { window.location.replace("/login"); return; }
+        try {
+          const doc = await db.collection("users").doc(user.uid).get();
+          const data = doc.exists ? doc.data() : null;
+          if (!data || !data.courseId) { window.location.replace("/register"); return; }
+
+          if (!data.gender) {
+            document.getElementById("genderGateOverlay").style.display = "flex";
+            return;
+          }
+
+          myInstitutionId = data.institutionId; myCourseId = data.courseId;
+          myCourseName = data.courseName || ""; myInstitutionName = data.institutionName || ""; myCampusName = data.campusName || "";
+          myRegNumber = data.registrationNumber || "";
+          myConfirmedByCR = data.confirmedByCR || false;
+          myRegistrationStatus = data.registrationStatus || "";
+
+          // Check app lock
+          if (data.appLockPin && sessionStorage.getItem("femosUnlocked_" + user.uid) !== "1") {
+            appLockEnabled = true;
+            appLockPinHash = data.appLockPin;
+            updateAppLockUI();
+            gate.style.display = "none";
+            document.getElementById("app").style.display = "block";
+            showPinGate();
+            return;
+          }
+
+          gate.style.display = "none";
+          document.getElementById("app").style.display = "block";
+          document.getElementById("uName").textContent = user.displayName || user.email;
+          document.getElementById("pName").textContent = user.displayName || user.email;
+          document.getElementById("pEmail").textContent = user.email;
+          document.getElementById("pInst").textContent = myInstitutionName || "—";
+          document.getElementById("pCampus").textContent = myCampusName || "—";
+          document.getElementById("pCourse").textContent = myCourseName || "—";
+          document.getElementById("pRegNum").textContent = myRegNumber || "Not set yet";
+          document.getElementById("pStudentId").textContent = data.studentId || "Not assigned yet (issued once confirmed)";
+          document.getElementById("rInst").textContent = myInstitutionName || "—";
+          document.getElementById("rCampus").textContent = myCampusName || "—";
+          document.getElementById("rCourse").textContent = myCourseName || "—";
+
+          document.getElementById("dzGenderValue").textContent = (data.gender || "Not set").charAt(0).toUpperCase() + (data.gender || "Not set").slice(1);
+
+          const status = data.registrationStatus || (data.confirmedByCR ? "confirmed" : "pending");
+          document.getElementById("statReg").textContent = status === "confirmed" ? "✓ Verified" : "⏳ Pending";
+          document.getElementById("statReg").style.color = status === "confirmed" ? "var(--success)" : "var(--warn)";
+          const rStatus = document.getElementById("rStatus");
+          rStatus.textContent = status === "confirmed" ? "✓ Confirmed" : "⏳ Pending Confirmation";
+          rStatus.className = "statusPill " + (status === "confirmed" ? "confirmed" : "pending");
+
+          if (user.photoURL) {
+            document.getElementById("uAv").innerHTML = '<img src="' + user.photoURL + '" alt=""/>';
+            document.getElementById("pAv").innerHTML = '<img src="' + user.photoURL + '" alt=""/>';
+          } else {
+            const initials = (user.displayName || user.email || "?").trim().split(/\s+/).map(function (p) { return p[0]; }).slice(0, 2).join("").toUpperCase();
+            document.getElementById("uAv").textContent = initials;
+            document.getElementById("pAv").textContent = initials;
+          }
+
+          // Check if user is a CR
+          const crRoleDoc = await db.collection("userRoles").doc(user.uid).get();
+          if (crRoleDoc.exists && crRoleDoc.data().role === "cr") {
+            document.getElementById("enterCRCard").style.display = "block";
+          }
+
+          loadCarousel();
+          initApp();
+        } catch (err) {
+          gate.innerHTML = "Could not load your dashboard. Please try refreshing the page.";
+        }
+      });
+
+      document.getElementById("btnLogout").addEventListener("click", function () {
+        showConfirm("Do you really want to logout?", async function () { await auth.signOut(); window.location.replace("/login"); });
+      });
+
+      let initialized = false;
+      function initApp() {
+        if (initialized) return;
+        initialized = true;
+        loadAnnouncements();
+        loadPolls();
+        loadCollectForms();
+        loadAttendanceHistory();
+        loadAttendanceScan();
+        updateAppLockUI();
+        requestNotifyPermission();
+        startAnnouncementListener();
+        initFCM(auth.currentUser);
+      }
+
+      // ================= ANNOUNCEMENTS =================
+      function levelBadge(d) {
+        if (d.level === "institution") return '<span style="font-size:0.68rem;font-weight:700;padding:3px 9px;border-radius:20px;background:#fdecec;color:var(--danger);margin-left:6px;">OFFICIAL — ' + escapeHtml(d.authorRole || "Institution") + "</span>";
+        return '<span style="font-size:0.68rem;font-weight:700;padding:3px 9px;border-radius:20px;background:#eaf6ff;color:var(--water-deep);margin-left:6px;">' + escapeHtml(d.authorRole || "Course") + "</span>";
+      }
+
+      let annCache = [];
+      let annActiveTab = "unread";
+
+      async function loadAnnouncements() {
+        const listEl = document.getElementById("annList");
+        listEl.innerHTML = "Loading...";
+        try {
+          const snap = await db.collection("announcements").where("institutionId", "==", myInstitutionId).get();
+          const now = Date.now();
+          const relevant = snap.docs.filter(function (d) {
+            const data = d.data();
+            if (data.level !== "institution" && data.courseId !== myCourseId) return false;
+            if (data.expiresAt && data.expiresAt.toMillis() < now) return false;
+            return true;
+          });
+          if (relevant.length === 0) {
+            listEl.innerHTML = '<div class="empty">No announcements yet for your course.</div>';
+            document.getElementById("statAnn").textContent = "Nothing new";
+            updateAnnBadge(0);
+            return;
+          }
+          const docs = relevant.slice().sort(function (a, b) {
+            const at = a.data().createdAt ? a.data().createdAt.toMillis() : 0;
+            const bt = b.data().createdAt ? b.data().createdAt.toMillis() : 0;
+            return bt - at;
+          });
+          annCache = [];
+          for (const doc of docs) {
+            const d = doc.data();
+            const myRead = await db.collection("announcements").doc(doc.id).collection("reads").doc(auth.currentUser.uid).get();
+            annCache.push({ doc: doc, data: d, read: myRead.exists ? myRead.data() : null });
+          }
+          const unread = annCache.filter(function (a) { return !a.read; }).length;
+          document.getElementById("statAnn").textContent = unread > 0 ? unread + " unread" : "All caught up";
+          document.getElementById("annUnreadCount").textContent = unread;
+          document.getElementById("annReadCount").textContent = annCache.length - unread;
+          updateAnnBadge(unread);
+          if (unread > 0 && !myRegNumber) showRegWarning();
+          renderAnnTab(annActiveTab);
+        } catch (err) {
+          listEl.innerHTML = '<div class="empty">Could not load announcements. Please try again later.</div>';
+          document.getElementById("statAnn").textContent = "Error loading";
+        }
+      }
+
+      function updateAnnBadge(count) {
+        var annCard = document.querySelector('[data-open="ann"]');
+        var oldBadge = annCard.querySelector(".unreadBadge");
+        if (oldBadge) oldBadge.remove();
+        if (count > 0) {
+          annCard.classList.add("unread");
+          var badge = document.createElement("div");
+          badge.className = "unreadBadge";
+          badge.textContent = count;
+          annCard.querySelector(".iconBadge").appendChild(badge);
+        } else {
+          annCard.classList.remove("unread");
+        }
+      }
+
+      var annSeenIds = {};
+      function startAnnouncementListener() {
+        db.collection("announcements").where("institutionId", "==", myInstitutionId)
+          .onSnapshot(function (snap) {
+            snap.docChanges().forEach(function (change) {
+              if (change.type !== "added") return;
+              var d = change.doc.data();
+              if (d.level !== "institution" && d.courseId !== myCourseId) return;
+              if (annSeenIds[change.doc.id]) return;
+              annSeenIds[change.doc.id] = true;
+              if (document.hidden) {
+                showLocalNotification("New Announcement: " + (d.title || "FeMOS"), d.body ? d.body.substring(0, 120) : "Tap to read", "/dashboard");
+              }
+            });
+          });
+      }
+
+      function renderAnnTab(tab) {
+        annActiveTab = tab;
+        document.querySelectorAll(".annTab").forEach(function (t) {
+          t.classList.toggle("active", t.getAttribute("data-ann-tab") === tab);
+        });
+        const listEl = document.getElementById("annList");
+        const items = tab === "unread"
+          ? annCache.filter(function (a) { return !a.read; })
+          : annCache.filter(function (a) { return !!a.read; });
+        if (items.length === 0) {
+          listEl.innerHTML = '<div class="empty">' + (tab === "unread" ? "All caught up! No unread announcements." : "No read announcements yet.") + '</div>';
+          return;
+        }
+        listEl.innerHTML = "";
+        for (const item of items) {
+          const card = document.createElement("div");
+          if (tab === "unread") {
+            card.className = "itemCard annTruncated";
+            card.innerHTML =
+              '<div class="ititle">' + escapeHtml(item.data.title) + levelBadge(item.data) + '</div>' +
+              '<div class="imeta">From ' + escapeHtml(item.data.createdByName || "") + " · Sent " + fmtDate(item.data.createdAt) + '</div>' +
+              '<div class="ibody">' + escapeHtml(item.data.body) + '</div>' +
+              (item.data.imageUrl ? '<div class="annImage"><img src="' + escapeHtml(item.data.imageUrl) + '" alt="Attachment"/></div>' : '') +
+              '<button class="readMoreBtn" data-read-more>Read more →</button>';
+            card.querySelector("[data-read-more]").addEventListener("click", async function (e) {
+              e.stopPropagation();
+              if (!myRegNumber) { showRegWarning(); return; }
+              try {
+                await db.collection("announcements").doc(item.doc.id).collection("reads").doc(auth.currentUser.uid).set({
+                  name: auth.currentUser.displayName || auth.currentUser.email,
+                  registrationNumber: myRegNumber,
+                  confirmedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                });
+                annActiveTab = "read";
+                loadAnnouncements();
+              } catch (err) { /* silent */ }
+            });
+          } else {
+            card.className = "itemCard";
+            card.innerHTML =
+              '<div class="ititle">' + escapeHtml(item.data.title) + levelBadge(item.data) + '</div>' +
+              '<div class="imeta">From ' + escapeHtml(item.data.createdByName || "") + " · Sent " + fmtDate(item.data.createdAt) + '</div>' +
+              '<div class="ibody">' + escapeHtml(item.data.body) + '</div>' +
+              (item.data.imageUrl ? '<div class="annImage"><img src="' + escapeHtml(item.data.imageUrl) + '" alt="Attachment"/></div>' : '') +
+              '<div class="readConfirmed">Viewed on ' + fmtDate(item.read.confirmedAt) + '</div>';
+          }
+          listEl.appendChild(card);
+        }
+      }
+
+      document.querySelectorAll(".annTab").forEach(function (tabBtn) {
+        tabBtn.addEventListener("click", function () {
+          renderAnnTab(tabBtn.getAttribute("data-ann-tab"));
+        });
+      });
+
+      function showRegWarning() {
+        var t = document.getElementById("regWarnToast");
+        t.classList.add("show");
+        clearTimeout(window._regWarnTimer);
+        window._regWarnTimer = setTimeout(function () { t.classList.remove("show"); }, 12000);
+      }
+      document.getElementById("regWarnClose").addEventListener("click", function () { document.getElementById("regWarnToast").classList.remove("show"); });
+      document.getElementById("regWarnLink").addEventListener("click", function (e) {
+        e.preventDefault();
+        document.getElementById("regWarnToast").classList.remove("show");
+        openView("detail-dangerZone");
+      });
+
+      // ================= POLLS =================
+      async function loadPolls() {
+        const listEl = document.getElementById("pollList");
+        listEl.innerHTML = "Loading...";
+        try {
+          const snap = await db.collection("polls").where("institutionId", "==", myInstitutionId).where("courseId", "==", myCourseId).get();
+          if (snap.empty) { listEl.innerHTML = '<div class="empty">No polls yet for your course.</div>'; document.getElementById("statPolls").textContent = "None yet"; return; }
+          const docs = snap.docs.slice().sort(function (a, b) { const at = a.data().createdAt ? a.data().createdAt.toMillis() : 0; const bt = b.data().createdAt ? b.data().createdAt.toMillis() : 0; return bt - at; });
+          let openCount = 0;
+          listEl.innerHTML = "";
+          for (const doc of docs) {
+            const d = doc.data();
+            const myVote = await db.collection("polls").doc(doc.id).collection("votes").doc(auth.currentUser.uid).get();
+            if (d.isOpen && !myVote.exists) openCount++;
+            const card = document.createElement("div");
+            card.className = "itemCard";
+            let inner = '<div class="ititle">' + escapeHtml(d.question) + '</div><div class="imeta">' + (d.isOpen ? "Open" : "Closed") + '</div>';
+            if (!myVote.exists && d.isOpen) {
+              inner += d.options.map(function (opt, i) { return '<button class="optBtn" data-vote="' + i + '">' + escapeHtml(opt) + "</button>"; }).join("");
+            } else {
+              const vc = d.voteCounts || {};
+              const counts = d.options.map(function (_, i) { return vc[i] || 0; });
+              const total = counts.reduce(function (a, b) { return a + b; }, 0) || 1;
+              if (myVote.exists) inner += '<div class="votedNote">You voted: ' + escapeHtml(d.options[myVote.data().optionIndex] || "") + "</div>";
+              inner += d.options.map(function (opt, i) { const pct = Math.round((counts[i] / total) * 100); return '<div class="barRow"><div class="barLabel"><span>' + escapeHtml(opt) + '</span><span>' + counts[i] + " (" + pct + '%)</span></div><div class="barTrack"><div class="barFill" style="width:' + pct + '%"></div></div></div>'; }).join("");
+            }
+            card.innerHTML = inner;
+            card.querySelectorAll("[data-vote]").forEach(function (voteBtn) {
+              voteBtn.addEventListener("click", async function () {
+                const idx = parseInt(voteBtn.getAttribute("data-vote"), 10);
+                try {
+                  await db.collection("polls").doc(doc.id).collection("votes").doc(auth.currentUser.uid).set({ optionIndex: idx, votedAt: firebase.firestore.FieldValue.serverTimestamp() });
+                  const inc = {}; inc["voteCounts." + idx] = firebase.firestore.FieldValue.increment(1);
+                  await db.collection("polls").doc(doc.id).update(inc);
+                  loadPolls();
+                } catch (err) { alert("Could not cast your vote. Please try again."); }
+              });
+            });
+            listEl.appendChild(card);
+          }
+          document.getElementById("statPolls").textContent = openCount > 0 ? openCount + " awaiting your vote" : "All voted";
+        } catch (err) {
+          listEl.innerHTML = '<div class="empty">Could not load polls. Please try again later.</div>';
+          document.getElementById("statPolls").textContent = "Error loading";
+        }
+      }
+
+      // ================= QUICK COLLECT =================
+      async function loadCollectForms() {
+        const listEl = document.getElementById("collectList");
+        listEl.innerHTML = "Loading...";
+        try {
+          const snap = await db.collection("collectForms").where("institutionId", "==", myInstitutionId).where("courseId", "==", myCourseId).where("isOpen", "==", true).get();
+          if (snap.empty) { listEl.innerHTML = '<div class="empty">No open forms right now.</div>'; document.getElementById("statCollect").textContent = "Nothing open"; return; }
+          listEl.innerHTML = "";
+          let pendingCount = 0;
+          for (const doc of snap.docs) {
+            const d = doc.data();
+            const mySub = await db.collection("collectForms").doc(doc.id).collection("submissions").doc(auth.currentUser.uid).get();
+            if (!mySub.exists) pendingCount++;
+            const card = document.createElement("div");
+            card.className = "itemCard";
+            card.innerHTML =
+              '<div class="collectRow"><div><div class="ititle">' + escapeHtml(d.title) + '</div><div class="imeta">' + escapeHtml(d.instructions) + '</div>' +
+              (mySub.exists ? '<div class="submittedTag">✓ Submitted: ' + escapeHtml(mySub.data().value) + '</div>' : "") +
+              '</div><a class="btn-outline-sm" href="/collect?id=' + doc.id + '">' + (mySub.exists ? "Update" : "Fill Out") + '</a></div>';
+            listEl.appendChild(card);
+          }
+          document.getElementById("statCollect").textContent = pendingCount > 0 ? pendingCount + " to fill" : "All submitted";
+        } catch (err) {
+          listEl.innerHTML = '<div class="empty">Could not load forms. Please try again later.</div>';
+          document.getElementById("statCollect").textContent = "Error loading";
+        }
+      }
+
+      // ================= ATTENDANCE: SCAN / CHECK-IN =================
+      function codeForSession(sessionId, ts) {
+        const bucket = Math.floor(ts / 60000);
+        const str = sessionId + "-" + bucket;
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) { hash = (hash * 31 + str.charCodeAt(i)) >>> 0; }
+        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        let code = "", h = hash || 1;
+        for (let j = 0; j < 6; j++) { code += chars[h % chars.length]; h = Math.floor(h / chars.length) || 1; }
+        return code;
+      }
+
+      let activeScanner = null;
+      function openQrScanner(onSuccess) {
+        const overlay = document.getElementById("qrScanOverlay");
+        const msgEl = document.getElementById("qrScanMsg");
+        msgEl.textContent = "";
+        overlay.classList.add("show");
+        if (typeof Html5Qrcode === "undefined") {
+          msgEl.style.color = "var(--danger)";
+          msgEl.textContent = "Camera scanner failed to load. Please type the code instead.";
+          return;
+        }
+        activeScanner = new Html5Qrcode("qrReader");
+        activeScanner.start(
+          { facingMode: "environment" },
+          { fps: 10, qrbox: 220 },
+          function (decodedText) {
+            closeQrScanner();
+            onSuccess(decodedText);
+          },
+          function () { /* ignore per-frame scan misses */ }
+        ).catch(function (err) {
+          msgEl.style.color = "var(--danger)";
+          msgEl.textContent = "Could not access your camera. Please type the code instead.";
+        });
+      }
+      function closeQrScanner() {
+        document.getElementById("qrScanOverlay").classList.remove("show");
+        if (activeScanner) {
+          activeScanner.stop().then(function () { activeScanner.clear(); }).catch(function () {});
+          activeScanner = null;
+        }
+      }
+      document.getElementById("btnCancelScan").addEventListener("click", closeQrScanner);
+
+      function haversineMeters(lat1, lng1, lat2, lng2) {
+        const R = 6371000;
+        const toRad = function (d) { return (d * Math.PI) / 180; };
+        const dLat = toRad(lat2 - lat1), dLng = toRad(lng2 - lng1);
+        const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      }
+      function getMyLocation() {
+        return new Promise(function (resolve) {
+          if (!navigator.geolocation) { resolve(null); return; }
+          navigator.geolocation.getCurrentPosition(
+            function (pos) { resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }); },
+            function () { resolve(null); },
+            { enableHighAccuracy: true, timeout: 8000 }
+          );
+        });
+      }
+
+      async function loadAttendanceScan() {
+        const listEl = document.getElementById("scanList");
+        listEl.innerHTML = "Loading...";
+        try {
+          const snap = await db.collection("attendanceSessions").where("institutionId", "==", myInstitutionId).where("courseId", "==", myCourseId).where("isOpen", "==", true).get();
+          if (snap.empty) { listEl.innerHTML = '<div class="empty">No live attendance session right now. Check back when your lecturer opens one.</div>'; return; }
+          listEl.innerHTML = "";
+          for (const doc of snap.docs) {
+            const d = doc.data();
+            const geoRange = d.geoRange || 100;
+            const allowSignOut = d.allowSignOut || false;
+            const myCheckin = await db.collection("attendanceSessions").doc(doc.id).collection("checkins").doc(auth.currentUser.uid).get();
+            const card = document.createElement("div");
+            card.className = "itemCard";
+            if (myCheckin.exists) {
+              const cd = myCheckin.data();
+              const signedOut = cd.signedOutAt ? true : false;
+              let statusHtml = '<div class="readConfirmed">✓ Checked in at ' + fmtDate(cd.checkedInAt) + '</div>';
+              if (allowSignOut && !signedOut) {
+                statusHtml += '<button class="btn" data-signout style="margin-top:10px;background:transparent;border:1.5px solid var(--warn);color:var(--warn);">Sign Out (Leave Class)</button>';
+                statusHtml += '<div class="hint" style="margin-top:6px;">Tap when you\'re leaving. This is optional.</div>';
+              } else if (signedOut) {
+                statusHtml += '<div class="readConfirmed" style="margin-top:6px;">✓ Signed out at ' + fmtDate(cd.signedOutAt) + '</div>';
+              }
+              card.innerHTML = '<div class="ititle">' + escapeHtml(d.label) + '</div>' + statusHtml;
+              if (allowSignOut && !signedOut) {
+                card.querySelector("[data-signout]").addEventListener("click", async function () {
+                  const btn = this;
+                  btn.disabled = true; btn.textContent = "Signing out...";
+                  const myLoc = await getMyLocation();
+                  let distance = null;
+                  if (d.location && myLoc) {
+                    distance = haversineMeters(d.location.lat, d.location.lng, myLoc.lat, myLoc.lng);
+                    if (distance > geoRange) {
+                      btn.disabled = false; btn.textContent = "Sign Out (Leave Class)";
+                      alert("You appear to be about " + Math.round(distance) + "m from class. You must be within " + geoRange + "m to sign out.");
+                      return;
+                    }
+                  }
+                  try {
+                    await db.collection("attendanceSessions").doc(doc.id).collection("checkins").doc(auth.currentUser.uid).set({
+                      signedOutAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    }, { merge: true });
+                    loadAttendanceScan();
+                  } catch (err) {
+                    btn.disabled = false; btn.textContent = "Sign Out (Leave Class)";
+                    alert(friendlyError(err));
+                  }
+                });
+              }
+            } else {
+              const deviceFP = getDeviceFingerprint();
+              card.innerHTML =
+                '<div class="ititle">' + escapeHtml(d.label) + '</div><div class="imeta">Scan the QR your lecturer is showing, or type the code (within ' + geoRange + 'm)</div>' +
+                '<button class="btn" data-scan-qr style="margin-top:10px;">Scan QR Code</button>' +
+                '<div class="field" style="margin-top:10px;"><input type="text" data-code-input placeholder="e.g. B7X9K2" style="text-transform:uppercase;letter-spacing:4px;font-weight:700;"/></div>' +
+                '<button class="btn-outline-sm" data-submit-code style="width:100%;padding:11px;text-align:center;">Check In</button><div class="msg" data-msg style="margin-top:10px;font-size:0.82rem;"></div>';
+              card.querySelector("[data-scan-qr]").addEventListener("click", function () {
+                openQrScanner(function (scannedText) {
+                  card.querySelector("[data-code-input]").value = scannedText.trim().toUpperCase();
+                  card.querySelector("[data-submit-code]").click();
+                });
+              });
+              card.querySelector("[data-submit-code]").addEventListener("click", async function () {
+                const entered = card.querySelector("[data-code-input]").value.trim().toUpperCase();
+                const msgEl = card.querySelector("[data-msg]");
+                const expected = codeForSession(doc.id, Date.now());
+                if (entered !== expected) { msgEl.style.color = "var(--danger)"; msgEl.textContent = "Code incorrect or expired — check with your lecturer and try again."; return; }
+                const btn = card.querySelector("[data-submit-code]");
+                btn.disabled = true; btn.textContent = "Checking your location...";
+                const myLoc = await getMyLocation();
+                let distance = null;
+                if (d.location && myLoc) {
+                  distance = haversineMeters(d.location.lat, d.location.lng, myLoc.lat, myLoc.lng);
+                  if (distance > geoRange) {
+                    btn.disabled = false; btn.textContent = "Check In";
+                    msgEl.style.color = "var(--danger)";
+                    msgEl.textContent = "You appear to be about " + Math.round(distance) + "m from class — you must be within " + geoRange + "m to check in.";
+                    return;
+                  }
+                }
+                try {
+                  await db.collection("attendanceSessions").doc(doc.id).collection("checkins").doc(auth.currentUser.uid).set({
+                    name: auth.currentUser.displayName || auth.currentUser.email, checkedInAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    distanceMeters: distance, deviceFingerprint: deviceFP, gpsLat: myLoc ? myLoc.lat : null, gpsLng: myLoc ? myLoc.lng : null,
+                  });
+                  loadAttendanceScan();
+                } catch (err) {
+                  btn.disabled = false; btn.textContent = "Check In";
+                  msgEl.style.color = "var(--danger)"; msgEl.textContent = friendlyError(err);
+                }
+              });
+            }
+            listEl.appendChild(card);
+          }
+        } catch (err) {
+          listEl.innerHTML = '<div class="empty">Could not load sessions. Please try again later.</div>';
+        }
+      }
+
+      function getDeviceFingerprint() {
+        var parts = [navigator.userAgent, navigator.language, screen.width + "x" + screen.height, Intl.DateTimeFormat().resolvedOptions().timeZone];
+        var h = 0;
+        var str = parts.join("|");
+        for (var i = 0; i < str.length; i++) { h = ((h << 5) - h + str.charCodeAt(i)) | 0; }
+        return "dev_" + Math.abs(h).toString(36);
+      }
+
+      // ================= ATTENDANCE: HISTORY =================
+      async function loadAttendanceHistory() {
+        const listEl = document.getElementById("attHistList");
+        listEl.innerHTML = "Loading...";
+        try {
+          const snap = await db.collection("attendanceSessions").where("institutionId", "==", myInstitutionId).where("courseId", "==", myCourseId).get();
+          const closed = snap.docs.filter(function (d) { return d.data().isOpen === false; })
+            .sort(function (a, b) { const at = a.data().startedAt ? a.data().startedAt.toMillis() : 0; const bt = b.data().startedAt ? b.data().startedAt.toMillis() : 0; return bt - at; });
+          if (closed.length === 0) {
+            listEl.innerHTML = '<div class="empty">No completed sessions yet.</div>';
+            document.getElementById("attRate").textContent = "—"; document.getElementById("statAttendance").textContent = "No sessions yet";
+            return;
+          }
+          let attended = 0;
+          listEl.innerHTML = "";
+          for (const doc of closed) {
+            const d = doc.data();
+            const myCheckin = await db.collection("attendanceSessions").doc(doc.id).collection("checkins").doc(auth.currentUser.uid).get();
+            if (myCheckin.exists) attended++;
+            const row = document.createElement("div");
+            row.className = "itemCard";
+            row.innerHTML = '<div class="ititle">' + escapeHtml(d.label) + '</div><div class="imeta">' + fmtDate(d.startedAt) + '</div>' +
+              (myCheckin.exists ? '<div class="readConfirmed">✓ Present</div>' : '<div style="color:var(--danger);font-size:0.82rem;font-weight:600;">✕ Absent</div>');
+            listEl.appendChild(row);
+          }
+          const pct = Math.round((attended / closed.length) * 100);
+          document.getElementById("attRate").textContent = pct + "%";
+          document.getElementById("statAttendance").textContent = attended + "/" + closed.length + " attended";
+        } catch (err) {
+          listEl.innerHTML = '<div class="empty">Could not load attendance records. Please try again later.</div>';
+          document.getElementById("statAttendance").textContent = "Error loading";
+        }
+      }
+
+      // ================= DANGER ZONE =================
+      const EMAILJS_PUBLIC_KEY = "n1q50LOlnNH_wWusx";
+      const EMAILJS_SERVICE_ID = "service_lx1zlxc";
+      const EMAILJS_COURSE_CHANGE_TEMPLATE_ID = "template_frf3vk8";
+      const CLOUDINARY_CLOUD_NAME = "j8zmetxr";
+      const CLOUDINARY_UPLOAD_PRESET = "FastLine_FeMOS";
+      if (typeof emailjs !== "undefined") { emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY }); }
+
+      function openDzOverlay(id) { document.getElementById(id).classList.add("show"); }
+      function closeDzOverlay(id) { document.getElementById(id).classList.remove("show"); }
+      function showDzStep(stepId, dotId, otherDotId) {
+        var box = document.getElementById(stepId).parentElement;
+        box.querySelectorAll(".dzStep").forEach(function (s) { s.classList.remove("active"); });
+        box.querySelectorAll(".dzStepDot").forEach(function (d) { d.classList.remove("active"); });
+        document.getElementById(stepId).classList.add("active");
+        document.getElementById(dotId).classList.add("active");
+      }
+      function dzMsg(id, text, type) {
+        var el = document.getElementById(id);
+        el.textContent = text; el.className = "msg show " + type;
+        if (type === "ok") setTimeout(function () { el.classList.remove("show"); }, 4000);
+      }
+
+      // ---------- 1. EDIT MY COURSE ----------
+      document.getElementById("dzEditCourse").addEventListener("click", async function () {
+        openDzOverlay("dzEditCourseOverlay");
+        showDzStep("editStep1", "editDot1", "editDot2");
+        document.getElementById("dzEditMsg").className = "msg";
+        try {
+          var snap = await db.collection("institutions").orderBy("name").get();
+          var sel = document.getElementById("dzEditInst");
+          sel.innerHTML = snap.docs.map(function (d) { return '<option value="' + d.id + '">' + escapeHtml(d.data().name) + "</option>"; }).join("") || '<option value="">-- none --</option>';
+          document.getElementById("dzEditCampus").innerHTML = '<option value="">-- pick institution --</option>';
+          document.getElementById("dzEditCampus").disabled = true;
+          document.getElementById("dzEditCourseSel").innerHTML = '<option value="">-- pick campus --</option>';
+          document.getElementById("dzEditCourseSel").disabled = true;
+        } catch (e) { document.getElementById("dzEditInst").innerHTML = '<option value="">Error loading</option>'; }
+      });
+      document.getElementById("dzEditInst").addEventListener("change", async function () {
+        var instId = this.value;
+        var campusSel = document.getElementById("dzEditCampus");
+        var courseSel = document.getElementById("dzEditCourseSel");
+        campusSel.innerHTML = '<option value="">Loading...</option>'; campusSel.disabled = true;
+        courseSel.innerHTML = '<option value="">-- pick campus --</option>'; courseSel.disabled = true;
+        if (!instId) return;
+        try {
+          var snap = await db.collection("institutions").doc(instId).collection("campuses").orderBy("name").get();
+          campusSel.innerHTML = snap.docs.map(function (d) { return '<option value="' + d.id + '">' + escapeHtml(d.data().name) + "</option>"; }).join("") || '<option value="">-- none --</option>';
+          campusSel.disabled = false;
+        } catch (e) { campusSel.innerHTML = '<option value="">Error</option>'; }
+      });
+      document.getElementById("dzEditCampus").addEventListener("change", async function () {
+        var instId = document.getElementById("dzEditInst").value;
+        var campusId = this.value;
+        var courseSel = document.getElementById("dzEditCourseSel");
+        courseSel.innerHTML = '<option value="">Loading...</option>'; courseSel.disabled = true;
+        if (!instId || !campusId) return;
+        try {
+          var snap = await db.collection("institutions").doc(instId).collection("campuses").doc(campusId).collection("courses").orderBy("name").get();
+          courseSel.innerHTML = snap.docs.map(function (d) { return '<option value="' + d.id + '">' + escapeHtml(d.data().name) + "</option>"; }).join("") || '<option value="">-- none --</option>';
+          courseSel.disabled = false;
+        } catch (e) { courseSel.innerHTML = '<option value="">Error</option>'; }
+      });
+      document.getElementById("dzEditCourseNext").addEventListener("click", async function () {
+        var newInstId = document.getElementById("dzEditInst").value;
+        var newCampusId = document.getElementById("dzEditCampus").value;
+        var newCourseId = document.getElementById("dzEditCourseSel").value;
+        if (!newInstId || !newCampusId || !newCourseId) { dzMsg("dzEditMsg", "Please select institution, campus, and course.", "err"); return; }
+        var newInstName = document.getElementById("dzEditInst").options[document.getElementById("dzEditInst").selectedIndex].text;
+        var newCampusName = document.getElementById("dzEditCampus").options[document.getElementById("dzEditCampus").selectedIndex].text;
+        var newCourseName = document.getElementById("dzEditCourseSel").options[document.getElementById("dzEditCourseSel").selectedIndex].text;
+        var confirmed = myConfirmedByCR || myRegistrationStatus === "confirmed";
+        showDzStep("editStep2", "editDot2", "editDot1");
+        if (confirmed) {
+          document.getElementById("editStep2Title").textContent = "CR Approval Required";
+          document.getElementById("editStep2Desc").innerHTML = "Because your CR confirmed your current registration, they'll need to approve this change.<br/><br/><b>From:</b> " + escapeHtml(myCourseName) + "<br/><b>To:</b> " + escapeHtml(newCourseName);
+        } else {
+          document.getElementById("editStep2Title").textContent = "Confirm Course Change";
+          document.getElementById("editStep2Desc").innerHTML = "You haven't been confirmed by your CR yet, so this change can be made immediately.<br/><br/><b>From:</b> " + escapeHtml(myCourseName) + "<br/><b>To:</b> " + escapeHtml(newCourseName);
+        }
+        document.getElementById("dzEditCourseConfirm").onclick = async function () {
+          var btn = this; btn.disabled = true; btn.textContent = "Processing...";
+          try {
+            if (confirmed) {
+              await db.collection("courseChangeRequests").add({
+                userId: auth.currentUser.uid, userName: auth.currentUser.displayName || auth.currentUser.email,
+                userEmail: auth.currentUser.email,
+                institutionId: newInstId,
+                oldCourseId: myCourseId, oldCourseName: myCourseName,
+                newCourseId: newCourseId, newCourseName: newCourseName,
+                newCampusId: newCampusId, newCampusName: newCampusName,
+                status: "pending",
+                requestedAt: firebase.firestore.FieldValue.serverTimestamp(),
+              });
+              try {
+                var crSnap = await db.collection("userRoles").where("role", "==", "cr").where("institutionId", "==", myInstitutionId).where("courseId", "==", myCourseId).get();
+                for (var crDoc of crSnap.docs) {
+                  var crData = crDoc.data();
+                  await db.collection("notifications").add({
+                    userId: crDoc.id, type: "courseChangeRequest",
+                    message: (auth.currentUser.displayName || auth.currentUser.email) + " wants to change from " + myCourseName + " to " + newCourseName,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(), read: false,
+                  });
+                  if (typeof emailjs !== "undefined" && !EMAILJS_COURSE_CHANGE_TEMPLATE_ID.startsWith("PUT_")) {
+                    try {
+                      var crUserDoc = await db.collection("users").doc(crDoc.id).get();
+                      var crUserData = crUserDoc.exists ? crUserDoc.data() : null;
+                      if (crUserData) crUserData = await FeMOSEncrypt.decryptFields(crDoc.id, crUserData, ["name", "email", "registrationNumber"]);
+                      var crEmail = crUserData ? crUserData.email : null;
+                      if (crEmail) {
+                        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_COURSE_CHANGE_TEMPLATE_ID, {
+                          to_email: crEmail, to_name: crData.fullName || crData.name || "CR",
+                          student_name: auth.currentUser.displayName || auth.currentUser.email,
+                          old_course: myCourseName, new_course: newCourseName,
+                        });
+                      }
+                    } catch (mailErr) { console.warn("Course change email failed:", mailErr); }
+                  }
+                }
+              } catch (nErr) { console.warn("Notification error:", nErr); }
+              document.getElementById("editStep3Title").textContent = "Request Sent!";
+              document.getElementById("editStep3Desc").textContent = "Your CR will review and approve this change. You'll be notified once a decision is made.";
+              showDzStep("editStep3", "editDot3", "editDot2");
+            } else {
+              await db.collection("users").doc(auth.currentUser.uid).set({
+                institutionId: newInstId, institutionName: newInstName,
+                campusId: newCampusId, campusName: newCampusName,
+                courseId: newCourseId, courseName: newCourseName,
+                registrationStatus: "pending", confirmedByCR: false,
+              }, { merge: true });
+              document.getElementById("editStep3Title").textContent = "Course Updated!";
+              document.getElementById("editStep3Desc").textContent = "Your course has been changed. Please wait for your new CR to confirm you.";
+              showDzStep("editStep3", "editDot3", "editDot2");
+              setTimeout(function () { location.reload(); }, 2500);
+            }
+          } catch (err) { dzMsg("dzEditMsg", friendlyError(err), "err"); }
+          finally { btn.disabled = false; btn.textContent = "Confirm Change"; }
+        };
+      });
+
+      // ---------- 1b. GENDER ----------
+      document.getElementById("dzGender").addEventListener("click", async function () {
+        const current = (await db.collection("users").doc(auth.currentUser.uid).get()).data().gender || "";
+        showConfirm("Your current gender: " + (current || "Not set") + ". Would you like to change it?", async function () {
+          const overlay = document.createElement("div");
+          overlay.id = "genderEditOverlay";
+          overlay.style.cssText = "position:fixed;inset:0;background:rgba(13,27,75,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;padding:18px;";
+          overlay.innerHTML = '<div style="background:#fff;border-radius:20px;padding:28px 24px;max-width:380px;width:100%;text-align:center;"><h3 style="font-size:1rem;font-weight:700;margin-bottom:16px;">Change Gender</h3><select id="genderEditSelect" style="width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid var(--line);font-size:0.95rem;color:var(--ink);background:#fbfdff;margin-bottom:16px;"><option value="male"' + (current === "male" ? " selected" : "") + '>Male</option><option value="female"' + (current === "female" ? " selected" : "") + '>Female</option></select><div style="display:flex;gap:10px;"><button onclick="document.getElementById(\'genderEditOverlay\').remove()" style="flex:1;padding:12px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font-weight:600;cursor:pointer;">Cancel</button><button id="genderEditSaveBtn" style="flex:1;padding:12px;border:none;border-radius:12px;background:linear-gradient(90deg,var(--water-mid),var(--water-deep));color:#fff;font-weight:700;cursor:pointer;">Save</button></div></div>';
+          document.body.appendChild(overlay);
+          document.getElementById("genderEditSaveBtn").addEventListener("click", async function () {
+            const val = document.getElementById("genderEditSelect").value;
+            await db.collection("users").doc(auth.currentUser.uid).set({ gender: val }, { merge: true });
+            document.getElementById("dzGenderValue").textContent = val.charAt(0).toUpperCase() + val.slice(1);
+            overlay.remove();
+          });
+        });
+      });
+
+      // ---------- 2. REGISTRATION NUMBER ----------
+      document.getElementById("dzRegNumber").addEventListener("click", function () {
+        openDzOverlay("dzRegNumOverlay");
+        document.getElementById("dzRegNumCurrent").value = myRegNumber || "Not set yet";
+        document.getElementById("dzRegNumInput").value = myRegNumber || "";
+        document.getElementById("dzRegNumMsg").className = "msg";
+      });
+      document.getElementById("dzRegNumSave").addEventListener("click", async function () {
+        var val = document.getElementById("dzRegNumInput").value.trim();
+        if (!val) { dzMsg("dzRegNumMsg", "Enter a registration number.", "err"); return; }
+        try {
+          var regData = { registrationNumber: val };
+          regData = await FeMOSEncrypt.encryptFields(auth.currentUser.uid, regData, ["name", "email", "registrationNumber"]);
+          await db.collection("users").doc(auth.currentUser.uid).set(regData, { merge: true });
+          myRegNumber = val;
+          document.getElementById("pRegNum").textContent = val;
+          dzMsg("dzRegNumMsg", "Registration number saved.", "ok");
+          setTimeout(function () { closeDzOverlay("dzRegNumOverlay"); }, 1200);
+        } catch (err) { dzMsg("dzRegNumMsg", friendlyError(err), "err"); }
+      });
+
+      // ---------- 3. PROFILE PHOTO ----------
+      var dzPhotoFile = null;
+      document.getElementById("dzPhoto").addEventListener("click", function () {
+        openDzOverlay("dzPhotoOverlay");
+        document.getElementById("dzPhotoMsg").className = "msg";
+        dzPhotoFile = null;
+        var preview = document.getElementById("dzPhotoPreview");
+        var uploadBtn = document.getElementById("dzPhotoUpload");
+        var removeBtn = document.getElementById("dzPhotoRemove");
+        if (auth.currentUser.photoURL) {
+          preview.innerHTML = '<img src="' + auth.currentUser.photoURL + '" alt="Photo"/><div class="dzPhotoOverlay" id="dzPhotoTap"><span>Tap to<br/>change</span></div>';
+          removeBtn.style.display = "block";
+        } else {
+          var initials = (auth.currentUser.displayName || auth.currentUser.email || "?").trim().split(/\s+/).map(function (p) { return p[0]; }).slice(0, 2).join("").toUpperCase();
+          preview.innerHTML = '<span>' + initials + '</span><div class="dzPhotoOverlay" id="dzPhotoTap"><span>Tap to<br/>change</span></div>';
+          removeBtn.style.display = "none";
+        }
+        uploadBtn.style.display = "none";
+        document.getElementById("dzPhotoTap").addEventListener("click", function () { document.getElementById("dzPhotoInput").click(); });
+      });
+      document.getElementById("dzPhotoInput").addEventListener("change", function (e) {
+        var file = e.target.files[0]; if (!file) return;
+        if (file.size > 5 * 1024 * 1024) { dzMsg("dzPhotoMsg", "Image must be under 5MB.", "err"); return; }
+        dzPhotoFile = file;
+        var reader = new FileReader();
+        reader.onload = function (ev) {
+          document.getElementById("dzPhotoPreview").innerHTML = '<img src="' + ev.target.result + '" alt="Preview"/>';
+          document.getElementById("dzPhotoUpload").style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      });
+      document.getElementById("dzPhotoUpload").addEventListener("click", async function () {
+        if (!dzPhotoFile) return;
+        var btn = this; btn.disabled = true; btn.textContent = "Uploading...";
+        try {
+          var url = "https://api.cloudinary.com/v1_1/" + CLOUDINARY_CLOUD_NAME + "/image/upload";
+          var form = new FormData();
+          form.append("file", dzPhotoFile);
+          form.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+          var res = await fetch(url, { method: "POST", body: form });
+          if (!res.ok) throw new Error("Upload failed");
+          var data = await res.json();
+          var photoURL = data.secure_url;
+          await auth.currentUser.updateProfile({ photoURL: photoURL });
+          await db.collection("users").doc(auth.currentUser.uid).set({ photoURL: photoURL }, { merge: true });
+          document.getElementById("uAv").innerHTML = '<img src="' + photoURL + '" alt=""/>';
+          document.getElementById("pAv").innerHTML = '<img src="' + photoURL + '" alt=""/>';
+          dzMsg("dzPhotoMsg", "Profile picture updated.", "ok");
+          setTimeout(function () { closeDzOverlay("dzPhotoOverlay"); }, 1200);
+        } catch (err) { dzMsg("dzPhotoMsg", friendlyError(err), "err"); }
+        finally { btn.disabled = false; btn.textContent = "Upload New Photo"; }
+      });
+      document.getElementById("dzPhotoRemove").addEventListener("click", async function () {
+        var btn = this; btn.disabled = true; btn.textContent = "Removing...";
+        try {
+          await auth.currentUser.updateProfile({ photoURL: null });
+          await db.collection("users").doc(auth.currentUser.uid).set({ photoURL: null }, { merge: true });
+          var initials = (auth.currentUser.displayName || auth.currentUser.email || "?").trim().split(/\s+/).map(function (p) { return p[0]; }).slice(0, 2).join("").toUpperCase();
+          document.getElementById("uAv").innerHTML = initials;
+          document.getElementById("pAv").innerHTML = initials;
+          dzMsg("dzPhotoMsg", "Photo removed.", "ok");
+          setTimeout(function () { closeDzOverlay("dzPhotoOverlay"); }, 1200);
+        } catch (err) { dzMsg("dzPhotoMsg", friendlyError(err), "err"); }
+        finally { btn.disabled = false; btn.textContent = "Remove Photo"; }
+      });
+
+      // ---------- 4. ADD/CHANGE PASSWORD ----------
+      document.getElementById("dzPassword").addEventListener("click", function () {
+        openDzOverlay("dzPassOverlay");
+        document.getElementById("dzPassNew").value = "";
+        document.getElementById("dzPassConfirm").value = "";
+        document.getElementById("dzPassStrength").style.width = "0%";
+        document.getElementById("dzPassStrengthText").textContent = "";
+        document.getElementById("dzPassMsg").className = "msg";
+      });
+      document.getElementById("dzPassNew").addEventListener("input", function () {
+        var v = this.value;
+        var pct = 0; var color = "#e0e4ec"; var label = "";
+        if (v.length >= 8) pct = 30;
+        if (v.length >= 10) pct = 50;
+        if (/[A-Z]/.test(v) && /[0-9]/.test(v)) pct = 70;
+        if (/[A-Z]/.test(v) && /[0-9]/.test(v) && /[^A-Za-z0-9]/.test(v)) pct = 90;
+        if (v.length === 0) { pct = 0; label = ""; }
+        else if (pct < 30) { label = "Too short"; color = "#e14b4b"; }
+        else if (pct < 50) { label = "Weak"; color = "#e0a020"; }
+        else if (pct < 70) { label = "Fair"; color = "#e0a020"; }
+        else if (pct < 90) { label = "Strong"; color = "#1fae6e"; }
+        else { label = "Very strong"; color = "#1fae6e"; }
+        document.getElementById("dzPassStrength").style.width = pct + "%";
+        document.getElementById("dzPassStrength").style.background = color;
+        document.getElementById("dzPassStrengthText").textContent = label;
+        document.getElementById("dzPassStrengthText").style.color = color;
+      });
+      document.getElementById("dzPassSave").addEventListener("click", async function () {
+        var newPass = document.getElementById("dzPassNew").value;
+        var confirmPass = document.getElementById("dzPassConfirm").value;
+        if (newPass.length < 8) { dzMsg("dzPassMsg", "Password must be at least 8 characters.", "err"); return; }
+        if (newPass !== confirmPass) { dzMsg("dzPassMsg", "Passwords do not match.", "err"); return; }
+        var btn = this; btn.disabled = true; btn.textContent = "Setting...";
+        try {
+          await auth.currentUser.updatePassword(newPass);
+          dzMsg("dzPassMsg", "Password set successfully.", "ok");
+          setTimeout(function () { closeDzOverlay("dzPassOverlay"); }, 1200);
+        } catch (err) {
+          if (err.code === "auth/requires-recent-login") {
+            dzMsg("dzPassMsg", "For security, please log out and log back in, then try again.", "err");
+          } else {
+            dzMsg("dzPassMsg", friendlyError(err), "err");
+          }
+        }
+        finally { btn.disabled = false; btn.textContent = "Set Password"; }
+      });
+
+      // ---------- 5. DELETE REGISTRATION ----------
+      document.getElementById("dzDelete").addEventListener("click", function () {
+        openDzOverlay("dzDeleteOverlay");
+        showDzStep("delStep1", "delDot1", "delDot2");
+        document.getElementById("dzDeleteMsg").className = "msg";
+        document.getElementById("dzDeleteEmail").value = "";
+        document.getElementById("dzDeleteConfirm").disabled = true;
+      });
+      document.getElementById("dzDeleteYes").addEventListener("click", function () {
+        showDzStep("delStep2", "delDot2", "delDot1");
+      });
+      document.getElementById("dzDeleteEmail").addEventListener("input", function () {
+        document.getElementById("dzDeleteConfirm").disabled = (this.value.trim().toLowerCase() !== (auth.currentUser.email || "").toLowerCase());
+      });
+      document.getElementById("dzDeleteConfirm").addEventListener("click", async function () {
+        var btn = this; btn.disabled = true; btn.textContent = "Deleting...";
+        try {
+          await db.collection("users").doc(auth.currentUser.uid).delete();
+          await auth.currentUser.delete();
+          window.location.replace("/register");
+        } catch (err) {
+          if (err.code === "auth/requires-recent-login") {
+            dzMsg("dzDeleteMsg", "For security, please log out and log back in, then try again.", "err");
+          } else {
+            dzMsg("dzDeleteMsg", friendlyError(err), "err");
+          }
+          btn.disabled = false; btn.textContent = "Delete Forever";
+        }
+      });
+
+      // ================= THEME =================
+      document.getElementById("dzTheme").addEventListener("click", function (e) {
+        if (e.target.closest("#dzThemeToggle")) {
+          feMosToggleTheme();
+        } else {
+          feMosToggleTheme();
+        }
+      });
+      document.getElementById("dzThemeToggle").addEventListener("click", function (e) {
+        e.stopPropagation();
+        feMosToggleTheme();
+      });
+
+      // ================= APP LOCK =================
+      var appLockEnabled = false;
+      var appLockPinHash = "";
+
+      function simpleHash(str) {
+        var hash = 0;
+        for (var i = 0; i < str.length; i++) {
+          var ch = str.charCodeAt(i);
+          hash = ((hash << 5) - hash) + ch;
+          hash = hash & hash;
+        }
+        return "h" + Math.abs(hash).toString(36);
+      }
+
+      function getPinFromInputs(container) {
+        var inputs = container.querySelectorAll(".pinInput");
+        var pin = "";
+        inputs.forEach(function (inp) { pin += inp.value; });
+        return pin;
+      }
+
+      function clearPinInputs(container) {
+        container.querySelectorAll(".pinInput").forEach(function (inp) { inp.value = ""; });
+        container.querySelector(".pinInput").focus();
+      }
+
+      function setupPinAutoAdvance(container) {
+        var inputs = container.querySelectorAll(".pinInput");
+        inputs.forEach(function (inp, idx) {
+          inp.addEventListener("input", function () {
+            this.value = this.value.replace(/[^0-9]/g, "").slice(0, 1);
+            if (this.value && idx < inputs.length - 1) inputs[idx + 1].focus();
+            var pin = getPinFromInputs(container);
+            var btn = container.closest(".dzBox, .pinGateBox") ? container.closest(".dzBox, .pinGateBox").querySelector(".dzConfirm, #pinGateError") : null;
+            var enableBtn = container.closest(".dzBox") ? container.closest(".dzBox").querySelector(".dzConfirm[disabled]") : null;
+          });
+          inp.addEventListener("keydown", function (e) {
+            if (e.key === "Backspace" && !this.value && idx > 0) { inputs[idx - 1].focus(); inputs[idx - 1].value = ""; }
+          });
+          inp.addEventListener("focus", function () { this.select(); });
+        });
+      }
+
+      function updateAppLockUI() {
+        var toggle = document.getElementById("dzAppLockToggle");
+        var knob = document.getElementById("dzAppLockKnob");
+        var desc = document.getElementById("dzAppLockDesc");
+        if (appLockEnabled) {
+          toggle.style.background = "var(--water-mid)";
+          knob.style.left = "22px";
+          desc.textContent = "Change or disable your PIN";
+        } else {
+          toggle.style.background = "#e0e4ec";
+          knob.style.left = "2px";
+          desc.textContent = "Set a 4-digit PIN to lock your app";
+        }
+      }
+
+      async function loadAppLockState() {
+        if (!auth.currentUser) return;
+        try {
+          var doc = await db.collection("users").doc(auth.currentUser.uid).get();
+          var data = doc.exists ? doc.data() : null;
+          if (data && data.appLockPin) {
+            appLockEnabled = true;
+            appLockPinHash = data.appLockPin;
+          } else {
+            appLockEnabled = false;
+            appLockPinHash = "";
+          }
+          updateAppLockUI();
+        } catch (e) { /* silent */ }
+      }
+
+      // --- App Lock toggle click ---
+      document.getElementById("dzAppLockToggle").addEventListener("click", function (e) {
+        e.stopPropagation();
+        if (appLockEnabled) {
+          openDzOverlay("dzPinChangeOverlay");
+          document.getElementById("dzPinOld").value = "";
+          document.getElementById("dzPinNew").value = "";
+          document.getElementById("dzPinNewConfirm").value = "";
+          document.getElementById("dzPinChangeMsg").className = "msg";
+        } else {
+          openDzOverlay("dzPinSetupOverlay");
+          showDzStep("pinStep1", "pinDot1", "pinDot2");
+          document.getElementById("dzPinMsg1").className = "msg";
+          var container = document.getElementById("dzPinSetupOverlay");
+          clearPinInputs(container);
+          setTimeout(function () { container.querySelector(".pinInput").focus(); }, 100);
+        }
+      });
+
+      // Also allow clicking the row itself
+      document.getElementById("dzAppLock").addEventListener("click", function (e) {
+        if (e.target.closest("#dzAppLockToggle")) return;
+        document.getElementById("dzAppLockToggle").click();
+      });
+
+      // --- PIN Setup Step 1: auto-advance + enable Continue ---
+      setupPinAutoAdvance(document.getElementById("pinStep1"));
+      (function () {
+        var step1Inputs = document.getElementById("pinStep1").querySelectorAll(".pinInput");
+        function checkStep1() {
+          var pin = getPinFromInputs(document.getElementById("pinStep1"));
+          document.getElementById("dzPinNext").disabled = pin.length !== 4;
+        }
+        step1Inputs.forEach(function (inp) { inp.addEventListener("input", checkStep1); });
+      })();
+
+      document.getElementById("dzPinNext").addEventListener("click", function () {
+        var pin = getPinFromInputs(document.getElementById("pinStep1"));
+        if (pin.length !== 4) { dzMsg("dzPinMsg1", "Please enter all 4 digits.", "err"); return; }
+        showDzStep("pinStep2", "pinDot2", "pinDot1");
+        setTimeout(function () { document.querySelector("#pinStep2 .pinInput").focus(); }, 100);
+      });
+
+      // --- PIN Setup Step 2: confirm ---
+      setupPinAutoAdvance(document.getElementById("pinStep2"));
+      (function () {
+        var step2Inputs = document.getElementById("pinStep2").querySelectorAll(".pinInput");
+        function checkStep2() {
+          var pin = getPinFromInputs(document.getElementById("pinStep2"));
+          document.getElementById("dzPinConfirm").disabled = pin.length !== 4;
+        }
+        step2Inputs.forEach(function (inp) { inp.addEventListener("input", checkStep2); });
+      })();
+
+      document.getElementById("dzPinConfirm").addEventListener("click", async function () {
+        var firstPin = getPinFromInputs(document.getElementById("pinStep1"));
+        var confirmPin = getPinFromInputs(document.getElementById("pinStep2"));
+        if (firstPin !== confirmPin) {
+          dzMsg("dzPinMsg2", "PINs don't match. Try again.", "err");
+          var inputs = document.getElementById("pinStep2").querySelectorAll(".pinInput");
+          inputs.forEach(function (inp) { inp.classList.add("error"); });
+          setTimeout(function () { inputs.forEach(function (inp) { inp.classList.remove("error"); }); }, 500);
+          clearPinInputs(document.getElementById("pinStep2"));
+          return;
+        }
+        var btn = this; btn.disabled = true; btn.textContent = "Saving...";
+        try {
+          await db.collection("users").doc(auth.currentUser.uid).set({ appLockPin: simpleHash(firstPin) }, { merge: true });
+          appLockEnabled = true;
+          appLockPinHash = simpleHash(firstPin);
+          updateAppLockUI();
+          closeDzOverlay("dzPinSetupOverlay");
+          showAppLockToast("App Lock has been enabled. You'll need your PIN to open FeMOS.");
+        } catch (err) {
+          dzMsg("dzPinMsg2", friendlyError(err), "err");
+        }
+        finally { btn.disabled = false; btn.textContent = "Set PIN"; }
+      });
+
+      // --- Change PIN ---
+      document.getElementById("dzPinChangeSave").addEventListener("click", async function () {
+        var oldPin = document.getElementById("dzPinOld").value.trim();
+        var newPin = document.getElementById("dzPinNew").value.trim();
+        var newConfirm = document.getElementById("dzPinNewConfirm").value.trim();
+        if (oldPin.length !== 4 || newPin.length !== 4 || newConfirm.length !== 4) {
+          dzMsg("dzPinChangeMsg", "All fields must be 4 digits.", "err"); return;
+        }
+        if (simpleHash(oldPin) !== appLockPinHash) {
+          dzMsg("dzPinChangeMsg", "Current PIN is incorrect.", "err"); return;
+        }
+        if (newPin !== newConfirm) {
+          dzMsg("dzPinChangeMsg", "New PINs don't match.", "err"); return;
+        }
+        if (oldPin === newPin) {
+          dzMsg("dzPinChangeMsg", "New PIN must be different from current.", "err"); return;
+        }
+        var btn = this; btn.disabled = true; btn.textContent = "Updating...";
+        try {
+          await db.collection("users").doc(auth.currentUser.uid).set({ appLockPin: simpleHash(newPin) }, { merge: true });
+          appLockPinHash = simpleHash(newPin);
+          closeDzOverlay("dzPinChangeOverlay");
+          showAppLockToast("PIN updated successfully.");
+        } catch (err) {
+          dzMsg("dzPinChangeMsg", friendlyError(err), "err");
+        }
+        finally { btn.disabled = false; btn.textContent = "Update PIN"; }
+      });
+
+      function showAppLockToast(text) {
+        var t = document.createElement("div");
+        t.className = "toast show";
+        t.innerHTML = '<svg width="18" height="18" fill="none" stroke="var(--success)" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span>' + text + '</span>';
+        document.body.appendChild(t);
+        setTimeout(function () { t.remove(); }, 4000);
+      }
+
+      // --- PIN Gate: check on auth ---
+      function showPinGate() {
+        var gate = document.getElementById("pinGateOverlay");
+        gate.classList.add("show");
+        clearPinInputs(document.getElementById("pinGateRow"));
+        document.getElementById("pinGateError").classList.remove("show");
+        setTimeout(function () { document.querySelector("#pinGateRow .pinInput").focus(); }, 200);
+      }
+
+      function hidePinGate() {
+        document.getElementById("pinGateOverlay").classList.remove("show");
+      }
+
+      setupPinAutoAdvance(document.getElementById("pinGateRow"));
+
+      (function () {
+        var gateInputs = document.querySelectorAll("#pinGateRow .pinInput");
+        function tryUnlock() {
+          var pin = getPinFromInputs(document.getElementById("pinGateRow"));
+          if (pin.length !== 4) return;
+          if (simpleHash(pin) === appLockPinHash) {
+            sessionStorage.setItem("femosUnlocked_" + auth.currentUser.uid, "1");
+            hidePinGate();
+          } else {
+            document.getElementById("pinGateError").classList.add("show");
+            var inputs = document.querySelectorAll("#pinGateRow .pinInput");
+            inputs.forEach(function (inp) { inp.classList.add("error"); });
+            setTimeout(function () {
+              inputs.forEach(function (inp) { inp.classList.remove("error"); inp.value = ""; });
+              inputs[0].focus();
+            }, 500);
+          }
+        }
+        gateInputs.forEach(function (inp) {
+          inp.addEventListener("input", function () { this.value = this.value.replace(/[^0-9]/g, "").slice(0, 1); if (this.value) { var next = this.getAttribute("data-pin"); var n = parseInt(next) + 1; if (n < 4) { var ni = document.querySelector('#pinGateRow .pinInput[data-pin="' + n + '"]'); if (ni) ni.focus(); } } tryUnlock(); });
+          inp.addEventListener("keydown", function (e) { if (e.key === "Backspace" && !this.value) { var prev = parseInt(this.getAttribute("data-pin")) - 1; if (prev >= 0) { var pi = document.querySelector('#pinGateRow .pinInput[data-pin="' + prev + '"]'); if (pi) { pi.focus(); pi.value = ""; } } } });
+        });
+      })();
+
+      document.getElementById("pinGateLogout").addEventListener("click", async function () {
+        await auth.signOut();
+        window.location.replace("/login");
+      });
+
+      // ================= FEEDBACK PANEL =================
+      var fpActiveTab = "cr";
+      var fpBackdrop = document.getElementById("fpBackdrop");
+      var fpPanel = document.getElementById("feedbackPanel");
+
+      function openFp() { fpPanel.classList.add("open"); fpBackdrop.classList.add("open"); }
+      function closeFp() { fpPanel.classList.remove("open"); fpBackdrop.classList.remove("open"); }
+
+      document.getElementById("feedbackFab").addEventListener("click", openFp);
+      document.getElementById("fpClose").addEventListener("click", closeFp);
+      fpBackdrop.addEventListener("click", closeFp);
+
+      document.querySelectorAll("[data-fp-tab]").forEach(function (t) {
+        t.addEventListener("click", function () {
+          fpActiveTab = t.getAttribute("data-fp-tab");
+          document.querySelectorAll("[data-fp-tab]").forEach(function (b) { b.classList.toggle("active", b.getAttribute("data-fp-tab") === fpActiveTab); });
+        });
+      });
+
+      document.getElementById("fpSend").addEventListener("click", async function () {
+        var msg = document.getElementById("fpMessage").value.trim();
+        if (!msg) { document.getElementById("fpMsg").textContent = "Please write something first."; document.getElementById("fpMsg").className = "msg show err"; return; }
+        var btn = this; btn.disabled = true; btn.textContent = "Sending...";
+        try {
+          var recipientId = null;
+          var recipientName = "";
+          if (fpActiveTab === "cr") {
+            var crSnap = await db.collection("userRoles").where("role", "==", "cr").where("institutionId", "==", myInstitutionId).where("courseId", "==", myCourseId).get();
+            if (!crSnap.empty) { var crDoc = crSnap.docs[0]; recipientId = crDoc.id; recipientName = crDoc.data().fullName || crDoc.data().name || "CR"; }
+          } else {
+            var adminSnap = await db.collection("userRoles").where("role", "==", "institutionAdmin").where("institutionId", "==", myInstitutionId).get();
+            if (!adminSnap.empty) { var adminDoc = adminSnap.docs[0]; recipientId = adminDoc.id; recipientName = adminDoc.data().fullName || adminDoc.data().name || "Institution Admin"; }
+          }
+          await db.collection("feedback").add({
+            userId: auth.currentUser.uid,
+            userName: auth.currentUser.displayName || auth.currentUser.email,
+            userEmail: auth.currentUser.email,
+            registrationNumber: myRegNumber || "Not set",
+            recipientId: recipientId,
+            recipientType: fpActiveTab,
+            message: msg,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            read: false,
+          });
+          document.getElementById("fpBody").innerHTML =
+            '<div class="fpSuccess">' +
+              '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>' +
+              '<h4>Feedback Sent!</h4>' +
+              '<p>Your feedback has been delivered to <strong>' + escapeHtml(recipientName) + '</strong>.</p>' +
+            '</div>';
+          setTimeout(function () { closeFp(); setTimeout(resetFp, 400); }, 2500);
+        } catch (err) {
+          document.getElementById("fpMsg").textContent = friendlyError(err);
+          document.getElementById("fpMsg").className = "msg show err";
+          btn.disabled = false; btn.textContent = "Send Feedback";
+        }
+      });
+
+      function resetFp() {
+        fpActiveTab = "cr";
+        document.querySelectorAll("[data-fp-tab]").forEach(function (b) { b.classList.toggle("active", b.getAttribute("data-fp-tab") === "cr"); });
+        document.getElementById("fpBody").innerHTML =
+          '<textarea id="fpMessage" placeholder="Write your feedback or suggestion about the system..."></textarea>' +
+          '<div class="fpWarning">' +
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' +
+            '<span>Your <strong>name</strong> and <strong>registration number</strong> will be visible to the recipient. Please keep your feedback professional.</span>' +
+          '</div>';
+        document.getElementById("fpMsg").className = "msg";
+        document.getElementById("fpSend").disabled = false;
+        document.getElementById("fpSend").textContent = "Send Feedback";
+      }
+    </script>
+  </body>
+</html>
