@@ -457,6 +457,9 @@
           /* Load user doc */
           var userDoc = await db.collection("users").doc(user.uid).get();
           myData = userDoc.exists ? userDoc.data() : {};
+          if (myData && typeof FeMOSEncrypt !== "undefined") {
+            await FeMOSEncrypt.decryptFields(user.uid, myData, ["name", "email", "registrationNumber"]);
+          }
 
           /* Load roles */
           var roleDoc = await db.collection("userRoles").doc(user.uid).get();
@@ -682,17 +685,18 @@
             approveAllBtn.addEventListener("click", approveAllPendingAdmin);
             el.appendChild(approveAllBtn);
           }
-          snap.docs.forEach(function(doc) {
+          for (var doc of snap.docs) {
             var d = doc.data();
+            if (typeof FeMOSEncrypt !== "undefined") await FeMOSEncrypt.decryptFields(doc.id, d, ["name", "email", "registrationNumber"]);
             var regInfo = d.registrationNumber ? ' · Reg: '+escapeHtml(d.registrationNumber) : ' · <span style="color:var(--danger)">No reg number</span>';
             var row = document.createElement("div"); row.className = "prow";
             row.innerHTML = '<div class="pleft"><div class="pname">'+escapeHtml(d.fullName||d.email||"Unknown")+'</div><div class="pmeta">'+escapeHtml(d.email||"")+' · '+(d.institutionName||"")+' · '+(d.courseName||"")+regInfo+'</div></div><div class="pright"><button class="btn btn-sm btn-approve" data-approve="'+doc.id+'">Approve</button><button class="btn btn-sm btn-reject" data-reject="'+doc.id+'">Reject</button></div>';
             el.appendChild(row);
-          });
+          }
           el.querySelectorAll("[data-approve]").forEach(function(b){b.addEventListener("click",async function(){
             var uid=b.getAttribute("data-approve");b.disabled=true;b.textContent="...";
             try{
-              var udoc=await db.collection("users").doc(uid).get();var ud=udoc.data();
+              var udoc=await db.collection("users").doc(uid).get();var ud=udoc.data();if(ud&&typeof FeMOSEncrypt!=="undefined")await FeMOSEncrypt.decryptFields(uid,ud,["name","email","registrationNumber"]);
               var regNum=(ud.registrationNumber||"").trim();
               if(!regNum){showToast("Cannot approve: student has no registration number.");b.disabled=false;b.textContent="Approve";return;}
               var dupSnap=await db.collection("users").where("registrationNumber","==",regNum).where("registrationStatus","==","confirmed").limit(1).get();
@@ -1090,13 +1094,14 @@
           if (snap.empty) { el.innerHTML = '<div class="empty">No confirmed students yet.</div>'; return; }
           el.innerHTML = "";
           var csvData = [["Name","Email","Registration No","Student ID"]];
-          snap.docs.forEach(function(doc) {
+          for (var doc of snap.docs) {
             var d = doc.data();
+            if (typeof FeMOSEncrypt !== "undefined") await FeMOSEncrypt.decryptFields(doc.id, d, ["name", "email", "registrationNumber"]);
             csvData.push([d.fullName||d.email||"",d.email||"",d.registrationNumber||"",d.studentId||""]);
             var row = document.createElement("div"); row.className = "prow";
             row.innerHTML = '<div class="pleft"><div class="pname">'+escapeHtml(d.fullName||d.email||"Unknown")+'</div><div class="pmeta">'+escapeHtml(d.registrationNumber||"Not set")+' \xb7 '+escapeHtml(d.studentId||"No ID")+'</div></div><div class="pright"><button class="btn btn-sm btn-reject" data-remove-roster="'+doc.id+'" style="font-size:0.75rem;padding:4px 10px;">Remove</button></div>';
             el.appendChild(row);
-          });
+          }
           el.querySelectorAll("[data-remove-roster]").forEach(function(b){b.addEventListener("click",function(){
             var uid=b.getAttribute("data-remove-roster");
             var docSnap=snap.docs.find(function(d){return d.id===uid;});

@@ -437,8 +437,9 @@
             approveAllBtn.addEventListener("click", approveAllPending);
             listEl.appendChild(approveAllBtn);
           }
-          snap.forEach(function (doc) {
+          for (const doc of snap.docs) {
             const d = doc.data();
+            if (typeof FeMOSEncrypt !== "undefined") await FeMOSEncrypt.decryptFields(doc.id, d, ["name", "email", "registrationNumber"]);
             const row = document.createElement("div");
             row.className = "prow";
             row.innerHTML =
@@ -458,7 +459,7 @@
               await rejectStudent(doc.id);
             });
             listEl.appendChild(row);
-          });
+          }
         } catch (err) {
           countEl.textContent = "";
           listEl.innerHTML = '<div class="empty">Could not load pending list. Please try again later.</div>';
@@ -698,6 +699,7 @@
           if (userSnap.empty) { showMsg("msgGrant", "No FeMOS user found with that email. They must sign up first.", "err"); return; }
           const targetUid = userSnap.docs[0].id;
           const targetData = userSnap.docs[0].data();
+          if (typeof FeMOSEncrypt !== "undefined") await FeMOSEncrypt.decryptFields(userSnap.docs[0].id, targetData, ["name", "email", "registrationNumber"]);
           const instName = document.getElementById("grantInstSelect").selectedOptions[0].textContent;
           await db.collection("userRoles").doc(targetUid).set({
             role: "institutionAdmin", institutionId: instId, institutionName: instName,
@@ -731,7 +733,11 @@
             let label = doc.id;
             try {
               const userDoc = await db.collection("users").doc(doc.id).get();
-              if (userDoc.exists) label = (userDoc.data().fullName || userDoc.data().email || doc.id);
+              if (userDoc.exists) {
+                const uData = userDoc.data();
+                if (typeof FeMOSEncrypt !== "undefined") await FeMOSEncrypt.decryptFields(doc.id, uData, ["name", "email", "registrationNumber"]);
+                label = (uData.fullName || uData.email || doc.id);
+              }
             } catch (e) {}
             html += '<div class="prow"><div class="info"><b>' + escapeHtml(label) + '</b>' +
                     "<span>" + escapeHtml(d.institutionName || d.institutionId) + '</span></div>' +

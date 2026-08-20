@@ -578,8 +578,9 @@
             approveAllBtn.addEventListener("click", approveAllPending);
             listEl.appendChild(approveAllBtn);
           }
-          snap.forEach(function (doc) {
+          for (const doc of snap.docs) {
             const d = doc.data();
+            if (typeof FeMOSEncrypt !== "undefined") await FeMOSEncrypt.decryptFields(doc.id, d, ["name", "email", "registrationNumber"]);
             const row = document.createElement("div");
             row.className = "prow";
             row.innerHTML =
@@ -592,7 +593,7 @@
             row.querySelector(".btn-approve").addEventListener("click", async function () { await approveStudent(doc.id, d); });
             row.querySelector(".btn-reject").addEventListener("click", async function () { await rejectStudent(doc.id); });
             listEl.appendChild(row);
-          });
+          }
         } catch (err) {
           countEl.textContent = "";
           listEl.innerHTML = '<div class="empty">Could not load pending list. Please try again later.</div>';
@@ -776,6 +777,7 @@
                         const crData = crDoc.data();
                         const crUserDoc = await db.collection("users").doc(crDoc.id).get();
                         const crUser = crUserDoc.exists ? crUserDoc.data() : {};
+                        if (crUserDoc.exists && typeof FeMOSEncrypt !== "undefined") await FeMOSEncrypt.decryptFields(crDoc.id, crUser, ["name", "email", "registrationNumber"]);
                         const crGender = crUser.gender || "unknown";
                         const crName = crUser.fullName || crData.email || "Unknown";
                         const genderLabel = crGender === "male" ? "Male CR" : crGender === "female" ? "Female CR" : "CR";
@@ -792,13 +794,14 @@
                       html += '<div class="noRosterNote">No confirmed students yet</div>';
                     } else {
                       html += '<div class="courseRosterList">';
-                      rosterSnap.forEach(function (sDoc) {
+                      for (const sDoc of rosterSnap.docs) {
                         const s = sDoc.data();
+                        if (typeof FeMOSEncrypt !== "undefined") await FeMOSEncrypt.decryptFields(sDoc.id, s, ["name", "email", "registrationNumber"]);
                         html += '<div class="courseRosterItem">' +
                           '<span class="rName">' + escapeHtml(s.fullName || s.name || "Unknown") + '</span>' +
                           '<span class="rReg">' + escapeHtml(s.registrationNumber || "No reg #") + '</span>' +
                         '</div>';
-                      });
+                      }
                       html += '</div>';
                     }
                     body.innerHTML = html;
@@ -1028,8 +1031,10 @@
             try {
               const userDoc = await db.collection("users").doc(doc.id).get();
               if (userDoc.exists) {
-                label = userDoc.data().fullName || userDoc.data().email || doc.id;
-                crGender = userDoc.data().gender || null;
+                const uData = userDoc.data();
+                if (typeof FeMOSEncrypt !== "undefined") await FeMOSEncrypt.decryptFields(doc.id, uData, ["name", "email", "registrationNumber"]);
+                label = uData.fullName || uData.email || doc.id;
+                crGender = uData.gender || null;
               }
             } catch (e) {}
             const genderLabel = crGender === "male" ? " · Male CR" : crGender === "female" ? " · Female CR" : "";
@@ -1077,6 +1082,7 @@
           if (userSnap.empty) { showMsg("msgLec", "No FeMOS account found with that email registered under your institution.", "err"); return; }
           const targetUid = userSnap.docs[0].id;
           const targetData = userSnap.docs[0].data();
+          if (typeof FeMOSEncrypt !== "undefined") await FeMOSEncrypt.decryptFields(userSnap.docs[0].id, targetData, ["name", "email", "registrationNumber"]);
           const assignmentId = targetUid + "_" + myInstitutionId + "_" + courseId;
           await db.collection("lecturerAssignments").doc(assignmentId).set({
             lecturerUid: targetUid, lecturerName: targetData.fullName || email, lecturerEmail: email,
@@ -1248,7 +1254,12 @@
         if (typeof emailjs === "undefined") return;
         try {
           const usersSnap = await db.collection("users").where("institutionId", "==", instId).where("registrationStatus", "==", "confirmed").get();
-          var emails = usersSnap.docs.map(function (d) { return d.data().email; }).filter(function (e) { return !!e; });
+          var emails = [];
+          for (const uDoc of usersSnap.docs) {
+            const uData = uDoc.data();
+            if (typeof FeMOSEncrypt !== "undefined") await FeMOSEncrypt.decryptFields(uDoc.id, uData, ["name", "email", "registrationNumber"]);
+            if (uData.email) emails.push(uData.email);
+          }
           for (var i = 0; i < emails.length; i++) {
             emailjs.send(EMAILJS_SERVICE_ID, "template_announcement", {
               to_email: emails[i], ann_title: title, ann_body: body.substring(0, 500),
