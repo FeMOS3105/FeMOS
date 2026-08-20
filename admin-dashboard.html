@@ -338,7 +338,8 @@
       function escapeHtml(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
       function fmtDate(ts){return ts&&ts.toDate?ts.toDate().toLocaleString():"";}
       function showMsg(id,text,type){var el=document.getElementById(id);if(!el)return;el.textContent=text;el.className="msg show "+type;if(type==="ok")setTimeout(function(){el.className="msg";},4000);}
-      function showConfirm(msg,cb){var o=document.getElementById("confirmOverlay");document.getElementById("confirmMsg").textContent=msg;o.classList.add("show");var ok=document.getElementById("confirmOkBtn");var cn=document.getElementById("confirmCancelBtn");function cl(){o.classList.remove("show");ok.removeEventListener("click",onOk);cn.removeEventListener("click",onCn);}function onOk(){cl();cb();}function onCn(){cl();}ok.addEventListener("click",onOk);cn.addEventListener("click",onCn);}
+      document.getElementById("confirmOverlay").classList.remove("show");
+      var _confirmCb=null;var _confirmOverlay=document.getElementById("confirmOverlay");var _confirmOk=document.getElementById("confirmOkBtn");var _confirmCn=document.getElementById("confirmCancelBtn");_confirmOk.addEventListener("click",function(){_confirmOverlay.classList.remove("show");if(_confirmCb){var cb=_confirmCb;_confirmCb=null;cb();}});_confirmCn.addEventListener("click",function(){_confirmCb=null;_confirmOverlay.classList.remove("show");});function showConfirm(msg,cb,opts){document.getElementById("confirmMsg").textContent=msg;_confirmCb=cb;_confirmOk.textContent=(opts&&opts.okText)||"Confirm";_confirmOk.className="btn "+((opts&&opts.okClass)||"btn-reject");_confirmOverlay.classList.add("show");}
       function friendlyError(err){var c=err&&err.code;var m={"permission-denied":"You don't have permission.","not-found":"Data not found.","unauthenticated":"Please log in again.","unavailable":"Service unavailable. Try later.","deadline-exceeded":"Timed out. Check connection.","resource-exhausted":"Too many requests.","failed-precondition":"Cannot complete now.","aborted":"Interrupted. Try again.","invalid-argument":"Invalid input.","internal":"Server error.","auth/requires-recent-login":"Please log out and log back in, then try again.","storage/unauthorized":"No permission to upload.","storage/canceled":"Upload cancelled.",};if(c&&m[c])return m[c];return "Something went wrong. Please try again.";}
       function generateSlug(t){return String(t||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");}
       async function generateStudentId(uid,instId){var c=instId.substring(0,4).toUpperCase();var y=new Date().getFullYear();var ref=db.collection("idCounters").doc(instId+"_"+y);var id=await db.runTransaction(async function(tx){var snap=await tx.get(ref);var n=snap.exists?(snap.data().count||0)+1:1;tx.set(ref,{count:n});return "FEMOS-"+c+"-"+y+"-"+String(n).padStart(6,"0");});await db.collection("users").doc(uid).set({studentId:id},{merge:true});return id;}
@@ -520,7 +521,7 @@
           try { await removeFCMToken(auth.currentUser); } catch(e) {}
           await auth.signOut();
           window.location.replace("login.html");
-        });
+        }, {okText:"Log Out",okClass:"btn"});
       });
 
       /* ==========================================
