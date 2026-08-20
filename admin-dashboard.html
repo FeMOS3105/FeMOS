@@ -441,7 +441,7 @@
       var userRoles = {};  /* { superAdmin: bool, institutionAdmin: {id,name}, lecturer: [...assignments], cr: {instId,courseId,courseName} } */
 
       auth.onAuthStateChanged(async function(user) {
-        if (!user) { window.location.href = "login.html"; return; }
+        if (!user) { window.location.replace("login.html"); return; }
         try {
           /* Load user doc */
           var userDoc = await db.collection("users").doc(user.uid).get();
@@ -519,7 +519,7 @@
         showConfirm("Do you really want to logout?", async function() {
           try { await removeFCMToken(auth.currentUser); } catch(e) {}
           await auth.signOut();
-          window.location.href = "login.html";
+          window.location.replace("login.html");
         });
       });
 

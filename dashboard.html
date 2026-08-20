@@ -903,11 +903,11 @@
 
       auth.onAuthStateChanged(async function (user) {
         const gate = document.getElementById("gate");
-        if (!user) { window.location.href = "login.html"; return; }
+        if (!user) { window.location.replace("login.html"); return; }
         try {
           const doc = await db.collection("users").doc(user.uid).get();
           const data = doc.exists ? doc.data() : null;
-          if (!data || !data.courseId) { window.location.href = "registration.html"; return; }
+          if (!data || !data.courseId) { window.location.replace("registration.html"); return; }
 
           myInstitutionId = data.institutionId; myCourseId = data.courseId;
           myCourseName = data.courseName || ""; myInstitutionName = data.institutionName || ""; myCampusName = data.campusName || "";
@@ -964,7 +964,7 @@
       });
 
       document.getElementById("btnLogout").addEventListener("click", function () {
-        showConfirm("Do you really want to logout?", async function () { await auth.signOut(); window.location.href = "login.html"; });
+        showConfirm("Do you really want to logout?", async function () { await auth.signOut(); window.location.replace("login.html"); });
       });
 
       let initialized = false;
@@ -1704,7 +1704,7 @@
         try {
           await db.collection("users").doc(auth.currentUser.uid).delete();
           await auth.currentUser.delete();
-          window.location.href = "registration.html";
+          window.location.replace("registration.html");
         } catch (err) {
           if (err.code === "auth/requires-recent-login") {
             dzMsg("dzDeleteMsg", "For security, please log out and log back in, then try again.", "err");

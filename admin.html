@@ -289,7 +289,7 @@
       // ---------- Access gate ----------
       auth.onAuthStateChanged(async function (user) {
         const gate = document.getElementById("gate");
-        if (!user) { window.location.href = "login.html"; return; }
+        if (!user) { window.location.replace("login.html"); return; }
         }
         try {
           const roleDoc = await db.collection("userRoles").doc(user.uid).get();
@@ -318,7 +318,7 @@
       });
 
       document.getElementById("btnLogout").addEventListener("click", function () {
-        showConfirm("Do you really want to logout?", async function () { await auth.signOut(); window.location.href = "login.html"; });
+        showConfirm("Do you really want to logout?", async function () { await auth.signOut(); window.location.replace("login.html"); });
       });
 
       // ---------- Tabs ----------

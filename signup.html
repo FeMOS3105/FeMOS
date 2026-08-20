@@ -661,7 +661,7 @@
           await tryStoreCredential(state.email, state.password, state.fullName);
           clearSessionState();
           showMsg("msgStep3", "Verified! Taking you to institution and course registration...", "ok");
-          setTimeout(function () { window.location.href = "registration.html"; }, 900);
+          setTimeout(function () { window.location.replace("registration.html"); }, 900);
         } catch (err) {
           let message = friendlyError(err);
           showMsg("msgStep3", message, "err");

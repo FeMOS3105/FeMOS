@@ -352,26 +352,26 @@
       async function routeAfterAuth(user) {
         const params = new URLSearchParams(window.location.search);
         const returnTo = params.get("return");
-        if (returnTo) { window.location.href = returnTo; return; }
+        if (returnTo) { window.location.replace(returnTo); return; }
 
         try {
           const roleDoc = await db.collection("userRoles").doc(user.uid).get();
           if (roleDoc.exists) {
             const role = roleDoc.data().role;
-            if (role === "superAdmin") { window.location.href = "admin.html"; return; }
-            if (role === "institutionAdmin") { window.location.href = "institution-admin.html"; return; }
-            if (role === "cr") { window.location.href = "cr-dashboard.html"; return; }
+            if (role === "superAdmin") { window.location.replace("admin.html"); return; }
+            if (role === "institutionAdmin") { window.location.replace("institution-admin.html"); return; }
+            if (role === "cr") { window.location.replace("cr-dashboard.html"); return; }
           }
           const lecSnap = await db.collection("lecturerAssignments").where("lecturerUid", "==", user.uid).limit(1).get();
-          if (!lecSnap.empty) { window.location.href = "lecturer-dashboard.html"; return; }
+          if (!lecSnap.empty) { window.location.replace("lecturer-dashboard.html"); return; }
         } catch (e) { /* if the role check fails, fall through to the normal student flow */ }
 
         const doc = await db.collection("users").doc(user.uid).get();
         const data = doc.exists ? doc.data() : null;
         if (data && data.courseId) {
-          window.location.href = "dashboard.html";
+          window.location.replace("dashboard.html");
         } else {
-          window.location.href = "registration.html";
+          window.location.replace("registration.html");
         }
       }
 
