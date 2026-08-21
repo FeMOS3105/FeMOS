@@ -58,7 +58,9 @@ service cloud.firestore {
     // ====== USER ROLES ======
     match /userRoles/{uid} {
       allow read: if isSignedIn();
-      allow write: if isAdmin() || isInstitutionAdmin("");
+      allow create: if isAdmin() || (isSignedIn() && getRole() == "institutionAdmin");
+      allow update: if isAdmin() || (isSignedIn() && getRole() == "institutionAdmin");
+      allow delete: if isAdmin() || (isSignedIn() && getRole() == "institutionAdmin");
     }
 
     // ====== INSTITUTIONS ======
