@@ -161,5 +161,23 @@ service cloud.firestore {
       allow read: if isSignedIn();
       allow write: if isSignedIn();
     }
+
+    // ====== INSTITUTION BANNERS ======
+    match /instBanners/{instId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // ====== POSTER TEMPLATES ======
+    match /posterTemplates/{templateId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn();
+    }
+
+    // ====== ID COUNTERS ======
+    match /idCounters/{counterId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
   }
 }
