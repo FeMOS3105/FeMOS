@@ -67,16 +67,18 @@
   async function decryptData(uid, ciphertext) {
     if (!ciphertext || !uid) return ciphertext;
     if (typeof ciphertext === "string" && ciphertext.indexOf("enc:") !== 0) return ciphertext;
-    var wrapped = ciphertext.slice(4);
-    var parts = wrapped.split(".");
-    var iv = new Uint8Array(atob(parts[0]).split("").map(function (c) { return c.charCodeAt(0); }));
-    var data = new Uint8Array(atob(parts[1]).split("").map(function (c) { return c.charCodeAt(0); }));
-    var keyB64 = sessionStorage.getItem(DB_KEY);
-    if (!keyB64) throw new Error("No data key in session");
-    var rawBytes = new Uint8Array(atob(keyB64).split("").map(function (c) { return c.charCodeAt(0); }));
-    var key = await crypto.subtle.importKey("raw", rawBytes, { name: "AES-GCM" }, false, ["decrypt"]);
-    var plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, data);
-    return new TextDecoder().decode(plain);
+    try {
+      var wrapped = ciphertext.slice(4);
+      var parts = wrapped.split(".");
+      var iv = new Uint8Array(atob(parts[0]).split("").map(function (c) { return c.charCodeAt(0); }));
+      var data = new Uint8Array(atob(parts[1]).split("").map(function (c) { return c.charCodeAt(0); }));
+      var keyB64 = sessionStorage.getItem(DB_KEY);
+      if (!keyB64) return ciphertext;
+      var rawBytes = new Uint8Array(atob(keyB64).split("").map(function (c) { return c.charCodeAt(0); }));
+      var key = await crypto.subtle.importKey("raw", rawBytes, { name: "AES-GCM" }, false, ["decrypt"]);
+      var plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, data);
+      return new TextDecoder().decode(plain);
+    } catch (e) { return ciphertext; }
   }
 
   async function encryptFields(uid, obj, fields) {

@@ -445,6 +445,14 @@
         if (err && err.message && err.message.includes("index")) return "This query needs a database index. Please contact support to set it up.";
         return "Something went wrong. Please try again.";
       }
+      function showToast(msg) {
+        var t = document.createElement("div");
+        t.textContent = msg;
+        t.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;padding:12px 20px;border-radius:12px;font-size:0.85rem;font-weight:600;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,0.25);max-width:90vw;text-align:center;";
+        document.body.appendChild(t);
+        setTimeout(function () { t.style.opacity = "0"; t.style.transition = "opacity 0.3s"; }, 2500);
+        setTimeout(function () { t.remove(); }, 3000);
+      }
       function slugify(text) {
         return text.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       }

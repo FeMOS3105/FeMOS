@@ -623,9 +623,12 @@
         <div class="dzSub">Enter your official institutional registration number. This is used by your CR and lecturers to identify you.</div>
         <div class="field"><label>Your current registration number</label><input id="dzRegNumCurrent" readonly style="background:#f5f7fa;color:var(--muted);"/></div>
         <div class="field"><label>New registration number</label><input id="dzRegNumInput" placeholder="e.g. T21-03-12345"/></div>
-        <div class="dzActions">
+        <div class="dzActions" id="dzRegNumActions">
           <button class="dzCancel" onclick="closeDzOverlay('dzRegNumOverlay')">Cancel</button>
           <button class="dzConfirm" id="dzRegNumSave">Save</button>
+        </div>
+        <div class="dzActions" id="dzRegNumDone" style="display:none;">
+          <button class="dzConfirm" onclick="closeDzOverlay('dzRegNumOverlay')" style="width:100%;background:linear-gradient(90deg,var(--water-mid),var(--water-deep));">Done — Back to Dashboard</button>
         </div>
         <div class="msg" id="dzRegNumMsg"></div>
       </div>
@@ -1643,18 +1646,22 @@
         document.getElementById("dzRegNumCurrent").value = myRegNumber || "Not set yet";
         document.getElementById("dzRegNumInput").value = myRegNumber || "";
         document.getElementById("dzRegNumMsg").className = "msg";
+        document.getElementById("dzRegNumActions").style.display = "";
+        document.getElementById("dzRegNumDone").style.display = "none";
+        document.getElementById("dzRegNumInput").readOnly = false;
       });
       document.getElementById("dzRegNumSave").addEventListener("click", async function () {
         var val = document.getElementById("dzRegNumInput").value.trim();
         if (!val) { dzMsg("dzRegNumMsg", "Enter a registration number.", "err"); return; }
         try {
-          var regData = { registrationNumber: val };
-          regData = await FeMOSEncrypt.encryptFields(auth.currentUser.uid, regData, ["name", "email", "registrationNumber"]);
-          await db.collection("users").doc(auth.currentUser.uid).set(regData, { merge: true });
+          await db.collection("users").doc(auth.currentUser.uid).set({ registrationNumber: val }, { merge: true });
           myRegNumber = val;
           document.getElementById("pRegNum").textContent = val;
-          dzMsg("dzRegNumMsg", "Registration number saved.", "ok");
-          setTimeout(function () { closeDzOverlay("dzRegNumOverlay"); }, 1200);
+          document.getElementById("dzRegNumCurrent").value = val;
+          document.getElementById("dzRegNumInput").readOnly = true;
+          document.getElementById("dzRegNumActions").style.display = "none";
+          document.getElementById("dzRegNumDone").style.display = "";
+          dzMsg("dzRegNumMsg", "Registration number saved successfully!", "ok");
         } catch (err) { dzMsg("dzRegNumMsg", friendlyError(err), "err"); }
       });
 
