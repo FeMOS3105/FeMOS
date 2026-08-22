@@ -203,6 +203,23 @@ html[data-theme="dark"] .annImage img { box-shadow: 0 4px 14px rgba(0,0,0,0.3); 
 /* ---- No-indexedDB warning ---- */
 html[data-theme="dark"] .warn-banner { background: rgba(224,160,32,0.15); color: var(--warn); border-color: var(--warn); }
 
+/* ---- Sidebar (shared across all dashboards) ---- */
+html[data-theme="dark"] .sidebar { background: #0f172a !important; border-right-color: var(--line) !important; }
+html[data-theme="dark"] .sidebarUser { border-bottom-color: var(--line) !important; }
+html[data-theme="dark"] .sidebarUser .sName { color: var(--ink) !important; }
+html[data-theme="dark"] .sidebarUser .sRole { color: var(--muted) !important; }
+html[data-theme="dark"] .sidebarUser .sInfo { color: var(--water-light) !important; }
+html[data-theme="dark"] .sidebarNav .navSection { color: var(--muted) !important; }
+html[data-theme="dark"] .sidebarNav .navItem { color: var(--muted) !important; }
+html[data-theme="dark"] .sidebarNav .navItem:hover { background: #1e293b !important; color: var(--ink) !important; }
+html[data-theme="dark"] .sidebarNav .navItem.active { background: linear-gradient(90deg, rgba(46,168,238,0.12), transparent) !important; color: var(--water-light) !important; border-left-color: var(--water-light) !important; }
+html[data-theme="dark"] .sidebarFooter { border-top-color: var(--line) !important; }
+html[data-theme="dark"] .sidebarFooter .logoutBtn { background: rgba(225,75,75,0.12) !important; color: var(--danger) !important; }
+html[data-theme="dark"] .sidebarFooter .logoutBtn:hover { background: rgba(225,75,75,0.2) !important; }
+html[data-theme="dark"] .hamburger { background: #1e293b !important; border-color: var(--line) !important; }
+html[data-theme="dark"] .hamburger svg { stroke: var(--ink) !important; }
+html[data-theme="dark"] .sidebarOverlay { background: rgba(0,0,0,0.6) !important; }
+
 /* ---- PWA Install Button ---- */
 @keyframes pwaSlideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 html[data-theme="dark"] #pwaInstallBtn { background: linear-gradient(135deg, #1e40af, #155fd1); }

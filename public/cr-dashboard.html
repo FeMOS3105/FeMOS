@@ -182,6 +182,14 @@
       .confirmActions button { flex: 1; padding: 11px; border-radius: 10px; border: none; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
       .confirmActions .cancel { background: #f2f4f8; color: var(--ink); }
       .confirmActions .ok { background: var(--danger); color: #fff; }
+
+      @media(max-width:768px) {
+        .sidebar { transform: translateX(-100%); }
+        .sidebar.open { transform: translateX(0); }
+        .sidebarOverlay.open { display: block; }
+        .hamburger { display: flex; }
+        .contentArea { margin-left: 0; padding: 16px 14px 60px; padding-top: 64px; }
+      }
     </style>
   </head>
   <body>

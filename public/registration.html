@@ -249,6 +249,7 @@
           showMsg("Registration submitted! Your status is Pending until confirmed.", "ok");
           setTimeout(function () { window.location.replace("/dashboard"); }, 1200);
         } catch (err) {
+          console.error("Registration save error:", err);
           showMsg("Could not save your registration. Please try again.", "err");
         } finally {
           btn.disabled = false; btn.textContent = "Complete Registration";
