@@ -20,8 +20,76 @@
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
         font-family: "Segoe UI", system-ui, sans-serif; background: linear-gradient(180deg, #eef5ff 0%, #f7fbff 100%);
-        color: var(--ink); min-height: 100vh; padding: 20px 16px 60px;
+        color: var(--ink); min-height: 100vh;
       }
+
+      /* Sidebar */
+      .appLayout { display: flex; min-height: 100vh; }
+      .sidebar { width: var(--sidebar-w, 260px); min-height: 100vh; background: #fff; border-right: 1.5px solid var(--line); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; transition: transform 0.3s ease; }
+      .sidebarUser { padding: 20px 18px 14px; border-bottom: 1.5px solid var(--line); text-align: center; }
+      .sidebarUser .sAvatar { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, var(--water-light), var(--water-deep)); display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; color: #fff; font-weight: 700; font-size: 1.1rem; overflow: hidden; }
+      .sidebarUser .sAvatar img { width: 100%; height: 100%; object-fit: cover; }
+      .sidebarUser .sName { font-weight: 700; font-size: 0.88rem; }
+      .sidebarUser .sRole { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+      .sidebarUser .sInfo { font-size: 0.68rem; color: var(--water-deep); font-weight: 600; margin-top: 4px; }
+
+      /* CR Mode Toggle */
+      .modeToggle { padding: 10px 18px; border-bottom: 1.5px solid var(--line); }
+      .modeToggleRow { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+      .modeToggleLabel { font-size: 0.75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+      .modeToggleSwitch { width: 40px; height: 22px; border-radius: 11px; background: #cbd5e1; position: relative; cursor: pointer; transition: background 0.3s; flex-shrink: 0; }
+      .modeToggleSwitch.on { background: var(--water-mid); }
+      .modeToggleSwitch .knob { width: 18px; height: 18px; border-radius: 50%; background: #fff; position: absolute; top: 2px; left: 2px; transition: left 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+      .modeToggleSwitch.on .knob { left: 20px; }
+      .modeToggleStatus { font-size: 0.7rem; font-weight: 600; color: var(--water-deep); margin-top: 4px; }
+
+      .sidebarNav { flex: 1; overflow-y: auto; padding: 12px 0; }
+      .sidebarNav .navSection { font-size: 0.65rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1.2px; padding: 10px 18px 6px; }
+      .sidebarNav .navItem { display: flex; align-items: center; gap: 10px; padding: 11px 18px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: var(--muted); transition: all 0.15s; border-left: 3px solid transparent; }
+      .sidebarNav .navItem:hover { background: #f0f4fb; color: var(--ink); }
+      .sidebarNav .navItem.active { background: linear-gradient(90deg, rgba(46,168,238,0.08), transparent); color: var(--water-deep); border-left-color: var(--water-deep); font-weight: 700; }
+      .sidebarNav .navItem svg { width: 18px; height: 18px; flex-shrink: 0; }
+      .sidebarNav .navBadge { margin-left: auto; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--danger); color: #fff; font-size: 0.65rem; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+      .sidebarFooter { padding: 14px 18px; border-top: 1.5px solid var(--line); }
+      .sidebarFooter .logoutBtn { display: flex; align-items: center; gap: 8px; width: 100%; padding: 10px; border-radius: 10px; border: none; background: #fdecec; color: var(--danger); font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: background 0.15s; justify-content: center; }
+      .sidebarFooter .logoutBtn:hover { background: #f8d5d5; }
+
+      .sidebarNav .navItem[data-cr-only] { display: none; }
+      .sidebarNav .navItem[data-student-only] { display: flex; }
+      body.crMode .sidebarNav .navItem[data-cr-only] { display: flex; }
+      body.crMode .sidebarNav .navItem[data-student-only] { display: none; }
+
+      /* Hamburger */
+      .hamburger { display: none; position: fixed; top: 14px; left: 14px; z-index: 200; width: 42px; height: 42px; border-radius: 12px; background: #fff; border: 1.5px solid var(--line); cursor: pointer; box-shadow: 0 4px 12px rgba(13,27,75,0.08); align-items: center; justify-content: center; }
+      .hamburger svg { width: 20px; height: 20px; stroke: var(--ink); }
+      .sidebarOverlay { display: none; position: fixed; inset: 0; background: rgba(13,27,75,0.4); z-index: 90; }
+      .sidebarOverlay.open { display: block; }
+
+      /* Content */
+      .contentArea { flex: 1; margin-left: var(--sidebar-w, 260px); padding: 24px 28px 60px; }
+      .contentPanel { display: none; }
+      .contentPanel.active { display: block; }
+      .panelHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+      .panelHeader h2 { font-size: 1.15rem; font-weight: 700; }
+      .courseTag { font-size: 0.8rem; color: var(--muted); margin-bottom: 18px; }
+      .courseTag b { color: var(--water-deep); }
+      .carousel { position: relative; width: 100%; height: 26vh; min-height: 150px; max-height: 260px; border-radius: 20px; overflow: hidden; box-shadow: 0 16px 40px rgba(13,27,75,0.15); margin-bottom: 18px; background: linear-gradient(120deg, var(--water-light), var(--water-deep)); }
+      .carousel .slide { position: absolute; inset: 0; opacity: 0; transition: opacity .7s ease; }
+      .carousel .slide.show { opacity: 1; }
+      .carousel .slide img { width: 100%; height: 100%; object-fit: cover; }
+      .carousel-dots { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; justify-content: center; gap: 6px; }
+      .carousel-dots span { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.5); }
+      .carousel-dots span.active { background: #fff; }
+      .carousel-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: #fff; font-weight: 700; font-size: 1.1rem; text-align: center; padding: 0 20px; }
+
+      @media(max-width:768px) {
+        .sidebar { transform: translateX(-100%); }
+        .sidebar.open { transform: translateX(0); }
+        .sidebarOverlay.open { display: block; }
+        .hamburger { display: flex; }
+        .contentArea { margin-left: 0; padding: 16px 14px 60px; padding-top: 64px; }
+      }
+
       .shell { max-width: 860px; margin: 0 auto; }
       .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
       .brand { display: flex; align-items: center; gap: 10px; }
@@ -31,6 +99,31 @@
       .userchip .av { width: 26px; height: 26px; border-radius: 50%; background: var(--water-mid); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; overflow: hidden; }
       .userchip .av img { width: 100%; height: 100%; object-fit: cover; }
       .userchip button { background: none; border: none; color: var(--danger); font-weight: 600; cursor: pointer; font-size: 0.78rem; margin-left: 6px; }
+
+      .prow { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px; border: 1.5px solid var(--line); border-radius: 12px; margin-bottom: 10px; flex-wrap: wrap; background: #fff; }
+      .prow .info b { display: block; font-size: 0.92rem; }
+      .prow .info span { font-size: 0.78rem; color: var(--muted); display: block; margin-top: 2px; }
+      .btn-approve { background: var(--success); color: #fff; }
+      .btn-reject { background: transparent; border: 1.5px solid var(--danger); color: var(--danger); }
+      .itemActions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+      .readList { margin-top: 10px; font-size: 0.8rem; color: var(--muted); }
+      .readList .rrow { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed var(--line); }
+      .linkBox { display: flex; gap: 8px; align-items: center; background: #f5f9ff; border-radius: 10px; padding: 10px 12px; margin: 10px 0; }
+      .linkBox code { flex: 1; font-size: 0.78rem; word-break: break-all; color: var(--water-deep); }
+      table.subTable { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 12px; font-size: 0.84rem; background: #fff; border-radius: 12px; overflow: hidden; border: 1.5px solid var(--line); }
+      table.subTable thead { background: linear-gradient(135deg, #f0f5ff 0%, #e8f0fe 100%); }
+      table.subTable th { text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--water-deep); font-weight: 700; padding: 10px 14px; border-bottom: 2px solid var(--line); }
+      table.subTable td { padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+      table.subTable tr:last-child td { border-bottom: none; }
+      .statusBadge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; background: #e9f9f1; color: var(--success); }
+      .statusBadge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--success); }
+      .optionRow { display: flex; gap: 8px; margin-bottom: 10px; align-items: center; }
+      .optionRow input { flex: 1; padding: 12px 18px; border-radius: 999px; border: 2px solid var(--line); font-size: 0.88rem; background: linear-gradient(135deg, #f8fbff 0%, #eef5ff 100%); transition: border-color 0.2s; }
+      .optionRow input:focus { border-color: var(--water-mid); outline: none; }
+      .optionRow button { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 1rem; padding: 4px 8px; border-radius: 50%; transition: background 0.15s; }
+      .optionRow button:hover { background: #fdecec; }
+      .addOptBtn { background: none; border: 2px dashed var(--line); color: var(--water-deep); border-radius: 999px; padding: 10px; width: 100%; font-size: 0.82rem; font-weight: 600; cursor: pointer; margin-bottom: 14px; transition: border-color 0.2s, background 0.2s; }
+      .addOptBtn:hover { border-color: var(--water-mid); background: #f0f7ff; }
 
       /* ---------- Sliding banner carousel ---------- */
       .carousel { position: relative; width: 100%; height: 26vh; min-height: 150px; max-height: 260px; border-radius: 20px; overflow: hidden; box-shadow: 0 16px 40px rgba(13,27,75,0.15); margin-bottom: 18px; background: linear-gradient(120deg, var(--water-light), var(--water-deep)); }
@@ -416,61 +509,111 @@
     </style>
   </head>
   <body>
-    <div class="shell">
-      <div id="gate" class="gate-card">Loading your dashboard...</div>
+    <button class="hamburger" id="hamburgerBtn"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <div class="sidebarOverlay" id="sidebarOverlay"></div>
 
-      <div id="app" style="display:none;">
-        <div class="topbar">
-          <div class="brand">
-            <img src="https://res.cloudinary.com/j8zmetxr/image/upload/v1784632765/FeOS_hwl9eh.png" alt="FeMOS"/>
-            <h1>FeMOS</h1>
+    <div id="gate" class="gate-card">Loading your dashboard...</div>
+
+    <div id="app" style="display:none;" class="appLayout">
+      <nav class="sidebar" id="sidebar">
+        <div class="sidebarUser">
+          <div class="sAvatar" id="sAvatar">?</div>
+          <div class="sName" id="sName">...</div>
+          <div class="sRole" id="sRole">Student</div>
+          <div class="sInfo" id="sInfo" style="display:none;"></div>
+        </div>
+        <div class="modeToggle" id="modeToggleWrap" style="display:none;">
+          <div class="modeToggleRow">
+            <span class="modeToggleLabel">Switch Mode</span>
+            <div class="modeToggleSwitch" id="modeToggleSwitch"><div class="knob"></div></div>
           </div>
-          <div class="userchip">
-            <div class="av" id="uAv">?</div>
-            <span id="uName">...</span>
-            <button id="btnLogout">Log Out</button>
+          <div class="modeToggleStatus" id="modeToggleStatus">Student Mode</div>
+        </div>
+        <div class="sidebarNav" id="sidebarNav">
+          <div class="navSection">Menu</div>
+          <div class="navItem active" data-panel="home">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Home
+          </div>
+          <div class="navItem" data-panel="ann">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11v2a1 1 0 001 1h2l4 4V6L6 10H4a1 1 0 00-1 1z"/><path d="M15 8a4 4 0 010 8"/><path d="M18 5a8 8 0 010 14"/></svg>
+            Announcements
+            <div class="navBadge" id="annNavBadge" style="display:none;"></div>
+          </div>
+          <div class="navItem" data-panel="polls">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+            Polls
+          </div>
+          <div class="navItem" data-panel="collect">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3v4a1 1 0 001 1h4"/><path d="M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"/></svg>
+            Quick Collect
+          </div>
+          <div class="navSection">Student</div>
+          <div class="navItem" data-panel="profile" data-student-only>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+            My Profile
+          </div>
+          <div class="navItem" data-panel="registration" data-student-only>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg>
+            My Registration
+          </div>
+          <div class="navItem" data-panel="attendance" data-student-only>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18"/><path d="M8 3v4M16 3v4"/></svg>
+            Attendance
+          </div>
+          <div class="navItem" data-panel="scan" data-student-only>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3z"/></svg>
+            Scan Attendance
+          </div>
+          <div class="navSection" data-cr-only>CR Tools</div>
+          <div class="navItem" data-panel="approve" data-cr-only>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
+            Approve Students
+          </div>
+          <div class="navItem" data-panel="roster" data-cr-only>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            Class Roster
+          </div>
+          <div class="navItem" data-panel="crFeedback" data-cr-only>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            Feedback
+            <div class="navBadge" id="crFeedbackBadge" style="display:none;"></div>
+          </div>
+          <div class="navSection">Account</div>
+          <div class="navItem" data-panel="settings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            My Settings
           </div>
         </div>
-
-        <div class="carousel" id="carousel"><div class="carousel-empty">Welcome to FeMOS</div></div>
-
-        <!-- ============ CARD GRID (home) ============ -->
-        <div id="homeView">
-          <div class="cardGrid">
-            <div class="dashCard" data-open="ann"><div class="iconBadge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M3 11v2a1 1 0 0 0 1 1h2l4 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15 8a4 4 0 0 1 0 8"/><path d="M18 5a8 8 0 0 1 0 14"/></svg></div><div class="label">Announcements</div><div class="stat" id="statAnn">Loading...</div></div>
-            <div class="dashCard" data-open="profile"><div class="iconBadge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div><div class="label">My Profile</div><div class="stat">View &amp; check details</div></div>
-            <div class="dashCard" data-open="registration"><div class="iconBadge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg></div><div class="label">My Registration</div><div class="stat" id="statReg">Loading...</div></div>
-            <div class="dashCard" data-open="attendanceHistory"><div class="iconBadge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18"/><path d="M8 3v4M16 3v4"/><path d="m9 15 2 2 4-4"/></svg></div><div class="label">Attendance</div><div class="stat" id="statAttendance">Loading...</div></div>
-            <div class="dashCard" data-open="attendanceScan"><div class="iconBadge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM18 18h3v3h-3zM14 21h3M21 14v3"/></svg></div><div class="label">Scan Attendance</div><div class="stat" id="statScan">Check for open sessions</div></div>
-            <div class="dashCard" data-open="polls"><div class="iconBadge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="label">Polls</div><div class="stat" id="statPolls">Loading...</div></div>
-            <div class="dashCard" data-open="collect"><div class="iconBadge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M9 13h6M9 17h6"/></svg></div><div class="label">Quick Collect</div><div class="stat" id="statCollect">Loading...</div></div>
-            <div class="dashCard settingsCard" data-open="dangerZone"><div class="iconBadge settingsBadge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div><div class="label">My Settings</div><div class="stat">Manage your account</div></div>
-            <div class="dashCard" id="enterCRCard" style="display:none;background:linear-gradient(135deg,#155fd1,#0b2f9e);color:#fff;cursor:pointer;" onclick="window.location.replace('/cr')">
-              <div style="display:flex;align-items:center;gap:14px;">
-                <div style="width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;">
-                  <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#fff" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                </div>
-                <div>
-                  <div style="font-size:1rem;font-weight:700;">Enter As Class Representative</div>
-                  <div style="font-size:0.82rem;opacity:0.85;">Access your CR dashboard</div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div class="sidebarFooter">
+          <button class="logoutBtn" id="btnLogout">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Log Out
+          </button>
         </div>
-
-        <!-- ============ DETAIL VIEWS ============ -->
-        <div class="detailArea" id="detail-ann">
-          <button class="backBtn" data-back>← Back</button>
+      </nav>
+      <main class="contentArea">
+        <div class="contentPanel active" id="panel-home">
+          <div class="carousel" id="carousel"><div class="carousel-empty">Welcome to FeMOS</div></div>
+        </div>
+        <div class="contentPanel" id="panel-ann">
+          <div class="panelHeader"><h2>Announcements</h2></div>
           <div class="annTabs">
             <button class="annTab active" data-ann-tab="unread">Unread <span class="tabCount" id="annUnreadCount">0</span></button>
             <button class="annTab" data-ann-tab="read">Read <span class="tabCount" id="annReadCount">0</span></button>
           </div>
           <div id="annList"><div class="empty">Loading...</div></div>
         </div>
-
-        <div class="detailArea" id="detail-profile">
-          <button class="backBtn" data-back>← Back</button>
+        <div class="contentPanel" id="panel-polls">
+          <div class="panelHeader"><h2>Polls</h2></div>
+          <div id="pollList"><div class="empty">Loading...</div></div>
+        </div>
+        <div class="contentPanel" id="panel-collect">
+          <div class="panelHeader"><h2>Quick Collect</h2></div>
+          <div id="collectList"><div class="empty">Loading...</div></div>
+        </div>
+        <div class="contentPanel" id="panel-profile">
+          <div class="panelHeader"><h2>My Profile</h2></div>
           <div class="profileBlock">
             <div class="bigAv" id="pAv">?</div>
             <div style="text-align:center;font-weight:700;font-size:1.05rem;" id="pName">...</div>
@@ -482,9 +625,8 @@
             <div class="row"><span>Registration No.</span><span id="pRegNum">—</span></div>
           </div>
         </div>
-
-        <div class="detailArea" id="detail-registration">
-          <button class="backBtn" data-back>← Back</button>
+        <div class="contentPanel" id="panel-registration">
+          <div class="panelHeader"><h2>My Registration</h2></div>
           <div class="profileBlock">
             <div style="text-align:center;margin-bottom:14px;"><span class="statusPill" id="rStatus">...</span></div>
             <div class="row"><span>Institution</span><span id="rInst">—</span></div>
@@ -492,57 +634,49 @@
             <div class="row"><span>Course</span><span id="rCourse">—</span></div>
           </div>
         </div>
-
-        <div class="detailArea" id="detail-attendanceHistory">
-          <button class="backBtn" data-back>← Back</button>
+        <div class="contentPanel" id="panel-attendance">
+          <div class="panelHeader"><h2>Attendance</h2></div>
           <div class="profileBlock" style="text-align:center;margin-bottom:14px;">
             <div class="statBig" id="attRate">—</div>
             <div class="statLabel">of sessions attended</div>
           </div>
           <div id="attHistList"><div class="empty">Loading...</div></div>
         </div>
-
-        <div class="detailArea" id="detail-attendanceScan">
-          <button class="backBtn" data-back>← Back</button>
+        <div class="contentPanel" id="panel-scan">
+          <div class="panelHeader"><h2>Scan Attendance</h2></div>
           <div id="scanList"><div class="empty">Loading...</div></div>
         </div>
-
-        <div class="detailArea" id="detail-polls">
-          <button class="backBtn" data-back>← Back</button>
-          <div id="pollList"><div class="empty">Loading...</div></div>
+        <div class="contentPanel" id="panel-approve">
+          <div class="panelHeader"><h2>Approve Students</h2></div>
+          <div id="approveCount" style="font-size:0.85rem;color:var(--muted);margin-bottom:14px;"></div>
+          <div id="approveList"><div class="empty">Loading...</div></div>
         </div>
-
-        <div class="detailArea" id="detail-collect">
-          <button class="backBtn" data-back>← Back</button>
-          <div id="collectList"><div class="empty">Loading...</div></div>
-        </div>
-
-        <!-- ============ DANGER ZONE ============ -->
-        <div class="detailArea" id="detail-dangerZone">
-          <button class="backBtn" data-back>← Back</button>
-          <div style="margin-bottom:16px;">
-            <h2 style="font-size:1.1rem;display:flex;align-items:center;gap:8px;color:var(--water-deep);">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-              My Settings
-            </h2>
-            <p style="font-size:0.82rem;color:var(--muted);margin-top:4px;">Manage your profile, security, and account preferences.</p>
+        <div class="contentPanel" id="panel-roster">
+          <div class="panelHeader">
+            <h2>Class Roster</h2>
+            <button class="btn-outline-sm" id="btnRosterCsv" style="display:none;">Download CSV</button>
           </div>
+          <div id="rosterCount" style="font-size:0.85rem;color:var(--muted);margin-bottom:14px;"></div>
+          <div id="rosterList"><div class="empty">Loading...</div></div>
+        </div>
+        <div class="contentPanel" id="panel-crFeedback">
+          <div class="panelHeader"><h2>Student Feedback</h2></div>
+          <div id="crFeedbackList"><div class="empty">Loading...</div></div>
+        </div>
+        <div class="contentPanel" id="panel-settings">
+          <div class="panelHeader"><h2>My Settings</h2></div>
+          <p style="font-size:0.82rem;color:var(--muted);margin-bottom:18px;">Manage your profile, security, and account preferences.</p>
           <div class="dzOptions">
             <div class="dzOpt" id="dzEditCourse">
               <div class="dzIcon blue"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg></div>
               <div class="dzInfo"><div class="dzTitle">Edit My Course</div><div class="dzDesc">Switch to a different course or campus</div></div>
             </div>
             <div class="dzOpt" id="dzGender">
-              <div class="dzIcon purple" style="background:linear-gradient(135deg,#c084fc,#9333ea);">
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M3 21v-2a7 7 0 0 1 7-7h4a7 7 0 0 1 7 7v2"/></svg>
-              </div>
-              <div class="dzInfo">
-                <div class="dzTitle">Gender</div>
-                <div class="dzDesc" id="dzGenderValue">Loading...</div>
-              </div>
+              <div class="dzIcon purple" style="background:linear-gradient(135deg,#c084fc,#9333ea);"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M3 21v-2a7 7 0 017-7h4a7 7 0 017 7v2"/></svg></div>
+              <div class="dzInfo"><div class="dzTitle">Gender</div><div class="dzDesc" id="dzGenderValue">Loading...</div></div>
             </div>
             <div class="dzOpt" id="dzRegNumber">
-              <div class="dzIcon green"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M9 13h6M9 17h6"/></svg></div>
+              <div class="dzIcon green"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M14 3v4a1 1 0 001 1h4"/><path d="M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"/><path d="M9 13h6M9 17h6"/></svg></div>
               <div class="dzInfo"><div class="dzTitle">Add Registration Number</div><div class="dzDesc">Set or update your institutional registration number</div></div>
             </div>
             <div class="dzOpt" id="dzPhoto">
@@ -550,11 +684,11 @@
               <div class="dzInfo"><div class="dzTitle">Change Profile Picture</div><div class="dzDesc">Upload a new photo or remove the current one</div></div>
             </div>
             <div class="dzOpt" id="dzPassword">
-              <div class="dzIcon blue"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+              <div class="dzIcon blue"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
               <div class="dzInfo"><div class="dzTitle">Add / Change Password</div><div class="dzDesc">Set a password for email login</div></div>
             </div>
             <div class="dzOpt" id="dzAppLock">
-              <div class="dzIcon blue"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg></div>
+              <div class="dzIcon blue"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/><circle cx="12" cy="16" r="1"/></svg></div>
               <div class="dzInfo"><div class="dzTitle">App Lock</div><div class="dzDesc" id="dzAppLockDesc">Set a 4-digit PIN to lock your app</div></div>
             </div>
             <div class="dzOpt" id="dzAppLockChange" style="display:none;">
@@ -569,12 +703,12 @@
               </div>
             </div>
             <div class="dzOpt dzDanger" id="dzDelete">
-              <div class="dzIcon red"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></div>
+              <div class="dzIcon red"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></div>
               <div class="dzInfo"><div class="dzTitle">Delete My Registration</div><div class="dzDesc">Permanently remove all your course data</div></div>
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
 
     <!-- ============ MODAL: EDIT COURSE (Step 1: Select new course) ============ -->
@@ -858,6 +992,8 @@
 
       let myInstitutionId = null, myCourseId = null, myCourseName = "", myInstitutionName = "", myCampusName = "";
       let myRegNumber = "", myConfirmedByCR = false, myRegistrationStatus = "";
+      var myCRInstitutionId = null, myCRCourseId = null, myCRCourseName = "";
+      var userIsCR = false;
 
       function escapeHtml(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
       function showConfirm(message, onConfirm) {
@@ -918,18 +1054,30 @@
         }
       }
 
-      // ---------- Navigation between card grid and detail views ----------
-      document.querySelectorAll("[data-open]").forEach(function (card) {
-        card.addEventListener("click", function () {
-          document.getElementById("homeView").style.display = "none";
-          document.getElementById("detail-" + card.getAttribute("data-open")).classList.add("show");
+      // ---------- Sidebar navigation ----------
+      document.querySelectorAll("#sidebarNav .navItem").forEach(function(el) {
+        el.addEventListener("click", function() {
+          var panel = el.getAttribute("data-panel");
+          document.querySelectorAll(".contentPanel").forEach(function(p) { p.classList.remove("active"); });
+          document.querySelectorAll("#sidebarNav .navItem").forEach(function(n) { n.classList.remove("active"); });
+          el.classList.add("active");
+          var target = document.getElementById("panel-" + panel);
+          if (target) target.classList.add("active");
+          closeSidebar();
         });
       });
-      document.querySelectorAll("[data-back]").forEach(function (btn) {
-        btn.addEventListener("click", function () {
-          document.querySelectorAll(".detailArea").forEach(function (d) { d.classList.remove("show"); });
-          document.getElementById("homeView").style.display = "block";
-        });
+      function closeSidebar() { document.getElementById("sidebar").classList.remove("open"); document.getElementById("sidebarOverlay").classList.remove("open"); }
+      document.getElementById("hamburgerBtn").addEventListener("click", function() { document.getElementById("sidebar").classList.toggle("open"); document.getElementById("sidebarOverlay").classList.toggle("open"); });
+      document.getElementById("sidebarOverlay").addEventListener("click", closeSidebar);
+
+      // ---------- CR Mode Toggle ----------
+      var modeToggleSwitch = document.getElementById("modeToggleSwitch");
+      modeToggleSwitch.addEventListener("click", function() {
+        userIsCR = !userIsCR;
+        this.classList.toggle("on", userIsCR);
+        document.body.classList.toggle("crMode", userIsCR);
+        document.getElementById("modeToggleStatus").textContent = userIsCR ? "CR Mode" : "Student Mode";
+        if (userIsCR) { loadApprove(); loadRoster(); loadCRFeedback(); loadNotifBadge(); }
       });
 
       // ---------- Banner carousel ----------
@@ -987,7 +1135,7 @@
 
           gate.style.display = "none";
           document.getElementById("app").style.display = "block";
-          document.getElementById("uName").textContent = user.displayName || user.email;
+          document.getElementById("sName").textContent = user.displayName || user.email;
           document.getElementById("pName").textContent = user.displayName || user.email;
           document.getElementById("pEmail").textContent = user.email;
           document.getElementById("pInst").textContent = myInstitutionName || "—";
@@ -1009,18 +1157,24 @@
           rStatus.className = "statusPill " + (status === "confirmed" ? "confirmed" : "pending");
 
           if (user.photoURL) {
-            document.getElementById("uAv").innerHTML = '<img src="' + user.photoURL + '" alt=""/>';
+            document.getElementById("sAvatar").innerHTML = '<img src="' + user.photoURL + '" alt=""/>';
             document.getElementById("pAv").innerHTML = '<img src="' + user.photoURL + '" alt=""/>';
           } else {
             const initials = (user.displayName || user.email || "?").trim().split(/\s+/).map(function (p) { return p[0]; }).slice(0, 2).join("").toUpperCase();
-            document.getElementById("uAv").textContent = initials;
+            document.getElementById("sAvatar").textContent = initials;
             document.getElementById("pAv").textContent = initials;
           }
 
           // Check if user is a CR
           const crRoleDoc = await db.collection("userRoles").doc(user.uid).get();
           if (crRoleDoc.exists && crRoleDoc.data().role === "cr") {
-            document.getElementById("enterCRCard").style.display = "block";
+            userIsCR = true;
+            var crData = crRoleDoc.data();
+            myCRInstitutionId = crData.institutionId || myInstitutionId;
+            myCRCourseId = crData.courseId || myCourseId;
+            myCRCourseName = crData.courseName || myCourseName;
+            document.getElementById("modeToggleWrap").style.display = "";
+            document.getElementById("sInfo").textContent = "CR \u2014 " + myCRCourseName;
           }
 
           loadCarousel();
@@ -1047,6 +1201,7 @@
         requestNotifyPermission();
         startAnnouncementListener();
         initFCM(auth.currentUser);
+        if (userIsCR) { loadApprove(); loadRoster(); loadCRFeedback(); loadNotifBadge(); }
       }
 
       // ================= ANNOUNCEMENTS =================
@@ -1101,17 +1256,12 @@
       }
 
       function updateAnnBadge(count) {
-        var annCard = document.querySelector('[data-open="ann"]');
-        var oldBadge = annCard.querySelector(".unreadBadge");
-        if (oldBadge) oldBadge.remove();
+        var badge = document.getElementById("annNavBadge");
         if (count > 0) {
-          annCard.classList.add("unread");
-          var badge = document.createElement("div");
-          badge.className = "unreadBadge";
           badge.textContent = count;
-          annCard.querySelector(".iconBadge").appendChild(badge);
+          badge.style.display = "flex";
         } else {
-          annCard.classList.remove("unread");
+          badge.style.display = "none";
         }
       }
 
@@ -1198,7 +1348,8 @@
       document.getElementById("regWarnLink").addEventListener("click", function (e) {
         e.preventDefault();
         document.getElementById("regWarnToast").classList.remove("show");
-        openView("detail-dangerZone");
+        var settingsItem = document.querySelector('[data-panel="settings"]');
+        if (settingsItem) { settingsItem.classList.add("active"); settingsItem.click(); }
       });
 
       // ================= POLLS =================
@@ -1710,7 +1861,7 @@
           var photoURL = data.secure_url;
           await auth.currentUser.updateProfile({ photoURL: photoURL });
           await db.collection("users").doc(auth.currentUser.uid).set({ photoURL: photoURL }, { merge: true });
-          document.getElementById("uAv").innerHTML = '<img src="' + photoURL + '" alt=""/>';
+          document.getElementById("sAvatar").innerHTML = '<img src="' + photoURL + '" alt=""/>';
           document.getElementById("pAv").innerHTML = '<img src="' + photoURL + '" alt=""/>';
           dzMsg("dzPhotoMsg", "Profile picture updated.", "ok");
           setTimeout(function () { closeDzOverlay("dzPhotoOverlay"); }, 1200);
@@ -1723,7 +1874,7 @@
           await auth.currentUser.updateProfile({ photoURL: null });
           await db.collection("users").doc(auth.currentUser.uid).set({ photoURL: null }, { merge: true });
           var initials = (auth.currentUser.displayName || auth.currentUser.email || "?").trim().split(/\s+/).map(function (p) { return p[0]; }).slice(0, 2).join("").toUpperCase();
-          document.getElementById("uAv").innerHTML = initials;
+          document.getElementById("sAvatar").innerHTML = initials;
           document.getElementById("pAv").innerHTML = initials;
           dzMsg("dzPhotoMsg", "Photo removed.", "ok");
           setTimeout(function () { closeDzOverlay("dzPhotoOverlay"); }, 1200);
